@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/widgets/appbar/appbar.dart';
+import '../../../../utils/constants/enums.dart';
 import '../../../../utils/produit_helper.dart';
 import '../../../personalization/controllers/user_controller.dart';
 import '../../controllers/product/produit_controller.dart';
@@ -367,16 +368,6 @@ class _ListProduitScreenState extends State<ListProduitScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          ProduitHelper.getAffichagePrix(produit),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.green,
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(height: 4),
-
         // 🔹 AJOUT: Afficher le nom du gérant/établissement pour l'admin
         if (isAdmin && produit.etablissement?.name != null)
           Text(
@@ -388,13 +379,9 @@ class _ListProduitScreenState extends State<ListProduitScreen> {
             ),
           ),
 
-        Text(
-          'Temps: ${produit.preparationTime} min',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey[600],
-          ),
-        ),
+        // 🔹 AFFICHAGE DES PRIX AVEC PROMOTION SI APPLICABLE
+        _buildPriceDisplay(produit),
+        const SizedBox(height: 4),
 
         if (produit.description != null && produit.description!.isNotEmpty) ...[
           const SizedBox(height: 2),
@@ -424,6 +411,72 @@ class _ListProduitScreenState extends State<ListProduitScreen> {
         _buildIndicateurStock(produit),
       ],
     );
+  }
+
+  // NOUVELLE MÉTHODE POUR L'AFFICHAGE DES PRIX
+  Widget _buildPriceDisplay(ProduitModel produit) {
+    // Si le produit est de type single ET a un prix soldé
+    if (produit.productType == ProductType.single.toString() &&
+        produit.salePrice > 0 &&
+        produit.salePrice < produit.price) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Prix original barré
+          Text(
+            'PRIX : ${produit.price} DT',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.red[600],
+              decoration: TextDecoration.lineThrough,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+          const SizedBox(height: 2),
+          // Prix soldé
+          Row(
+            children: [
+              Text(
+                '${produit.salePrice} DT',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 6),
+              // Pourcentage de réduction
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Text(
+                  '-${((produit.price - produit.salePrice) / produit.price * 100).toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red.shade700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    } else {
+      // Prix normal sans promotion
+      return Text(
+        ProduitHelper.getAffichagePrix(produit),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.green,
+          fontSize: 14,
+        ),
+      );
+    }
   }
 
   Widget _buildIndicateurStock(ProduitModel produit) {

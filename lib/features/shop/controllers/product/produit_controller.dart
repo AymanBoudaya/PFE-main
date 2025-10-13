@@ -393,41 +393,34 @@ class ProduitController extends GetxController {
 
   /// get product price or price range for variations
   String getProductPrice(ProduitModel product) {
-    double smallestPrice = double.infinity;
-    double largestPrice = 0.0;
-
-    //if no variations exist return the simple price or sale price
+    // Pour les produits single, prioriser le salePrice
     if (product.productType == ProductType.single.toString()) {
       return (product.salePrice > 0 ? product.salePrice : product.price)
-          .toString();
+          .toStringAsFixed(0);
     } else {
-      //calculate the smallest and largest prices among variations
-      if (product.sizesPrices != null) {
-        for (var variation in product.sizesPrices!) {
-          //determine the price to consider(sale price if available, otherwise regular price)
-          double priceToConsider =
-              variation.price > 0.0 ? variation.price : variation.price;
+      // ... reste du code existant pour les variations
+      double smallestPrice = double.infinity;
+      double largestPrice = 0.0;
 
-          //update smallest and largest price
+      if (product.sizesPrices != null && product.sizesPrices.isNotEmpty) {
+        for (var variation in product.sizesPrices) {
+          double priceToConsider = variation.price;
+
           if (priceToConsider < smallestPrice) {
             smallestPrice = priceToConsider;
           }
-
           if (priceToConsider > largestPrice) {
             largestPrice = priceToConsider;
           }
         }
-      } else {
-        smallestPrice = 0.0;
-        largestPrice = 234;
-      }
 
-      //if smallest and largest price are the same return a single price
-      if (smallestPrice.isEqual(largestPrice)) {
-        return largestPrice.toString();
+        if (smallestPrice.isEqual(largestPrice)) {
+          return largestPrice.toStringAsFixed(0);
+        } else {
+          return '${smallestPrice.toStringAsFixed(0)} - ${largestPrice.toStringAsFixed(0)}';
+        }
       } else {
-        //otherwise return A price range
-        return '$smallestPrice - \$$largestPrice';
+        return '0';
       }
     }
   }

@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../features/shop/models/produit_model.dart';
+import 'constants/enums.dart';
 
 class ProduitHelper {
   static String getAffichagePrix(ProduitModel produit) {
-    if (produit.sizesPrices.isEmpty) {
-      return 'Prix à définir';
-    } else if (produit.sizesPrices.length == 1) {
-      return 'DT${produit.sizesPrices.first.price.toStringAsFixed(2)}';
+    if (produit.productType == ProductType.single.toString()) {
+      // Pour les produits simples, afficher le prix soldé s'il existe
+      if (produit.salePrice > 0 && produit.salePrice < produit.price) {
+        return '${produit.salePrice} DT';
+      }
+      return '${produit.price} DT';
     } else {
-      final minPrice = produit.minPrice;
-      final maxPrice = produit.maxPrice;
-      return 'DT${minPrice.toStringAsFixed(2)} - DT${maxPrice.toStringAsFixed(2)}';
+      // Pour les produits avec tailles, garder la logique existante
+      if (produit.sizesPrices.isEmpty) return '${produit.price} DT';
+
+      final prix = produit.sizesPrices
+          .map((p) => p.price)
+          .reduce((a, b) => a < b ? a : b);
+      final prixMax = produit.sizesPrices
+          .map((p) => p.price)
+          .reduce((a, b) => a > b ? a : b);
+
+      return prix == prixMax ? '$prix DT' : '$prix - $prixMax DT';
     }
   }
 
