@@ -1,18 +1,21 @@
-import 'package:caferesto/common/widgets/images/t_rounded_image.dart';
+import 'dart:ui';
+
 import 'package:caferesto/common/widgets/products/favorite_icon/favorite_icon.dart';
-import 'package:caferesto/common/widgets/texts/brand_title_text_with_verified_icon.dart';
-import 'package:caferesto/common/widgets/texts/product_price_text.dart';
-import 'package:caferesto/common/widgets/texts/product_title_text.dart';
-import 'package:caferesto/features/shop/models/product_model.dart';
 import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:get/get.dart';
 
 import '../../../../features/shop/controllers/product/produit_controller.dart';
 import '../../../../features/shop/models/produit_model.dart';
+import '../../../../features/shop/screens/product_details/product_detail.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
+import '../../../styles/shadows.dart';
+import '../../texts/brand_title_text_with_verified_icon.dart';
+import '../../texts/product_price_text.dart';
+import '../../texts/product_title_text.dart';
+import 'widgets/add_to_cart_button.dart';
 import 'widgets/rounded_container.dart';
 
 class TProductCardHorizontal extends StatelessWidget {
@@ -22,156 +25,312 @@ class TProductCardHorizontal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = THelperFunctions.isDarkMode(context);
-
     final controller = ProduitController.instance;
     final salePercentage =
         controller.calculateSalePercentage(product.price, product.salePrice);
-    return Container(
+    final dark = THelperFunctions.isDarkMode(context);
+
+    return GestureDetector(
+      onTap: () => Get.to(() => ProductDetailScreen(product: product)),
+      child: Container(
         width: 310,
-        padding: const EdgeInsets.all(1),
+        padding: const EdgeInsets.all(0),
         decoration: BoxDecoration(
-          color: dark ? AppColors.darkerGrey : AppColors.softGrey,
-          borderRadius: BorderRadius.circular(AppSizes.productImageRadius),
+          color: dark ? AppColors.eerieBlack : AppColors.white,
+          borderRadius: BorderRadius.circular(AppSizes.defaultSpace),
+          boxShadow: [TShadowStyle.vericalCardProductShadow],
         ),
         child: Row(
           children: [
-            /// Thumbnail
-            TRoundedContainer(
-              height: 120,
-              padding: const EdgeInsets.all(AppSizes.sm),
-              backgroundColor: dark ? AppColors.dark : AppColors.light,
-              child: Stack(
-                children: [
-                  /// Image Thumbnail
-                  SizedBox(
-                      width: 120,
-                      height: 120,
-                      child: TRoundedImage(
-                        imageUrl: product.name,
-                        applyImageRadius: true,
-                        isNetworkImage: true,
-                      )),
+            /// Thumbnail Section
+            _buildThumbnailSection(context, dark, salePercentage),
 
-                  /// Pourcentage de remise
-                  if (salePercentage != null)
-                    Positioned(
-                      top: 12,
-                      child: TRoundedContainer(
-                        radius: AppSizes.sm,
-                        backgroundColor:
-                            AppColors.secondary.withAlpha((255 * 0.8).toInt()),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: AppSizes.xs, horizontal: AppSizes.sm),
-                        child: Text(
-                          '$salePercentage%',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge!
-                              .apply(color: AppColors.black),
+            /// Details Section
+            Expanded(
+              child: _buildDetailsSection(context, dark, salePercentage),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnailSection(
+      BuildContext context, bool dark, String? salePercentage) {
+    return Stack(
+      children: [
+        /// Thumbnail Container
+        TRoundedContainer(
+          height: 120,
+          width: 120,
+          padding: const EdgeInsets.all(AppSizes.sm),
+          backgroundColor: dark ? AppColors.dark : AppColors.light,
+          child: Stack(
+            children: [
+              /// Product Image
+              _buildProductImage(),
+
+              /// Overlay effects
+              ClipRRect(
+                borderRadius:
+                    BorderRadius.circular(AppSizes.productImageRadius),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: Stack(
+                    children: [
+                      /// Blur overlay
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 30,
+                        child: ClipRect(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.white
+                                        .withAlpha((255 * 0.15).toInt()),
+                                    Colors.white.withOpacity(0.01),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
 
-                  /// Icon Favoris
-                  Positioned(
-                      top: 0,
-                      right: 0,
-                      child: FavoriteIcon(productId: product.id))
-                ],
+                      /// Sale Tag
+                      if (salePercentage != null)
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSizes.xs,
+                              horizontal: AppSizes.sm,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.redAccent,
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.buttonRadius),
+                            ),
+                            child: Text(
+                              '- $salePercentage%',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.2,
+                                  ),
+                            ),
+                          ),
+                        ),
+
+                      /// Favorite Icon
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: dark
+                                ? Colors.black.withAlpha((255 * 0.3).toInt())
+                                : AppColors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: FavoriteIcon(productId: product.id),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
-            /// Détails
-            SizedBox(
-              width: 172,
-              child: Padding(
-                padding:
-                    const EdgeInsets.only(top: AppSizes.sm, left: AppSizes.sm),
+  Widget _buildDetailsSection(
+      BuildContext context, bool dark, String? salePercentage) {
+    final controller = ProduitController.instance;
+
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          /// Top Section - Brand and Title
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BrandTitleWithVerifiedIcon(
+                title: product.etablissement?.name ?? product.etablissementId,
+                textColor: dark ? Colors.white70 : Colors.grey[700],
+              ),
+              const SizedBox(height: AppSizes.spaceBtwItems / 2),
+
+              /// Product Title
+              TProductTitleText(
+                title: product.name,
+                maxLines: 2,
+                smallSize: true,
+              ),
+            ],
+          ),
+
+          /// Bottom Section - Price and Add to Cart
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              /// Price Section
+              Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TProductTitleText(
-                          title: product.name,
-                          smallSize: true,
-                        ),
-                        SizedBox(
-                          height: AppSizes.spaceBtwItems / 2,
-                        ),
-                        BrandTitleWithVerifiedIcon(
-                            title: product.etablissementId /*!.name*/),
-                      ],
+                    /// Original Price (strikethrough) if on sale
+                    if (product.productType == ProductType.single.toString() &&
+                        product.salePrice > 0)
+                      Text(
+                        '${product.price} DT',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey,
+                            ),
+                      ),
+
+                    /// Current Price
+                    ProductPriceText(
+                      price: controller.getProductPrice(product),
+                      isLarge: false,
                     ),
-                    const Spacer(),
-
-                    /// Colonne de Prix
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        /// Prix
-                        Flexible(
-                          child: Column(
-                            children: [
-                              if (product.productType ==
-                                      ProductType.single.toString() &&
-                                  product.salePrice > 0)
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: AppSizes.sm),
-                                  child: Text(
-                                    product.price.toString(),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelMedium!
-                                        .apply(
-                                          color: AppColors.textSecondary,
-                                          decoration:
-                                              TextDecoration.lineThrough,
-                                        ),
-                                  ),
-                                ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: AppSizes.sm),
-                                child: ProductPriceText(
-                                  price: controller.getProductPrice(product),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        /// Add To cart button
-                        Container(
-                          decoration: const BoxDecoration(
-                            color: AppColors.dark,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(AppSizes.cardRadiusMd),
-                              bottomRight:
-                                  Radius.circular(AppSizes.productImageRadius),
-                            ),
-                          ),
-                          child: const SizedBox(
-                            width: AppSizes.iconLg * 1.2,
-                            height: AppSizes.iconLg * 1.2,
-                            child: Center(
-                              child: Icon(
-                                Iconsax.add,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    )
                   ],
                 ),
               ),
-            )
-          ],
-        ));
+
+              /// Add to Cart Button
+              ProductCardAddToCartButton(product: product),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Méthode pour construire l'image du produit (identique à ProductCardVertical)
+  Widget _buildProductImage() {
+    // Si l'URL de l'image commence par http, c'est une image réseau
+    if (product.imageUrl != null &&
+        product.imageUrl!.isNotEmpty &&
+        product.imageUrl!.startsWith('http')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(AppSizes.productImageRadius),
+        child: Image.network(
+          product.imageUrl!,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildImageErrorWidget();
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return _buildImageLoadingWidget(loadingProgress);
+          },
+        ),
+      );
+    }
+
+    // Si c'est un asset local
+    if (product.imageUrl != null && product.imageUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(AppSizes.productImageRadius),
+        child: Image.asset(
+          product.imageUrl!,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildImageErrorWidget();
+          },
+        ),
+      );
+    }
+
+    // Si aucune image n'est disponible
+    return _buildImagePlaceholderWidget();
+  }
+
+  Widget _buildImageErrorWidget() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(AppSizes.productImageRadius),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, color: Colors.grey, size: 24),
+          SizedBox(height: 4),
+          Text(
+            'Erreur',
+            style: TextStyle(color: Colors.grey, fontSize: 10),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageLoadingWidget(ImageChunkEvent loadingProgress) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(AppSizes.productImageRadius),
+      ),
+      child: Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+              : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePlaceholderWidget() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(AppSizes.productImageRadius),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.fastfood, color: Colors.grey, size: 24),
+          SizedBox(height: 4),
+          Text(
+            'Aucune image',
+            style: TextStyle(color: Colors.grey, fontSize: 10),
+          ),
+        ],
+      ),
+    );
   }
 }

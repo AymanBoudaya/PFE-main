@@ -379,11 +379,11 @@ class ProduitController extends GetxController {
   }
 
   String? calculateSalePercentage(double originalPrice, double salePrice) {
-    if (salePrice == null || salePrice <= 0.0) return null;
-    if (originalPrice <= 0) return null;
+    // Si pas de réduction, on ne renvoie rien
+    if (salePrice <= 0 || salePrice >= originalPrice) return null;
 
-    double percentage = ((originalPrice - salePrice) / originalPrice) * 100;
-    return percentage.toStringAsFixed(0);
+    final percent = ((originalPrice - salePrice) / originalPrice) * 100;
+    return percent.toStringAsFixed(0); // Renvoie "20" (sans le symbole %)
   }
 
   /// -- check product stock status
@@ -391,37 +391,38 @@ class ProduitController extends GetxController {
     return stock > 0 ? 'En Stock' : 'Hors Stock';
   }
 
-  /// get product price or price range for variations
   String getProductPrice(ProduitModel product) {
-    // Pour les produits single, prioriser le salePrice
-    if (product.productType == ProductType.single.toString()) {
-      return (product.salePrice > 0 ? product.salePrice : product.price)
-          .toStringAsFixed(0);
-    } else {
-      // ... reste du code existant pour les variations
-      double smallestPrice = double.infinity;
-      double largestPrice = 0.0;
-
-      if (product.sizesPrices != null && product.sizesPrices.isNotEmpty) {
-        for (var variation in product.sizesPrices) {
-          double priceToConsider = variation.price;
-
-          if (priceToConsider < smallestPrice) {
-            smallestPrice = priceToConsider;
-          }
-          if (priceToConsider > largestPrice) {
-            largestPrice = priceToConsider;
-          }
+    try {
+      // 🔹 PRODUIT SIMPLE
+      if (product.productType == ProductType.single.toString()) {
+        // Si promo active
+        if (product.salePrice > 0 && product.salePrice < product.price) {
+          return "${product.salePrice.toStringAsFixed(2)}";
         }
-
-        if (smallestPrice.isEqual(largestPrice)) {
-          return largestPrice.toStringAsFixed(0);
-        } else {
-          return '${smallestPrice.toStringAsFixed(0)} - ${largestPrice.toStringAsFixed(0)}';
-        }
-      } else {
-        return '0';
+        return "${product.price.toStringAsFixed(2)}";
       }
+
+      // 🔹 PRODUIT AVEC VARIANTES / TAILLES
+      if (product.sizesPrices.isNotEmpty) {
+        final prices = product.sizesPrices.map((e) => e.price).toList();
+        prices.sort(); // du plus petit au plus grand
+        final minPrice = prices.first;
+        final maxPrice = prices.last;
+
+        // Si toutes les tailles ont le même prix → un seul affichage
+        if (minPrice == maxPrice) {
+          return "${minPrice.toStringAsFixed(2)}";
+        }
+
+        // Sinon afficher une plage
+        return "${minPrice.toStringAsFixed(2)} - ${maxPrice.toStringAsFixed(2)}";
+      }
+
+      // 🔹 PAR DÉFAUT
+      return "${product.price.toStringAsFixed(2)}";
+    } catch (e, s) {
+      debugPrint("❌ Erreur getProductPrice: $e\n$s");
+      return "0.00";
     }
   }
 }

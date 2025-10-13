@@ -31,30 +31,43 @@ class ProduitRepository extends GetxController {
     }
   }
 
-  Future<List<ProduitModel>> getProductsForCategory({
-    required String categoryId,
-    int limit = -1,
-  }) async {
+  Future<List<ProduitModel>> getProductsForCategory(
+      {required String categoryId, int limit = 4}) async {
     try {
-      final query = _db
-          .from('produits')
-          .select('*')
-          .eq('categorie_id', categoryId)
-          .order('name', ascending: true);
+      // Essayer avec différents noms de colonnes possibles
+      final query = _db.from(_table).select('''
+            *,
+            etablissement:etablissement_id(*),
+            category:categorie_id(*)
+          ''').eq('categorie_id', categoryId); // ou 'categoryId' selon votre BD
 
-      final response = limit == -1 ? await query : await query.limit(limit);
-
-      if (response == null || (response as List).isEmpty) {
-        return [];
+      if (limit > 0) {
+        query.limit(limit);
       }
 
-      return (response as List<dynamic>)
-          .map((json) => ProduitModel.fromMap(Map<String, dynamic>.from(json)))
-          .toList();
-    } on PostgrestException catch (e) {
-      throw Exception('Erreur Supabase: ${e.message}');
+      final data = await query;
+
+      if (data.isEmpty) return [];
+
+      return data.map((item) => ProduitModel.fromMap(item)).toList();
     } catch (e) {
-      throw Exception('Erreur inattendue: $e');
+      // Debug: afficher l'erreur exacte
+      debugPrint('Erreur getProductsForCategory: $e');
+
+      // Fallback: essayer avec une requête plus simple
+      try {
+        final simpleQuery = _db
+            .from(_table)
+            .select('*')
+            .eq('categorie_id', categoryId)
+            .limit(limit);
+
+        final simpleData = await simpleQuery;
+        return simpleData.map((item) => ProduitModel.fromMap(item)).toList();
+      } catch (fallbackError) {
+        debugPrint('Fallback error: $fallbackError');
+        throw 'Impossible de charger les produits: $e';
+      }
     }
   }
 

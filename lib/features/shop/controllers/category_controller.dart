@@ -18,7 +18,8 @@ import '../models/produit_model.dart';
 
 enum CategoryFilter { all, featured }
 
-class CategoryController extends GetxController with GetTickerProviderStateMixin {
+class CategoryController extends GetxController
+    with GetTickerProviderStateMixin {
   static CategoryController get instance => Get.find();
 
   final formKey = GlobalKey<FormState>();
@@ -155,14 +156,15 @@ class CategoryController extends GetxController with GetTickerProviderStateMixin
       // ✅ Upload image Web/Mobile
       if ((kIsWeb && pickedImageBytes.value != null) ||
           (!kIsWeb && pickedImage.value != null)) {
-        final dynamic file = kIsWeb ? pickedImageBytes.value! : pickedImage.value!;
+        final dynamic file =
+            kIsWeb ? pickedImageBytes.value! : pickedImage.value!;
         imageUrl = await _categoryRepository.uploadCategoryImage(file);
       }
 
       final String? parentId =
-      (selectedParentId.value != null && selectedParentId.value!.isNotEmpty)
-          ? selectedParentId.value
-          : null;
+          (selectedParentId.value != null && selectedParentId.value!.isNotEmpty)
+              ? selectedParentId.value
+              : null;
 
       final newCategory = CategoryModel(
         id: '',
@@ -178,7 +180,8 @@ class CategoryController extends GetxController with GetTickerProviderStateMixin
       clearForm();
       Get.back();
       TLoaders.successSnackBar(
-        message: 'Catégorie "${nameController.text.trim()}" ajoutée avec succès',
+        message:
+            'Catégorie "${nameController.text.trim()}" ajoutée avec succès',
       );
     } catch (e) {
       TLoaders.errorSnackBar(message: e.toString());
@@ -204,7 +207,8 @@ class CategoryController extends GetxController with GetTickerProviderStateMixin
       // ✅ Upload image Web/Mobile
       if ((kIsWeb && pickedImageBytes.value != null) ||
           (!kIsWeb && pickedImage.value != null)) {
-        final dynamic file = kIsWeb ? pickedImageBytes.value! : pickedImage.value!;
+        final dynamic file =
+            kIsWeb ? pickedImageBytes.value! : pickedImage.value!;
         imageUrl = await _categoryRepository.uploadCategoryImage(file);
       }
 

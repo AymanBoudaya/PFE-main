@@ -2,14 +2,14 @@ class CategoryModel {
   final String id;
   final String name;
   late final String image;
-  final String? parentId; // Nullable, peut être null si pas de parent
+  final String? parentId; 
   final bool isFeatured;
 
   CategoryModel({
     this.id = '',
     required this.name,
     required this.image,
-    this.parentId, // Peut être null
+    this.parentId, 
     this.isFeatured = false,
   });
 
