@@ -560,10 +560,11 @@ class _ListProduitScreenState extends State<ListProduitScreen> {
   }
 
   Widget _buildBottomSheetContent(ProduitModel produit) {
+    final dark = THelperFunctions.isDarkMode(context);
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: dark ? AppColors.eerieBlack : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(

@@ -232,7 +232,8 @@ class ProduitController extends GetxController {
     try {
       isLoading.value = true;
       await produitRepository.addProduct(produit);
-      await fetchProducts();
+      await loadProductsByRole();
+      Get.back(result: true);
       TLoaders.successSnackBar(
           message: 'Produit "${produit.name}" ajouté avec succès');
       return true;
@@ -260,7 +261,8 @@ class ProduitController extends GetxController {
     try {
       isLoading.value = true;
       await produitRepository.updateProduct(produit);
-      await fetchProducts();
+      await loadProductsByRole();
+      Get.back(result: true);
       TLoaders.successSnackBar(
           message: 'Produit "${produit.name}" modifié avec succès');
       return true;
@@ -302,7 +304,7 @@ class ProduitController extends GetxController {
     try {
       isLoading.value = true;
       await produitRepository.deleteProduct(productId);
-      await fetchProducts();
+      await loadProductsByRole();
       TLoaders.successSnackBar(message: 'Produit supprimé avec succès');
     } catch (e) {
       TLoaders.errorSnackBar(message: "Erreur lors de la suppression: $e");

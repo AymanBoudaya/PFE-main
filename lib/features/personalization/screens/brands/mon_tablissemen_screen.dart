@@ -85,10 +85,10 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   Widget _buildBody() {
     if (_chargement) return _buildLoadingState();
 
-    if (_userRole != 'Admin' && _userRole != 'Gérant')
+    if (_userRole != 'Admin' && _userRole != 'Gérant') {
       return _buildAccesRefuse();
+    }
 
-    // ✅ Use Obx to react to changes in the controller's RxList
     return Obx(() {
       final data = _controller.etablissements;
 
@@ -109,19 +109,17 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   }
 
   Widget _buildFloatingActionButton() {
-    return Obx(() {
-      return FloatingActionButton(
-        onPressed: () async {
-          final result = await Get.to(() => AddEtablissementScreen());
-          if (result == true) _chargerEtablissements();
-        },
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add, size: 28),
-      );
-    });
+    return FloatingActionButton(
+      onPressed: () async {
+        final result = await Get.to(() => AddEtablissementScreen());
+        if (result == true) _chargerEtablissements();
+      },
+      backgroundColor: Colors.blue.shade600,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: const Icon(Icons.add, size: 28),
+    );
   }
 
   Widget _buildLoadingState() {

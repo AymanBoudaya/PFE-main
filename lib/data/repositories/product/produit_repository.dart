@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -39,7 +37,7 @@ class ProduitRepository extends GetxController {
             *,
             etablissement:etablissement_id(*),
             category:categorie_id(*)
-          ''').eq('categorie_id', categoryId); // ou 'categoryId' selon votre BD
+          ''').eq('categorie_id', categoryId);
 
       if (limit > 0) {
         query.limit(limit);
@@ -160,7 +158,6 @@ class ProduitRepository extends GetxController {
   Future<void> addProduct(ProduitModel produit) async {
     try {
       await _db.from(_table).insert(produit.toJson());
-      // Pas besoin de vérifier error → si ça échoue, une exception sera levée
     } on PostgrestException catch (e) {
       throw 'Erreur base de données : ${e.code} - ${e.message}';
     } catch (e) {
@@ -216,27 +213,6 @@ class ProduitRepository extends GetxController {
     debugPrint("Product image uploaded. Public URL: $publicUrl");
     return publicUrl;
   }
-
-  /// Uploader une image de produit
-  /*Future<String> uploadProductImage(File imageFile) async {
-    try {
-      final fileName = 'produit_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final bucket = 'produits';
-
-      // Upload vers le bucket "produits"
-      await Supabase.instance.client.storage
-          .from(bucket)
-          .upload(fileName, imageFile);
-
-      // Récupérer l'URL publique
-      final publicUrl =
-          Supabase.instance.client.storage.from(bucket).getPublicUrl(fileName);
-
-      return publicUrl;
-    } catch (e) {
-      throw 'Erreur lors de l\'upload de l\'image : $e';
-    }
-  }*/
 
   Future<List<ProduitModel>> getFeaturedProducts() async {
     try {
