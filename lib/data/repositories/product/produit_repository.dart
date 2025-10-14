@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -37,7 +39,7 @@ class ProduitRepository extends GetxController {
             *,
             etablissement:etablissement_id(*),
             category:categorie_id(*)
-          ''').eq('categorie_id', categoryId);
+          ''').eq('categorie_id', categoryId); 
 
       if (limit > 0) {
         query.limit(limit);

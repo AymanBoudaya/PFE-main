@@ -14,33 +14,33 @@ class EtablissementController extends GetxController {
   EtablissementController(this.repo);
 
   // Ajouter établissement sans horaires
-  Future<String?> createEtablissement(Etablissement e) async {
-    try {
-      if (!_isUserGerant()) {
-        _logError('création',
-            'Permission refusée : seul un Gérant peut créer un établissement');
-        return null;
-      }
-
-      final id = await repo.createEtablissement(e);
-
-      if (id != null && id.isNotEmpty) {
-        // Ajouter localement
-        etablissements.add(e.copyWith(id: id));
-
-        // ✅ Et rafraîchir depuis la base pour être sûr d’avoir les dernières données
-        final user = userController.user.value;
-        if (user.id.isNotEmpty) {
-          await fetchEtablissementsByOwner(user.id);
-        }
-      }
-
-      return id;
-    } catch (err, stack) {
-      _logError('création', err, stack);
+ Future<String?> createEtablissement(Etablissement e) async {
+  try {
+    if (!_isUserGerant()) {
+      _logError('création',
+          'Permission refusée : seul un Gérant peut créer un établissement');
       return null;
     }
+
+    final id = await repo.createEtablissement(e);
+
+    if (id != null && id.isNotEmpty) {
+      // ✅ Ajouter localement
+      etablissements.add(e.copyWith(id: id));
+
+      // ✅ Et rafraîchir depuis la base pour être sûr d’avoir les dernières données
+      final user = userController.user.value;
+      if (user.id.isNotEmpty) {
+        await fetchEtablissementsByOwner(user.id);
+      }
+    }
+
+    return id;
+  } catch (err, stack) {
+    _logError('création', err, stack);
+    return null;
   }
+}
 
   // Mettre à jour un établissement
   Future<bool> updateEtablissement(
@@ -109,7 +109,7 @@ class EtablissementController extends GetxController {
       String ownerId) async {
     try {
       final data = await repo.getEtablissementsByOwner(ownerId);
-      etablissements.assignAll(data);
+      etablissements.assignAll(data); 
       return data;
     } catch (e, stack) {
       _logError('récupération', e, stack);

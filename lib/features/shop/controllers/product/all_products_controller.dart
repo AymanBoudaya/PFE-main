@@ -1,64 +1,104 @@
 import 'package:get/get.dart';
-
 import '../../../../data/repositories/product/produit_repository.dart';
 import '../../models/produit_model.dart';
 
 class AllProductsController extends GetxController {
-  // This controller can be used to manage the state of all products in the shop.
-  // You can add methods and properties here to handle product data, such as fetching products from an API,
-  // filtering products, or managing the cart.
   static AllProductsController get instance => Get.find();
+
   final repository = ProduitRepository.instance;
-  final RxString selectedSortOption = 'Nom'.obs;
+
+  /// Liste complète des produits
   final RxList<ProduitModel> products = <ProduitModel>[].obs;
 
-/*
-  Future<List<ProductModel>> fetchProductsByQuery(Query? query) async {
+  /// État du chargement
+  final RxBool isLoading = false.obs;
+
+  /// Option de tri sélectionnée
+  final RxString selectedSortOption = 'Nom'.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchAllProducts();
+  }
+
+  /// Récupère tous les produits
+  Future<void> fetchAllProducts() async {
     try {
-      if (query == null) {
-        return [];
-      }
-      final products = await repository.fetchProductsByQuery(query);
-      return products;
+      isLoading.value = true;
+      final all = await repository.getAllProducts();
+      
+      // 🔥 CORRECTION : S'assurer que la liste n'est pas null
+      products.assignAll(all ?? []);
+      
+      // 🔥 CORRECTION : Trier après assignation
+      sortProducts(selectedSortOption.value);
+      
+      print('✅ ${products.length} produits chargés avec succès');
     } catch (e) {
-      TLoaders.errorSnackBar(title: "Erreur", message: e.toString());
-      return [];
+      print("❌ Erreur chargement produits : $e");
+      // 🔥 CORRECTION : Assigner une liste vide en cas d'erreur
+      products.assignAll([]);
+    } finally {
+      isLoading.value = false;
     }
   }
-*/
+
+  /// Trie les produits selon l'option choisie
   void sortProducts(String sortOption) {
     selectedSortOption.value = sortOption;
+
     switch (sortOption) {
       case 'Nom':
         products.sort((a, b) => a.name.compareTo(b.name));
         break;
-      case 'Prix décroissant':
-        products.sort((a, b) => b.price.compareTo(a.price));
-        break;
       case 'Prix croissant':
-        products.sort((a, b) => a.price.compareTo(b.price));
+        products.sort((a, b) {
+          final priceA = a.price ?? a.salePrice ?? 0.0;
+          final priceB = b.price ?? b.salePrice ?? 0.0;
+          return priceA.compareTo(priceB);
+        });
+        break;
+      case 'Prix décroissant':
+        products.sort((a, b) {
+          final priceA = a.price ?? a.salePrice ?? 0.0;
+          final priceB = b.price ?? b.salePrice ?? 0.0;
+          return priceB.compareTo(priceA);
+        });
         break;
       case 'Récent':
-        products.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        products.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         break;
       case 'Ventes':
         products.sort((a, b) {
-          if (b.salePrice > 0) {
-            return b.salePrice.compareTo(a.salePrice);
-          } else if (a.salePrice > 0) {
-            return -1;
-          } else {
-            return 1;
-          }
+          // 🔥 CORRECTION : Logique de tri par ventes améliorée
+          final salesA = a.salePrice ?? 0.0;
+          final salesB = b.salePrice ?? 0.0;
+          return salesB.compareTo(salesA);
         });
         break;
       default:
         products.sort((a, b) => a.name.compareTo(b.name));
     }
+    
+    print('🔄 Produits triés par: $sortOption');
   }
 
-  void assignProducts(List<ProduitModel> products) {
-    this.products.assignAll(products);
-    sortProducts('name');
+  /// Permet d'assigner une nouvelle liste (utilisé dans la recherche)
+  void assignProducts(List<ProduitModel> newProducts) {
+    products.assignAll(newProducts);
+    sortProducts(selectedSortOption.value);
+  }
+
+  // 🔥 NOUVELLE MÉTHODE : Recherche rapide
+  List<ProduitModel> searchProducts(String query) {
+    if (query.isEmpty) return products;
+    
+    final searchText = query.toLowerCase();
+    return products.where((product) {
+      return product.name.toLowerCase().contains(searchText) ||
+          (product.description ?? '').toLowerCase().contains(searchText);// ||
+          // (product.categoryName ?? '').toLowerCase().contains(searchText);
+    }).toList();
   }
 }

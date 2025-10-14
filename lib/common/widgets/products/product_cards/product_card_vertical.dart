@@ -52,7 +52,7 @@ class ProductCardVertical extends StatelessWidget {
             /// Thumbnail
             Stack(
               children: [
-                /// -- Thumbnail Image (CORRIGÉ pour supporter les URLs réseau)
+                /// -- Thumbnail Image
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(24),

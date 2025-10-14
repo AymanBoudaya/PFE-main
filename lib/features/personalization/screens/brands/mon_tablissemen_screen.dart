@@ -109,17 +109,23 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   }
 
   Widget _buildFloatingActionButton() {
-    return FloatingActionButton(
-      onPressed: () async {
-        final result = await Get.to(() => AddEtablissementScreen());
-        if (result == true) _chargerEtablissements();
-      },
-      backgroundColor: Colors.blue.shade600,
-      foregroundColor: Colors.white,
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: const Icon(Icons.add, size: 28),
-    );
+    return Obx(() {
+      if (_userRole == 'Gérant' && _controller.etablissements.isNotEmpty) {
+        return const SizedBox();
+      }
+
+      return FloatingActionButton(
+        onPressed: () async {
+          final result = await Get.to(() => AddEtablissementScreen());
+          if (result == true) _chargerEtablissements();
+        },
+        backgroundColor: Colors.blue.shade600,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add, size: 28),
+      );
+    });
   }
 
   Widget _buildLoadingState() {
