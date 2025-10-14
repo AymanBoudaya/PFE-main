@@ -1,7 +1,9 @@
+import 'package:caferesto/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/widgets/appbar/appbar.dart';
 import '../../../../data/repositories/etablissement/etablissement_repository.dart';
+import '../../../../utils/helpers/helper_functions.dart';
 import '../../../../utils/popups/loaders.dart';
 import '../../../shop/controllers/etablissement_controller.dart';
 import '../../../shop/models/etablissement_model.dart';
@@ -67,13 +69,13 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen> {
     try {
       // CORRECTION : Créer l'établissement SANS horaires
       final id = await _controller.createEtablissement(etab); // Sans horaires
+      Get.back(result: true);
 
       if (id != null) {
         TLoaders.successSnackBar(
             message:
                 'Établissement créé avec succès. Vous pourrez ajouter les horaires plus tard.');
         _formKey.currentState!.reset();
-        Get.back(result: true);
       } else {
         TLoaders.errorSnackBar(
             message: 'Erreur lors de la création de l\'établissement');
@@ -125,6 +127,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen> {
       );
     }
 
+    final dark = THelperFunctions.isDarkMode(context);
     return Scaffold(
       appBar: TAppBar(
         title: const Text('Ajouter un établissement'),
@@ -196,7 +199,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen> {
 
               // Information sur les horaires
               Card(
-                color: Colors.blue[50],
+                color: dark ? AppColors.eerieBlack : Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Row(

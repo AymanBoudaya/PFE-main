@@ -50,34 +50,17 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   }
 
   void _chargerEtablissements() async {
-    setState(() {
-      _chargement = true;
-    });
+    setState(() => _chargement = true);
+    final user = _userController.user.value;
 
-    try {
-      final user = _userController.user.value;
-      if (_userRole == 'Gérant' && user.id.isNotEmpty) {
-        final data = await _controller.fetchEtablissementsByOwner(user.id);
-        setState(() {
-          _etablissements = data ?? [];
-        });
-      } else if (_userRole == 'Admin') {
-        final data = await _controller.getTousEtablissements();
-        setState(() {
-          _etablissements = data;
-        });
-      }
-    } catch (e) {
-      // print('Erreur chargement établissements: $e');
-      Get.snackbar('Erreur', 'Impossible de charger les établissements');
-      setState(() {
-        _etablissements = [];
-      });
-    } finally {
-      setState(() {
-        _chargement = false;
-      });
+    if (_userRole == 'Gérant' && user.id.isNotEmpty) {
+      await _controller.fetchEtablissementsByOwner(user.id);
+    } else if (_userRole == 'Admin') {
+      final data = await _controller.getTousEtablissements();
+      _controller.etablissements.assignAll(data);
     }
+
+    setState(() => _chargement = false);
   }
 
   @override
@@ -105,36 +88,40 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
     if (_userRole != 'Admin' && _userRole != 'Gérant')
       return _buildAccesRefuse();
 
-    if (_etablissements.isEmpty) return _buildEmptyState();
+    // ✅ Use Obx to react to changes in the controller's RxList
+    return Obx(() {
+      final data = _controller.etablissements;
 
-    return RefreshIndicator(
-      onRefresh: () async => _chargerEtablissements(),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _etablissements.length,
-        itemBuilder: (context, index) {
-          final e = _etablissements[index];
-          return _buildEtablissementCard(e, index);
-        },
-      ),
-    );
+      if (data.isEmpty) return _buildEmptyState();
+
+      return RefreshIndicator(
+        onRefresh: () async => _chargerEtablissements(),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: data.length,
+          itemBuilder: (context, index) {
+            final e = data[index];
+            return _buildEtablissementCard(e, index);
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildFloatingActionButton() {
-    return _userRole == 'Gérant' && _etablissements.isEmpty
-        ? FloatingActionButton(
-            onPressed: () async {
-              final result = await Get.to(() => AddEtablissementScreen());
-              if (result == true) _chargerEtablissements();
-            },
-            backgroundColor: Colors.blue.shade600,
-            foregroundColor: Colors.white,
-            elevation: 4,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: const Icon(Icons.add, size: 28),
-          )
-        : const SizedBox.shrink();
+    return Obx(() {
+      return FloatingActionButton(
+        onPressed: () async {
+          final result = await Get.to(() => AddEtablissementScreen());
+          if (result == true) _chargerEtablissements();
+        },
+        backgroundColor: Colors.blue.shade600,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add, size: 28),
+      );
+    });
   }
 
   Widget _buildLoadingState() {

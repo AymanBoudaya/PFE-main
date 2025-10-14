@@ -27,6 +27,11 @@ class SettingsScreen extends StatelessWidget {
 
     bool canAddCategory() {
       final role = userController.user.value.role;
+      return role == 'Admin';
+    }
+
+    bool canAddEtablissement() {
+      final role = userController.user.value.role;
       return role == 'Gérant' || role == 'Admin';
     }
 
@@ -139,7 +144,7 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                 SizedBox(height: AppSizes.spaceBtwItems),
-                if (canAddCategory())
+                if (canAddEtablissement())
                   TSettingsMenuTile(
                     icon: Iconsax.home,
                     title: "Gérer  établissement",
@@ -151,7 +156,7 @@ class SettingsScreen extends StatelessWidget {
                   height: AppSizes.spaceBtwItems,
                 ),
 
-                if (canAddCategory())
+                if (canAddEtablissement())
                   TSettingsMenuTile(
                     icon: Iconsax.bag_tick_2,
                     title: "Gérer produit",

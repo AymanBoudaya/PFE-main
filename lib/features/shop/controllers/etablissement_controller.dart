@@ -14,27 +14,33 @@ class EtablissementController extends GetxController {
   EtablissementController(this.repo);
 
   // Méthode pour créer un établissement SANS horaires
-  Future<String?> createEtablissement(Etablissement e) async {
-    try {
-      if (!_isUserGerant()) {
-        _logError('création',
-            'Permission refusée : seul un Gérant peut créer un établissement');
-        return null;
-      }
-
-      final id = await repo.createEtablissement(e);
-
-      // Si la création réussit, on recharge la liste automatiquement
-      if (id != null && id.isNotEmpty) {
-        await fetchEtablissementsByOwner(e.idOwner!);
-      }
-
-      return id;
-    } catch (err, stack) {
-      _logError('création', err, stack);
+ Future<String?> createEtablissement(Etablissement e) async {
+  try {
+    if (!_isUserGerant()) {
+      _logError('création',
+          'Permission refusée : seul un Gérant peut créer un établissement');
       return null;
     }
+
+    final id = await repo.createEtablissement(e);
+
+    if (id != null && id.isNotEmpty) {
+      // ✅ Ajouter localement
+      etablissements.add(e.copyWith(id: id));
+
+      // ✅ Et rafraîchir depuis la base pour être sûr d’avoir les dernières données
+      final user = userController.user.value;
+      if (user.id.isNotEmpty) {
+        await fetchEtablissementsByOwner(user.id);
+      }
+    }
+
+    return id;
+  } catch (err, stack) {
+    _logError('création', err, stack);
+    return null;
   }
+}
 
   // Mettre à jour un établissement
   Future<bool> updateEtablissement(
@@ -153,10 +159,19 @@ class EtablissementController extends GetxController {
     try {
       if (!_isUserGerant() && !_isUserAdmin()) {
         _logError('suppression',
-            'Permission refusée : seul un Gérant peut supprimer un établissement');
+            'Permission refusée : seul un Gérant/Admin peut supprimer un établissement');
         return false;
       }
+
       await repo.deleteEtablissement(id);
+
+      etablissements.removeWhere((e) => e.id == id);
+
+      final user = userController.user.value;
+      if (user.id.isNotEmpty) {
+        await fetchEtablissementsByOwner(user.id);
+      }
+
       return true;
     } catch (e, stack) {
       _logError('suppression', e, stack);
@@ -258,6 +273,7 @@ class EtablissementController extends GetxController {
       print(stack);
     }
   }
+
   /// Méthode pour récupérer tous les établissements,
   /// sans filtrer par rôle (utile pour les produits)
   Future<List<Etablissement>> getTousEtablissementsPourProduit() async {
@@ -270,5 +286,4 @@ class EtablissementController extends GetxController {
       return [];
     }
   }
-
 }

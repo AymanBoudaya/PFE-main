@@ -1,4 +1,3 @@
-
 import 'statut_etablissement_model.dart';
 
 import 'horaire_model.dart';
@@ -31,7 +30,8 @@ class Etablissement {
   factory Etablissement.fromJson(Map<String, dynamic> json) {
     List<Horaire>? horaires;
     if (json['horaires'] != null && json['horaires'] is List) {
-      horaires = (json['horaires'] as List).map((e) => Horaire.fromJson(e)).toList();
+      horaires =
+          (json['horaires'] as List).map((e) => Horaire.fromJson(e)).toList();
     }
 
     return Etablissement(
@@ -43,7 +43,9 @@ class Etablissement {
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       idOwner: json['id_owner'],
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
       horaires: horaires,
     );
   }
@@ -59,5 +61,32 @@ class Etablissement {
       'id_owner': idOwner,
       'created_at': createdAt?.toIso8601String(),
     };
+  }
+
+  /// ✅ Ajout du copyWith
+  Etablissement copyWith({
+    String? id,
+    String? name,
+    String? address,
+    String? imageUrl,
+    StatutEtablissement? statut,
+    double? latitude,
+    double? longitude,
+    String? idOwner,
+    DateTime? createdAt,
+    List<Horaire>? horaires,
+  }) {
+    return Etablissement(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      address: address ?? this.address,
+      imageUrl: imageUrl ?? this.imageUrl,
+      statut: statut ?? this.statut,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      idOwner: idOwner ?? this.idOwner,
+      createdAt: createdAt ?? this.createdAt,
+      horaires: horaires ?? this.horaires,
+    );
   }
 }
