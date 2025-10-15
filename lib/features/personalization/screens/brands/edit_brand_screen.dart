@@ -137,21 +137,21 @@ class _EditEtablissementScreenState extends State<EditEtablissementScreen> {
         if (_longitudeController.text.isNotEmpty) {
           updateData['longitude'] = double.tryParse(_longitudeController.text);
         }
+      }
 
-        final success = await _etablissementController.updateEtablissement(
-          widget.etablissement.id,
-          updateData,
-        );
+      final success = await _etablissementController.updateEtablissement(
+        widget.etablissement.id,
+        updateData,
+      );
 
-        Get.back(result: true);
-        if (success) {
-          TLoaders.successSnackBar(
-              message: 'Établissement mis à jour avec succès');
+      Get.back(result: true);
+      if (success) {
+        TLoaders.successSnackBar(
+            message: 'Établissement mis à jour avec succès');
 
-          await Future.delayed(const Duration(milliseconds: 1500));
-        } else {
-          TLoaders.errorSnackBar(message: 'Échec de la mise à jour');
-        }
+        await Future.delayed(const Duration(milliseconds: 1500));
+      } else {
+        TLoaders.errorSnackBar(message: 'Échec de la mise à jour');
       }
     } catch (e) {
       TLoaders.errorSnackBar(message: 'Erreur: $e');
