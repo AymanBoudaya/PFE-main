@@ -83,7 +83,7 @@ class _AdminGestionEtablissementsScreenState
         return "Approuvé ✓";
       case StatutEtablissement.rejete:
         return "Rejeté ✗";
-      case StatutEtablissement.enAttente:
+      case StatutEtablissement.en_attente:
         return "En attente 🕓";
     }
   }
@@ -94,7 +94,7 @@ class _AdminGestionEtablissementsScreenState
         return Colors.green;
       case StatutEtablissement.rejete:
         return Colors.red;
-      case StatutEtablissement.enAttente:
+      case StatutEtablissement.en_attente:
         return Colors.orange;
     }
   }

@@ -36,7 +36,7 @@ class _EditEtablissementScreenState extends State<EditEtablissementScreen> {
 
   bool _isLoading = false;
   bool _horairesLoaded = false;
-  StatutEtablissement _selectedStatut = StatutEtablissement.enAttente;
+  StatutEtablissement _selectedStatut = StatutEtablissement.en_attente;
 
   @override
   void initState() {
@@ -296,7 +296,7 @@ class _EditEtablissementScreenState extends State<EditEtablissementScreen> {
         return 'Approuvé ✓';
       case StatutEtablissement.rejete:
         return 'Rejeté ✗';
-      case StatutEtablissement.enAttente:
+      case StatutEtablissement.en_attente:
         return 'En attente de validation';
     }
   }
@@ -307,7 +307,7 @@ class _EditEtablissementScreenState extends State<EditEtablissementScreen> {
         return Colors.green;
       case StatutEtablissement.rejete:
         return Colors.red;
-      case StatutEtablissement.enAttente:
+      case StatutEtablissement.en_attente:
         return Colors.orange;
     }
   }

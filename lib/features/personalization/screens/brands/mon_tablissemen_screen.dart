@@ -9,8 +9,8 @@ import '../../../../utils/helpers/helper_functions.dart';
 import '../../../shop/controllers/etablissement_controller.dart';
 import '../../../shop/models/etablissement_model.dart';
 import '../../../shop/models/statut_etablissement_model.dart';
-import 'edit_brand_screen.dart';
 import 'add_brand_screen.dart';
+import 'edit_brand_screen.dart';
 
 class MonEtablissementScreen extends StatefulWidget {
   const MonEtablissementScreen({super.key});
@@ -23,26 +23,36 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   late final EtablissementController _controller;
   late final UserController _userController;
   String _userRole = '';
+
   @override
   void initState() {
     super.initState();
-    if (!Get.isRegistered<EtablissementController>()) {
-      Get.put(EtablissementController(EtablissementRepository()));
-    }
-    _controller = Get.find<EtablissementController>();
+    _initializeControllers();
+  }
 
+  // 🔥 CORRECTION : Initialisation améliorée
+  void _initializeControllers() {
+    // Initialiser UserController
     if (!Get.isRegistered<UserController>()) {
       Get.put(UserController());
     }
     _userController = Get.find<UserController>();
 
+    // Initialiser EtablissementController
+    if (!Get.isRegistered<EtablissementController>()) {
+      Get.put(EtablissementController(EtablissementRepository()));
+    }
+    _controller = Get.find<EtablissementController>();
+
     _userRole = _userController.userRole;
 
+    // Charger les données après un court délai
     Future.delayed(const Duration(milliseconds: 100), () {
       _chargerEtablissements();
     });
   }
 
+  // 🔥 CORRECTION : Chargement amélioré
   Future<void> _chargerEtablissements() async {
     try {
       _controller.isLoading.value = true;
@@ -56,10 +66,27 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
     } catch (e) {
       print('❌ Erreur chargement établissements: $e');
       TLoaders.errorSnackBar(
-          title: 'Erreur',
-          message: 'Impossible de charger les établissements: $e');
+          title: 'Erreur', message: 'Impossible de charger les établissements');
     } finally {
       _controller.isLoading.value = false;
+    }
+  }
+
+  // 🔥 CORRECTION : Suppression avec confirmation
+  Future<void> _deleteEtablissement(Etablissement etablissement) async {
+    if (etablissement.id == null) {
+      TLoaders.errorSnackBar(message: 'ID établissement manquant');
+      return;
+    }
+
+    try {
+      final success = await _controller.deleteEtablissement(etablissement.id!);
+      if (success) {
+        // La liste se met à jour automatiquement via les observables
+        print('✅ Établissement supprimé avec succès');
+      }
+    } catch (e) {
+      print('❌ Erreur suppression: $e');
     }
   }
 
@@ -83,19 +110,19 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   }
 
   Widget _buildBody() {
-    if (_controller.isLoading.value) return _buildLoadingState();
-
-    if (_userRole != 'Admin' && _userRole != 'Gérant') {
-      return _buildAccesRefuse();
-    }
-
     return Obx(() {
+      if (_controller.isLoading.value) return _buildLoadingState();
+
+      if (_userRole != 'Admin' && _userRole != 'Gérant') {
+        return _buildAccesRefuse();
+      }
+
       final data = _controller.etablissements;
 
       if (data.isEmpty) return _buildEmptyState();
 
       return RefreshIndicator(
-        onRefresh: () async => _chargerEtablissements(),
+        onRefresh: _chargerEtablissements,
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: data.length,
@@ -109,23 +136,25 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   }
 
   Widget _buildFloatingActionButton() {
-    return Obx(() {
-      if (_userRole == 'Gérant' && _controller.etablissements.isNotEmpty) {
-        return const SizedBox();
-      }
+    // Gérant ne peut créer qu'un seul établissement
+    if (_userRole == 'Gérant' && _controller.etablissements.isNotEmpty) {
+      return const SizedBox();
+    }
 
-      return FloatingActionButton(
-        onPressed: () async {
-          final result = await Get.to(() => AddEtablissementScreen());
-          if (result == true) _chargerEtablissements();
-        },
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add, size: 28),
-      );
-    });
+    // Admin peut toujours créer
+    return FloatingActionButton(
+      onPressed: () async {
+        final result = await Get.to(() => AddEtablissementScreen());
+        if (result == true) {
+          await _chargerEtablissements();
+        }
+      },
+      backgroundColor: Colors.blue.shade600,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: const Icon(Icons.add, size: 28),
+    );
   }
 
   Widget _buildLoadingState() {
@@ -291,7 +320,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
 
   (Color, String) _getStatutInfo(StatutEtablissement statut) {
     switch (statut) {
-      case StatutEtablissement.enAttente:
+      case StatutEtablissement.en_attente:
         return (Colors.orange, "En attente");
       case StatutEtablissement.approuve:
         return (Colors.green, "Approuvé");
@@ -492,17 +521,5 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
         );
       },
     );
-  }
-
-  void _deleteEtablissement(Etablissement etablissement) {
-    if (etablissement.id == null) {
-      TLoaders.errorSnackBar(
-        message: 'Impossible de supprimer l\'établissement : ID manquant',
-      );
-      return;
-    }
-
-    _controller.deleteEtablissement(etablissement.id!);
-    _chargerEtablissements();
   }
 }

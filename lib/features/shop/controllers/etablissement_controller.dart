@@ -1,9 +1,9 @@
 import 'package:caferesto/utils/popups/loaders.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/repositories/etablissement/etablissement_repository.dart';
 import '../../personalization/controllers/user_controller.dart';
 import '../models/etablissement_model.dart';
-import '../models/horaire_model.dart';
 import '../models/statut_etablissement_model.dart';
 
 class EtablissementController extends GetxController {
@@ -14,54 +14,81 @@ class EtablissementController extends GetxController {
 
   EtablissementController(this.repo);
 
-  // Ajouter établissement sans horaires
+  @override
+  void onInit() {
+    super.onInit();
+    print('EtablissementController initialisé');
+  }
+
+  // 🔥 CORRECTION : Méthode de création améliorée
   Future<String?> createEtablissement(Etablissement e) async {
     try {
-      if (!_isUserGerant()) {
-        _logError('création',
-            'Permission refusée : seul un Gérant peut créer un établissement');
+      if (!_hasPermissionForAction('création')) {
         return null;
       }
 
+      isLoading.value = true;
       final id = await repo.createEtablissement(e);
 
       if (id != null && id.isNotEmpty) {
-        // ✅ Ajouter localement
-        etablissements.add(e.copyWith(id: id));
-
-        // ✅ Et rafraîchir depuis la base pour être sûr d’avoir les dernières données
-        final user = userController.user.value;
-        if (user.id.isNotEmpty) {
-          await fetchEtablissementsByOwner(user.id);
-        }
+        // 🔥 CORRECTION : Rafraîchir selon le rôle
+        await _refreshEtablissementsAfterAction();
+        TLoaders.successSnackBar(message: 'Établissement créé avec succès');
+      } else {
+        TLoaders.errorSnackBar(message: 'Erreur lors de la création');
       }
 
       return id;
     } catch (err, stack) {
       _logError('création', err, stack);
+      TLoaders.errorSnackBar(message: 'Erreur création: $err');
       return null;
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  // Mettre à jour un établissement
+  // Méthode de mise à jour améliorée
   Future<bool> updateEtablissement(
       String? id, Map<String, dynamic> data) async {
     try {
-      if (!_isUserGerant() && !_isUserAdmin()) {
-        _logError('mise à jour',
-            'Permission refusée : seul un Gérant/Admin peut modifier un établissement');
+      if (!_hasPermissionForAction('mise à jour')) {
         return false;
       }
 
+      if (id == null || id.isEmpty) {
+        TLoaders.errorSnackBar(message: 'ID établissement manquant');
+        return false;
+      }
+
+      isLoading.value = true;
+
+      // S'assurer que le statut est converti correctement
+      if (data.containsKey('statut') && data['statut'] is StatutEtablissement) {
+        data['statut'] = (data['statut'] as StatutEtablissement).value;
+      }
+
       final success = await repo.updateEtablissement(id, data);
+      Get.back(result: true);
+      if (success) {
+        await _refreshEtablissementsAfterAction();
+        TLoaders.successSnackBar(
+            message: 'Établissement mis à jour avec succès');
+      } else {
+        TLoaders.errorSnackBar(message: 'Échec de la mise à jour');
+      }
+
       return success;
     } catch (e, stack) {
       _logError('mise à jour', e, stack);
+      TLoaders.errorSnackBar(message: 'Erreur mise à jour: $e');
       return false;
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  // Méthode pour changer le statut d'un établissement (pour Admin)
+  // 🔥 CORRECTION : Méthode pour changer le statut
   Future<bool> changeStatutEtablissement(
       String id, StatutEtablissement newStatut) async {
     try {
@@ -70,11 +97,13 @@ class EtablissementController extends GetxController {
         return false;
       }
 
+      isLoading.value = true;
+
+      // 🔥 CORRECTION : Utiliser la valeur correcte pour l'enum
       final success = await repo.changeStatut(id, newStatut);
 
       if (success) {
-        // Rafraîchir la liste des établissements
-        await getTousEtablissements();
+        await _refreshEtablissementsAfterAction();
         TLoaders.successSnackBar(message: 'Statut mis à jour avec succès');
       } else {
         TLoaders.errorSnackBar(message: 'Échec de la mise à jour du statut');
@@ -83,26 +112,52 @@ class EtablissementController extends GetxController {
       return success;
     } catch (e, stack) {
       _logError('changement statut', e, stack);
-      TLoaders.errorSnackBar(
-          message: 'Erreur lors du changement de statut: $e');
+      TLoaders.errorSnackBar(message: 'Erreur changement statut: $e');
       return false;
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  // Ajouter des horaires à un établissement existant
-  Future<bool> addHorairesToEtablissement(
-      String etablissementId, List<Horaire> horaires) async {
+  // 🔥 NOUVELLE MÉTHODE : Rafraîchissement après action
+  Future<void> _refreshEtablissementsAfterAction() async {
     try {
-      if (!_isUserGerant()) {
-        _logError('ajout horaires', 'Permission refusée');
-        return false;
+      final userRole = userController.userRole;
+      final userId = userController.user.value.id;
+
+      if (userRole == 'Admin') {
+        await getTousEtablissements();
+      } else if (userRole == 'Gérant' && userId.isNotEmpty) {
+        await fetchEtablissementsByOwner(userId);
       }
-      await repo.addHorairesToEtablissement(etablissementId, horaires);
-      return true;
-    } catch (e, stack) {
-      _logError('ajout horaires', e, stack);
+    } catch (e) {
+      print('Erreur rafraîchissement: $e');
+    }
+  }
+
+  // 🔥 NOUVELLE MÉTHODE : Vérification de permission unifiée
+  bool _hasPermissionForAction(String action) {
+    final userRole = userController.userRole;
+
+    if (userRole.isEmpty) {
+      TLoaders.errorSnackBar(message: 'Utilisateur non connecté');
       return false;
     }
+
+    if (action == 'création' && userRole != 'Gérant' && userRole != 'Admin') {
+      TLoaders.errorSnackBar(
+          message: 'Seuls les Gérants peuvent créer des établissements');
+      return false;
+    }
+
+    if (action == 'mise à jour' &&
+        userRole != 'Gérant' &&
+        userRole != 'Admin') {
+      TLoaders.errorSnackBar(message: 'Permission refusée pour la mise à jour');
+      return false;
+    }
+
+    return true;
   }
 
   // Récupérer les établissements d'un propriétaire
@@ -115,36 +170,14 @@ class EtablissementController extends GetxController {
       return data;
     } catch (e) {
       print('❌ Erreur fetchEtablissementsByOwner: $e');
+      TLoaders.errorSnackBar(message: 'Erreur chargement établissements: $e');
       return null;
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Récupérer l'établissement du gérant connecté
-  Future<Etablissement?> getMonEtablissement() async {
-    try {
-      final userRole = userController.userRole;
-      if (userRole.isEmpty) {
-        _logError('récupération établissement', 'Utilisateur non connecté');
-        return null;
-      }
-
-      final user = userController.user.value;
-      if (user.id.isEmpty) {
-        _logError('récupération établissement', 'Utilisateur non connecté');
-        return null;
-      }
-
-      final etablissements = await repo.getEtablissementsByOwner(user.id);
-      return etablissements.isNotEmpty ? etablissements.first : null;
-    } catch (e, stack) {
-      _logError('récupération établissement', e, stack);
-      return null;
-    }
-  }
-
-  /// 2. Pour Admin - tous les établissements (liste complète)
+  // Pour Admin - tous les établissements
   Future<List<Etablissement>> getTousEtablissements() async {
     try {
       isLoading.value = true;
@@ -153,42 +186,74 @@ class EtablissementController extends GetxController {
       return data;
     } catch (e) {
       print('❌ Erreur getTousEtablissements: $e');
+      TLoaders.errorSnackBar(message: 'Erreur chargement établissements: $e');
       rethrow;
     } finally {
       isLoading.value = false;
     }
   }
 
+  // 🔥 CORRECTION : Suppression améliorée
   Future<bool> deleteEtablissement(String id) async {
     try {
-      if (!_isUserGerant() && !_isUserAdmin()) {
-        _logError('suppression',
-            'Permission refusée : seul un Gérant/Admin peut supprimer un établissement');
+      if (!_hasPermissionForAction('suppression')) {
         return false;
       }
 
-      await repo.deleteEtablissement(id);
+      // 🔥 CORRECTION : Confirmation avant suppression
+      final shouldDelete = await _showDeleteConfirmation();
+      if (!shouldDelete) return false;
 
-      etablissements.removeWhere((e) => e.id == id);
+      isLoading.value = true;
 
-      final user = userController.user.value;
-      if (user.id.isNotEmpty) {
-        await fetchEtablissementsByOwner(user.id);
+      final success = await repo.deleteEtablissement(id);
+
+      if (success) {
+        // Supprimer localement ET rafraîchir
+        etablissements.removeWhere((e) => e.id == id);
+        await _refreshEtablissementsAfterAction();
+        TLoaders.successSnackBar(message: 'Établissement supprimé avec succès');
+      } else {
+        TLoaders.errorSnackBar(message: 'Échec de la suppression');
       }
 
-      return true;
+      return success;
     } catch (e, stack) {
       _logError('suppression', e, stack);
+      TLoaders.errorSnackBar(message: 'Erreur suppression: $e');
       return false;
+    } finally {
+      isLoading.value = false;
     }
   }
 
-// Méthode pour récupérer un établissement par son ID
+  // 🔥 NOUVELLE MÉTHODE : Confirmation de suppression
+  Future<bool> _showDeleteConfirmation() async {
+    final result = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Confirmer la suppression'),
+        content: const Text(
+            'Êtes-vous sûr de vouloir supprimer cet établissement ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  // Récupérer un établissement par ID
   Future<Etablissement?> getEtablissementById(String id) async {
     try {
-      /* final tousEtablissements = await getTousEtablissements(); */
       final tousEtablissements = await getTousEtablissementsPourProduit();
-
       return tousEtablissements.firstWhereOrNull((etab) => etab.id == id);
     } catch (e) {
       _logError('récupération par ID', e);
@@ -198,43 +263,12 @@ class EtablissementController extends GetxController {
 
   bool _isUserGerant() {
     final userRole = userController.userRole;
-    if (userRole.isEmpty) {
-      _logError('vérification rôle', 'Utilisateur non connecté');
-      return false;
-    }
-    if (userRole != 'Gérant') {
-      _logError(
-          'vérification rôle', 'Rôle insuffisant. Rôle actuel: $userRole');
-      return false;
-    }
-    return true;
+    return userRole == 'Gérant';
   }
 
-  // Méthode utilitaire pour vérifier si l'utilisateur est admin
   bool _isUserAdmin() {
     final userRole = userController.userRole;
-
-    if (userRole.isEmpty) {
-      _logError('vérification admin', 'Utilisateur non connecté');
-      return false;
-    }
-
-    // Vérifie si le rôle est "Admin" (avec majuscule comme dans votre UserModel)
-    final isAdmin = userRole == 'Admin';
-
-    return isAdmin;
-  }
-
-  /// Pour récupérer  le statut
-  Future<StatutEtablissement?> getStatutEtablissement(
-      String etablissementId) async {
-    try {
-      final etablissement = await getEtablissementById(etablissementId);
-      return etablissement?.statut;
-    } catch (e) {
-      _logError('récupération statut', e);
-      return null;
-    }
+    return userRole == 'Admin';
   }
 
   // Récupérer l'établissement de l'utilisateur connecté
@@ -242,38 +276,23 @@ class EtablissementController extends GetxController {
     try {
       final user = userController.user.value;
 
-      // Vérifier que l'utilisateur est connecté
       if (user.id.isEmpty) {
         _logError('récupération établissement', 'Utilisateur non connecté');
         return null;
       }
 
-      // Récupérer les établissements de l'utilisateur
       final etablissementsUtilisateur =
           await fetchEtablissementsByOwner(user.id);
-
-      if (etablissementsUtilisateur == null ||
-          etablissementsUtilisateur.isEmpty) {
-        return null;
-      }
-
-      // Retourner le premier établissement (ou le seul établissement)
-      final etablissement = etablissementsUtilisateur.first;
-      return etablissement;
+      return etablissementsUtilisateur?.isNotEmpty == true
+          ? etablissementsUtilisateur!.first
+          : null;
     } catch (e, stack) {
       _logError('récupération établissement utilisateur', e, stack);
       return null;
     }
   }
 
-  void _logError(String action, Object error, [StackTrace? stack]) {
-    if (stack != null) {
-      print(stack);
-    }
-  }
-
-  /// Méthode pour récupérer tous les établissements,
-  /// sans filtrer par rôle (utile pour les produits)
+  // Pour les produits - sans loading state
   Future<List<Etablissement>> getTousEtablissementsPourProduit() async {
     try {
       final data = await repo.getAllEtablissements();
@@ -282,5 +301,18 @@ class EtablissementController extends GetxController {
       _logError('récupération établissements pour produit', e, stack);
       return [];
     }
+  }
+
+  void _logError(String action, Object error, [StackTrace? stack]) {
+    print('❌ Erreur $action: $error');
+    if (stack != null) {
+      print('Stack: $stack');
+    }
+  }
+
+  @override
+  void onClose() {
+    print('🔄 EtablissementController fermé');
+    super.onClose();
   }
 }

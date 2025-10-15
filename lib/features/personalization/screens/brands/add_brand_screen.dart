@@ -100,7 +100,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen> {
   Widget build(BuildContext context) {
     final user = userController.user.value;
 
-    if (user.role != 'Gérant') {
+    if (user.role != 'Admin' && user.role != 'Gérant') {
       return Scaffold(
         appBar: TAppBar(
           title: const Text('Accès refusé'),
@@ -112,12 +112,12 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen> {
               Icon(Icons.error, size: 64, color: Colors.red),
               SizedBox(height: 16),
               Text(
-                'Accès réservé aux Gérants',
+                'Accès réservé aux Administrateurs et Gérants',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               Text(
-                'Seuls les utilisateurs avec le rôle "Gérant" peuvent créer des établissements.',
+                'Seuls les utilisateurs avec le rôle "Admin" ou "Gérant" peuvent créer des établissements.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
               ),
@@ -155,7 +155,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen> {
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             Text(
-                              'Gérant',
+                              user.role,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyLarge

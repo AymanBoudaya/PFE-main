@@ -19,7 +19,7 @@ class Etablissement {
     required this.name,
     required this.address,
     this.imageUrl,
-    this.statut = StatutEtablissement.enAttente,
+    this.statut = StatutEtablissement.en_attente,
     this.latitude,
     this.longitude,
     required this.idOwner,
@@ -63,7 +63,7 @@ class Etablissement {
     };
   }
 
-  /// Ajout du copyWith
+  /// ✅ Ajout du copyWith
   Etablissement copyWith({
     String? id,
     String? name,
