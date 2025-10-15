@@ -253,7 +253,35 @@ class ProduitRepository extends GetxController {
     return publicUrl;
   }
 
-  Future<List<ProduitModel>> getFeaturedProducts() async {
+  Future<List<ProduitModel>> getFeaturedProducts(int limit) async {
+    try {
+      final response = await _db
+          .from(_table)
+          .select('*, etablissement:etablissement_id(*)')
+          .eq('is_featured', true)
+          .limit(limit)
+          .order('created_at', ascending: false);
+
+      if (response == null) {
+        throw Exception('Aucune réponse reçue de Supabase.');
+      }
+
+      final data = response as List<dynamic>;
+
+      // Convertit les résultats en objets ProduitModel
+      final products = data.map((productData) {
+        return ProduitModel.fromMap(Map<String, dynamic>.from(productData));
+      }).toList();
+
+      return products;
+    } on PostgrestException catch (e) {
+      throw Exception('Erreur Supabase: ${e.message}');
+    } catch (e) {
+      rethrow; // important pour que Flutter te montre l’exception dans la console
+    }
+  }
+
+  Future<List<ProduitModel>> getAllFeaturedProducts() async {
     try {
       final response = await _db
           .from(_table)

@@ -140,7 +140,7 @@ class ProduitController extends GetxController {
         filteredProducts.clear();
       }
 
-      applyFilters(); 
+      applyFilters();
     } catch (e) {
       TLoaders.errorSnackBar(
           message: 'Erreur lors du chargement des produits: $e');
@@ -279,7 +279,7 @@ class ProduitController extends GetxController {
       isLoading.value = true;
 
       // Fetch products from an API or database
-      final products = await produitRepository.getFeaturedProducts();
+      final products = await produitRepository.getFeaturedProducts(8);
       // Assign products
       featuredProducts.assignAll(products);
     } catch (e) {
@@ -368,7 +368,7 @@ class ProduitController extends GetxController {
   Future<List<ProduitModel>> fetchAllFeaturedProducts() async {
     try {
       // Fetch products from an API or database
-      final products = await produitRepository.getFeaturedProducts();
+      final products = await produitRepository.getAllFeaturedProducts();
       return products;
     } catch (e) {
       // Handle error
@@ -382,7 +382,7 @@ class ProduitController extends GetxController {
     if (salePrice <= 0 || salePrice >= originalPrice) return null;
 
     final percent = ((originalPrice - salePrice) / originalPrice) * 100;
-    return percent.toStringAsFixed(0); 
+    return percent.toStringAsFixed(0);
   }
 
   /// -- check product stock status
@@ -404,7 +404,7 @@ class ProduitController extends GetxController {
       // PRODUIT AVEC VARIANTES / TAILLES
       if (product.sizesPrices.isNotEmpty) {
         final prices = product.sizesPrices.map((e) => e.price).toList();
-        prices.sort(); 
+        prices.sort();
         final minPrice = prices.first;
         final maxPrice = prices.last;
 
