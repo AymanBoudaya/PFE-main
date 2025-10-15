@@ -8,7 +8,7 @@ import '../../../../../common/widgets/products/cart/cart_menu_icon.dart';
 import '../../../../../common/widgets/shimmer/shimmer_effect.dart';
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/text_strings.dart';
-import 'custom_search_bar.dart';
+import 'search_overlay.dart';
 
 class THomeAppBar extends StatelessWidget {
   const THomeAppBar({
@@ -52,7 +52,7 @@ class THomeAppBar extends StatelessWidget {
         IconButton(
           icon: const Icon(Iconsax.search_normal_1, color: Colors.white),
           onPressed: () {
-            Get.to(() => const CustomSearchPage(),
+            Get.to(() => const SearchOverlay(),
                 transition: Transition.fadeIn,
                 duration: const Duration(milliseconds: 300),
                 opaque: false,

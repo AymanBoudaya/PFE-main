@@ -126,6 +126,71 @@ class TDeviceUtils {
       return DeviceType.desktop;
     }
   }
+
+  /// Détermine le nombre de colonnes selon la largeur de l'écran
+  static int getCrossAxisCount(double screenWidth) {
+    if (screenWidth < 480) {
+      return 2; // Mobile petit
+    } else if (screenWidth < 768) {
+      return 3; // Mobile large / tablette petite
+    } else if (screenWidth < 1024) {
+      return 4; // Tablette
+    } else if (screenWidth < 1440) {
+      return 5; // PC moyen
+    } else {
+      return 6; // PC large
+    }
+  }
+
+  /// Détermine la hauteur des éléments selon la largeur de l'écran
+  static double getMainAxisExtent(double screenWidth) {
+    if (screenWidth < 480) {
+      return 280; // Mobile petit
+    } else if (screenWidth < 768) {
+      return 300; // Mobile large / tablette petite
+    } else if (screenWidth < 1024) {
+      return 320; // Tablette
+    } else if (screenWidth < 1440) {
+      return 340; // PC moyen
+    } else {
+      return 360; // PC large
+    }
+  }
+
+  /// Détermine la hauteur du PromoSlider avec taille maximale
+  static double getPromoSliderHeight(double screenWidth, double screenHeight) {
+    double baseHeight;
+
+    if (screenWidth < 480) {
+      baseHeight = screenHeight * 0.20; // 20% de la hauteur sur mobile
+    } else if (screenWidth < 768) {
+      baseHeight = screenHeight * 0.25; // 25% sur tablette petite
+    } else if (screenWidth < 1024) {
+      baseHeight = screenHeight * 0.30; // 30% sur tablette
+    } else {
+      baseHeight = screenHeight * 0.35; // 35% sur PC
+    }
+
+    // Taille maximale à ne pas dépasser
+    const double maxHeight = 400.0;
+    return baseHeight > maxHeight ? maxHeight : baseHeight;
+  }
+
+  /// Détermine le padding horizontal selon la largeur de l'écran
+  static double getHorizontalPadding(double screenWidth) {
+    if (screenWidth < 480) {
+      return 16.0; // Mobile petit
+    } else if (screenWidth < 768) {
+      return 20.0; // Mobile large
+    } else if (screenWidth < 1024) {
+      return 32.0; // Tablette
+    } else if (screenWidth < 1440) {
+      return 48.0; // PC moyen
+    } else {
+      return 64.0; // PC large
+    }
+  }
+
 // Add more device utility methods as per your specific requirements.
 }
 

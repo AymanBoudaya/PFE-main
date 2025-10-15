@@ -1,58 +1,54 @@
-import 'dart:async';
-
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import '../../../data/repositories/product/produit_repository.dart';
 import '../models/produit_model.dart';
-import 'product/all_products_controller.dart';
 
-class Query {
-  final String keyword;
-  Query(this.keyword);
-}
+class ResearchController extends GetxController {
+  final ProduitRepository _repo = Get.find<ProduitRepository>();
 
-class ProductSearchController extends GetxController {
-  final RxString query = ''.obs;
-  final TextEditingController searchController = TextEditingController();
-  final allProductsController = Get.put(AllProductsController());
-  final RxList<ProduitModel> searchedProducts = <ProduitModel>[].obs;
+  RxList<ProduitModel> searchResults = <ProduitModel>[].obs;
+  RxBool isLoading = false.obs;
+  RxString query = ''.obs;
 
-  final RxBool isLoading = false.obs;
-  Timer? _debounce;
+  /// Fetch all products once and keep them in memory for instant filtering
+  RxList<ProduitModel> allProducts = <ProduitModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    searchController.addListener(_onSearchChanged);
-    _onSearchChanged();
+    _loadAllProducts();
   }
 
-  void _onSearchChanged() {
-    final text = searchController.text;
-    query.value = text;
+  Future<void> _loadAllProducts() async {
+    try {
+      isLoading.value = true;
+      final products = await _repo.getAllProducts();
+      allProducts.assignAll(products);
+    } catch (e) {
+      print('Error loading products for search: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
-    if (_debounce?.isActive ?? false) _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () async {
-      if (text.isEmpty) {
-        searchedProducts.assignAll(allProductsController.products);
-      } else {
-        isLoading.value = true;
-        isLoading.value = false;
-      }
-    });
+  /// Called whenever the user types in the search field
+  void onSearchChanged(String text) {
+    query.value = text;
+    if (text.isEmpty) {
+      searchResults.clear();
+      return;
+    }
+
+    final results = allProducts.where((p) {
+      final name = p.name.toLowerCase();
+      final desc = p.description?.toLowerCase() ?? '';
+      return name.contains(text.toLowerCase()) || desc.contains(text.toLowerCase());
+    }).toList();
+
+    searchResults.assignAll(results);
   }
 
   void clearSearch() {
     query.value = '';
-    searchController.clear();
-    searchedProducts.assignAll(allProductsController.products);
-  }
-
-  @override
-  void onClose() {
-    searchController.removeListener(_onSearchChanged);
-    searchController.dispose();
-    _debounce?.cancel();
-    super.onClose();
+    searchResults.clear();
   }
 }

@@ -1,4 +1,6 @@
 import 'package:caferesto/common/widgets/products/product_cards/product_card_vertical.dart';
+import 'package:caferesto/features/shop/screens/home/widgets/build_empty_state.dart';
+import 'package:caferesto/utils/device/device_utility.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
@@ -52,7 +54,7 @@ class HomeScreen extends StatelessWidget {
             /// Corps
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: _getHorizontalPadding(screenWidth),
+                horizontal: TDeviceUtils.getHorizontalPadding(screenWidth),
                 vertical: AppSizes.defaultSpace,
               ),
               child: Column(
@@ -64,7 +66,8 @@ class HomeScreen extends StatelessWidget {
                       TImages.promoBanner2,
                       TImages.promoBanner3
                     ],
-                    height: _getPromoSliderHeight(screenWidth, screenHeight),
+                    height: TDeviceUtils.getPromoSliderHeight(
+                        screenWidth, screenHeight),
                     autoPlay: true,
                     autoPlayInterval: 5000,
                   ),
@@ -73,6 +76,7 @@ class HomeScreen extends StatelessWidget {
                   /// -- En tête
                   TSectionHeading(
                     title: 'Produits Populaires',
+                    showActionButton: true,
                     onPressed: () => Get.to(() => AllProducts(
                           title: 'Produits populaires',
                           futureMethod: controller.fetchAllFeaturedProducts(),
@@ -86,15 +90,17 @@ class HomeScreen extends StatelessWidget {
                       return const TVerticalProductShimmer();
                     }
                     if (controller.featuredProducts.isEmpty) {
-                      return _buildEmptyState();
+                      return BuildEmptyState();
                     }
                     return GridLayout(
                       itemCount: controller.featuredProducts.length,
                       itemBuilder: (_, index) => ProductCardVertical(
                         product: controller.featuredProducts[index],
                       ),
-                      crossAxisCount: _getCrossAxisCount(screenWidth),
-                      mainAxisExtent: _getMainAxisExtent(screenWidth),
+                      crossAxisCount:
+                          TDeviceUtils.getCrossAxisCount(screenWidth),
+                      mainAxisExtent:
+                          TDeviceUtils.getMainAxisExtent(screenWidth),
                     );
                   })
                 ],
@@ -102,106 +108,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // 🔧 MÉTHODES RESPONSIVES
-
-  /// Détermine le nombre de colonnes selon la largeur de l'écran
-  int _getCrossAxisCount(double screenWidth) {
-    if (screenWidth < 480) {
-      return 2; // Mobile petit
-    } else if (screenWidth < 768) {
-      return 3; // Mobile large / tablette petite
-    } else if (screenWidth < 1024) {
-      return 4; // Tablette
-    } else if (screenWidth < 1440) {
-      return 5; // PC moyen
-    } else {
-      return 6; // PC large
-    }
-  }
-
-  /// Détermine la hauteur des éléments selon la largeur de l'écran
-  double _getMainAxisExtent(double screenWidth) {
-    if (screenWidth < 480) {
-      return 280; // Mobile petit
-    } else if (screenWidth < 768) {
-      return 300; // Mobile large / tablette petite
-    } else if (screenWidth < 1024) {
-      return 320; // Tablette
-    } else if (screenWidth < 1440) {
-      return 340; // PC moyen
-    } else {
-      return 360; // PC large
-    }
-  }
-
-  /// Détermine la hauteur du PromoSlider avec taille maximale
-  double _getPromoSliderHeight(double screenWidth, double screenHeight) {
-    double baseHeight;
-
-    if (screenWidth < 480) {
-      baseHeight = screenHeight * 0.20; // 20% de la hauteur sur mobile
-    } else if (screenWidth < 768) {
-      baseHeight = screenHeight * 0.25; // 25% sur tablette petite
-    } else if (screenWidth < 1024) {
-      baseHeight = screenHeight * 0.30; // 30% sur tablette
-    } else {
-      baseHeight = screenHeight * 0.35; // 35% sur PC
-    }
-
-    // Taille maximale à ne pas dépasser
-    const double maxHeight = 400.0;
-    return baseHeight > maxHeight ? maxHeight : baseHeight;
-  }
-
-  /// Détermine le padding horizontal selon la largeur de l'écran
-  double _getHorizontalPadding(double screenWidth) {
-    if (screenWidth < 480) {
-      return 16.0; // Mobile petit
-    } else if (screenWidth < 768) {
-      return 20.0; // Mobile large
-    } else if (screenWidth < 1024) {
-      return 32.0; // Tablette
-    } else if (screenWidth < 1440) {
-      return 48.0; // PC moyen
-    } else {
-      return 64.0; // PC large
-    }
-  }
-
-  /// Widget pour l'état vide
-  Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(40),
-      child: Column(
-        children: [
-          Icon(
-            Icons.fastfood_outlined,
-            size: 64,
-            color: Colors.grey[300],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Aucun produit populaire',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Les produits en vedette apparaîtront ici',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }

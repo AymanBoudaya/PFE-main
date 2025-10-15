@@ -1,5 +1,7 @@
+import 'package:caferesto/features/shop/controllers/product/all_products_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../../common/widgets/appbar/appbar.dart';
 import '../../../../common/widgets/products/sortable/sortable_products.dart';
@@ -18,6 +20,7 @@ class AllProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Get.put(AllProductsController());
     return Scaffold(
       appBar: TAppBar(
         title: Text(title),

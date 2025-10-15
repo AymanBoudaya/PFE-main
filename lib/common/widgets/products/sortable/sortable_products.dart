@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../features/shop/models/produit_model.dart';
+import '../../../../utils/device/device_utility.dart';
 
 class TSortableProducts extends StatelessWidget {
   const TSortableProducts({
@@ -20,6 +21,7 @@ class TSortableProducts extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = AllProductsController.instance;
     controller.assignProducts(products);
+    final screenWidth = MediaQuery.of(context).size.width;
     return Column(
       children: [
         /// DropDown
@@ -44,9 +46,12 @@ class TSortableProducts extends StatelessWidget {
         /// Products
         Obx(
           () => GridLayout(
-              itemCount: controller.products.length,
-              itemBuilder: (_, index) =>
-                  ProductCardVertical(product: controller.products[index])),
+            itemCount: controller.products.length,
+            itemBuilder: (_, index) =>
+                ProductCardVertical(product: controller.products[index]),
+            crossAxisCount: TDeviceUtils.getCrossAxisCount(screenWidth),
+            mainAxisExtent: TDeviceUtils.getMainAxisExtent(screenWidth),
+          ),
         )
       ],
     );

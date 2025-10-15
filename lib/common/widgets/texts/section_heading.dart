@@ -9,7 +9,7 @@ class TSectionHeading extends StatelessWidget {
     super.key,
     required this.title,
     this.showActionButton = false,
-    this.buttonTitle = 'Voir plus',
+    this.buttonTitle = 'Voir tout',
     this.onPressed,
     this.padding,
   });

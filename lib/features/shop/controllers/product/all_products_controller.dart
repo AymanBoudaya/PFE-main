@@ -90,7 +90,7 @@ class AllProductsController extends GetxController {
     sortProducts(selectedSortOption.value);
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Recherche rapide
+  // Recherche rapide
   List<ProduitModel> searchProducts(String query) {
     if (query.isEmpty) return products;
     

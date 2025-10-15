@@ -159,7 +159,7 @@ class ProduitController extends GetxController {
       isLoading.value = true;
       final productsList = await produitRepository.getAllProducts();
       allProducts.assignAll(productsList);
-      filteredProducts.assignAll(productsList); // initialise la liste filtrée
+      filteredProducts.assignAll(productsList);
     } catch (e) {
       TLoaders.errorSnackBar(
           message: 'Erreur lors du chargement des produits: $e');
@@ -284,7 +284,6 @@ class ProduitController extends GetxController {
       final products = await produitRepository.getFeaturedProducts();
       // Assign products
       featuredProducts.assignAll(products);
-      print(featuredProducts[0].id);
     } catch (e) {
       // Handle error
       TLoaders.errorSnackBar(title: 'Erreur!', message: e.toString());
