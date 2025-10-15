@@ -77,7 +77,7 @@ class EtablissementRepository {
     try {
       final response = await supabase
           .from('etablissements')
-          .select('*')
+          .select('*, id_owner(*)')
           .order('created_at', ascending: false);
 
       return response
@@ -95,7 +95,7 @@ class EtablissementRepository {
     try {
       final response = await supabase
           .from('etablissements')
-          .select('*')
+          .select('*, id_owner(*)')
           .eq('id_owner', ownerId)
           .order('created_at', ascending: false);
 

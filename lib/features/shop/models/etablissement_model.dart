@@ -1,3 +1,4 @@
+import '../../personalization/models/user_model.dart';
 import 'statut_etablissement_model.dart';
 
 import 'horaire_model.dart';
@@ -13,6 +14,7 @@ class Etablissement {
   final String idOwner;
   final DateTime? createdAt;
   final List<Horaire>? horaires;
+  final UserModel? owner;
 
   Etablissement({
     this.id,
@@ -25,6 +27,7 @@ class Etablissement {
     required this.idOwner,
     this.createdAt,
     this.horaires,
+    this.owner,
   });
 
   factory Etablissement.fromJson(Map<String, dynamic> json) {
@@ -34,6 +37,10 @@ class Etablissement {
           (json['horaires'] as List).map((e) => Horaire.fromJson(e)).toList();
     }
 
+    final ownerData = json['id_owner'] is Map<String, dynamic>
+        ? UserModel.fromJson(json['id_owner'])
+        : null;
+
     return Etablissement(
       id: json['id'],
       name: json['name'],
@@ -42,11 +49,14 @@ class Etablissement {
       statut: StatutEtablissementExt.fromString(json['statut']),
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
-      idOwner: json['id_owner'],
+      idOwner: json['id_owner'] is String
+          ? json['id_owner']
+          : (json['id_owner']['id'] ?? ''),
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
       horaires: horaires,
+      owner: ownerData,
     );
   }
 

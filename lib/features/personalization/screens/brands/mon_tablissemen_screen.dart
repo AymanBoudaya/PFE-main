@@ -278,13 +278,30 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   }
 
   Widget _buildEtablissementImage(Etablissement etablissement) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12), color: Colors.blue.shade50),
-      child: Icon(Icons.business, color: Colors.blue.shade600, size: 24),
-    );
+    if (etablissement.imageUrl != null && etablissement.imageUrl!.isNotEmpty) {
+      return Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          image: DecorationImage(
+            image: NetworkImage(etablissement.imageUrl!),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    } else {
+      // Image par défaut
+      return Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.blue.shade50,
+        ),
+        child: Icon(Icons.business, color: Colors.blue.shade600, size: 24),
+      );
+    }
   }
 
   Widget _buildEtablissementSubtitle(Etablissement etablissement) {
@@ -297,8 +314,14 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
             overflow: TextOverflow.ellipsis),
         if (_userRole == 'Admin') ...[
           const SizedBox(height: 4),
-          Text("Propriétaire: ${etablissement.idOwner}",
-              style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+          Row(
+            children: [
+              Text(etablissement.owner?.role ?? 'Admin ou Gérant'),
+              Text(' : '),
+              Text(etablissement.owner?.fullName ?? 'inconnu',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+            ],
+          ),
         ],
       ],
     );
@@ -384,7 +407,31 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
-          _buildEtablissementImage(etablissement),
+          // Afficher l'image réelle
+          if (etablissement.imageUrl != null &&
+              etablissement.imageUrl!.isNotEmpty)
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: NetworkImage(etablissement.imageUrl!),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            )
+          else
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.blue.shade50,
+              ),
+              child:
+                  Icon(Icons.business, color: Colors.blue.shade600, size: 30),
+            ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(

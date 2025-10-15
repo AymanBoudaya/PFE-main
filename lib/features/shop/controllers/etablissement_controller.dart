@@ -1,6 +1,8 @@
 import 'package:caferesto/utils/popups/loaders.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/repositories/etablissement/etablissement_repository.dart';
 import '../../personalization/controllers/user_controller.dart';
 import '../models/etablissement_model.dart';
@@ -11,6 +13,7 @@ class EtablissementController extends GetxController {
   final UserController userController = Get.find<UserController>();
   final isLoading = false.obs;
   final etablissements = <Etablissement>[].obs;
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   EtablissementController(this.repo);
 
@@ -18,6 +21,18 @@ class EtablissementController extends GetxController {
   void onInit() {
     super.onInit();
     print('EtablissementController initialisé');
+  }
+
+    Future<String?> uploadEtablissementImage(XFile file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final filePath = 'etablissements/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+      await _supabase.storage.from('etablissements').uploadBinary(filePath, bytes);
+      return _supabase.storage.from('etablissements').getPublicUrl(filePath);
+    } catch (e) {
+      TLoaders.errorSnackBar(message: 'Erreur upload image: $e');
+      return null;
+    }
   }
 
   // Méthode de création améliorée
