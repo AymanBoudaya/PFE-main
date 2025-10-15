@@ -65,16 +65,16 @@ class EtablissementController extends GetxController {
       isLoading.value = true;
 
       // S'assurer que le statut est converti correctement
-      /* if (data.containsKey('statut') && data['statut'] is StatutEtablissement) {
+      if (data.containsKey('statut') && data['statut'] is StatutEtablissement) {
         data['statut'] = (data['statut'] as StatutEtablissement).value;
       }
-*/
+
+      Get.back(result: true);
       final success = await repo.updateEtablissement(id, data);
       if (success) {
         await _refreshEtablissementsAfterAction();
         TLoaders.successSnackBar(
             message: 'Établissement mis à jour avec succès');
-        Get.back(result: true);
       } else {
         TLoaders.errorSnackBar(message: 'Échec de la mise à jour');
       }
@@ -228,13 +228,13 @@ class EtablissementController extends GetxController {
     }
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Confirmation de suppression
+  //Confirmatio n de suppression
   Future<bool> _showDeleteConfirmation() async {
     final result = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Confirmer la suppression'),
         content: const Text(
-            'Êtes-vous sûr de vouloir supprimer cet établissement ?'),
+            'Êtes-vous sûr de vouloir supprimer cet établissement avec tout ses produits ?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
