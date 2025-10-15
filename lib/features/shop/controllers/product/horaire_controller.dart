@@ -28,9 +28,9 @@ class HoraireController extends GetxController {
       hasHoraires.value = false;
       horaires.refresh();
       print(
-          '✅ ${horaires.length} horaires initialisés pour l\'établissement $etablissementId');
+          '${horaires.length} horaires initialisés pour l\'établissement $etablissementId');
     } catch (e) {
-      print('❌ Erreur initialisation horaires: $e');
+      print('Erreur initialisation horaires: $e');
     }
   }
 
@@ -49,7 +49,7 @@ class HoraireController extends GetxController {
     horaires.assignAll(horairesVides);
     hasHoraires.value = false;
     horaires.refresh();
-    print('✅ ${horaires.length} horaires initialisés pour création');
+    print('${horaires.length} horaires initialisés pour création');
   }
 
   // Créer les horaires pour un établissement
@@ -71,7 +71,7 @@ class HoraireController extends GetxController {
       horaires.refresh();
 
       print(
-          '✅ ${horairesAvecVraiId.length} horaires créés pour l\'établissement $etablissementId');
+          '${horairesAvecVraiId.length} horaires créés pour l\'établissement $etablissementId');
       return true;
     } catch (e) {
       _logError('création des horaires', e);
@@ -94,18 +94,18 @@ class HoraireController extends GetxController {
       horaires.refresh();
 
       print(
-          '✅ ${horairesList.length} horaires chargés pour l\'établissement $etablissementId');
+          '${horairesList.length} horaires chargés pour l\'établissement $etablissementId');
 
       // Vérification
       if (horairesList.length != 7) {
-        print('⚠️ Attention: ${horairesList.length}/7 jours trouvés');
+        print('Attention: ${horairesList.length}/7 jours trouvés');
       } else {
-        print('🎉 Tous les 7 jours sont présents !');
+        print('Tous les 7 jours sont présents !');
 
         // Debug: Afficher l'état de chaque jour
         for (final horaire in horairesList) {
           print(
-              '   📅 ${horaire.jour.valeur}: ${horaire.estOuvert ? "Ouvert" : "Fermé"} ${horaire.estOuvert ? "(${horaire.ouverture} - ${horaire.fermeture})" : ""}');
+              '${horaire.jour.valeur}: ${horaire.estOuvert ? "Ouvert" : "Fermé"} ${horaire.estOuvert ? "(${horaire.ouverture} - ${horaire.fermeture})" : ""}');
         }
       }
 
@@ -141,11 +141,10 @@ class HoraireController extends GetxController {
       // Sauvegarder en base si l'horaire a un ID
       if (horaire.id != null) {
         await repository.updateHoraire(horaire);
-        print(
-            '✅ Horaire ${horaire.jour.valeur} mis à jour (ID: ${horaire.id})');
+        print('Horaire ${horaire.jour.valeur} mis à jour (ID: ${horaire.id})');
       } else {
         print(
-            'ℹ️ Horaire ${horaire.jour.valeur} mis à jour localement (pas d\'ID)');
+            'Horaire ${horaire.jour.valeur} mis à jour localement (pas d\'ID)');
       }
 
       return true;
@@ -164,10 +163,6 @@ class HoraireController extends GetxController {
       horaires.assignAll(newHoraires);
       hasHoraires.value = newHoraires.any((h) => h.isValid);
       horaires.refresh();
-
-      final nbJoursOuverts = nombreJoursOuverts;
-      print(
-          '✅ ${newHoraires.length} horaires mis à jour ($nbJoursOuverts jours ouverts)');
       return true;
     } catch (e) {
       _logError('mise à jour de tous les horaires', e);
@@ -185,9 +180,6 @@ class HoraireController extends GetxController {
       horaires.clear();
       hasHoraires.value = false;
       horaires.refresh();
-
-      print(
-          '✅ Tous les horaires supprimés pour l\'établissement $etablissementId');
       return true;
     } catch (e) {
       _logError('suppression des horaires', e);
@@ -297,16 +289,6 @@ class HoraireController extends GetxController {
   }
 
   void _logError(String action, Object error) {
-    print('❌ Erreur lors de la $action: $error');
-  }
-
-  // Méthode pour vérifier l'état du contrôleur
-  void debugState() {
-    print('=== DEBUG HoraireController ===');
-    print('Horaires chargés: ${horaires.length}');
-    print('Jours ouverts: $nombreJoursOuverts');
-    print('HasHoraires: ${hasHoraires.value}');
-    print('IsOpenNow: $isOpenNow');
-    print('==============================');
+    print('Erreur lors de la $action: $error');
   }
 }

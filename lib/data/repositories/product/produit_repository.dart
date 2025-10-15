@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -15,6 +13,8 @@ class ProduitRepository extends GetxController {
   /// Variables
   final _db = Supabase.instance.client;
   final _table = 'produits';
+  int _page = 1;
+  final int _limit = 10;
 
   /// Charger tous les produits
   Future<List<ProduitModel>> getAllProducts() async {
@@ -31,6 +31,44 @@ class ProduitRepository extends GetxController {
     }
   }
 
+  /// Optional: Search directly in Supabase (server-side search)
+  Future<List<ProduitModel>> searchProducts(String query) async {
+    final response = await _db
+        .from(_table)
+        .select('*')
+        .or('name.ilike.%$query%,description.ilike.%$query%')
+        .order('created_at', ascending: false)
+        .limit(20);
+
+    if (response.isEmpty) return [];
+
+    return response.map((e) => ProduitModel.fromMap(e)).toList();
+  }
+
+  Future<List<ProduitModel>> getAllProductsPaginated({
+    int? page,
+    int? limit,
+  }) async {
+    final currentPage = page ?? _page;
+    final currentLimit = limit ?? _limit;
+
+    final from = (currentPage - 1) * currentLimit;
+    final to = from + currentLimit - 1;
+
+    final response = await _db
+        .from(_table)
+        .select('*')
+        .order('created_at', ascending: false)
+        .range(from, to);
+
+    if (response.isEmpty) return [];
+
+    // Increment page counter for next call
+    _page++;
+
+    return response.map((e) => ProduitModel.fromMap(e)).toList();
+  }
+
   Future<List<ProduitModel>> getProductsForCategory(
       {required String categoryId, int limit = 4}) async {
     try {
@@ -39,7 +77,7 @@ class ProduitRepository extends GetxController {
             *,
             etablissement:etablissement_id(*),
             category:categorie_id(*)
-          ''').eq('categorie_id', categoryId); 
+          ''').eq('categorie_id', categoryId);
 
       if (limit > 0) {
         query.limit(limit);
@@ -163,7 +201,6 @@ class ProduitRepository extends GetxController {
     } on PostgrestException catch (e) {
       throw 'Erreur base de données : ${e.code} - ${e.message}';
     } catch (e) {
-      print(e);
       throw 'Erreur lors de l\'ajout du produit : $e';
     }
   }

@@ -16,7 +16,7 @@ class ProductSearchController extends GetxController {
     super.onInit();
     allProductsController = AllProductsController.instance;
 
-    // 🔧 CORRECTION : Initialiser avec les produits disponibles
+    // Initialiser avec les produits disponibles
     _initializeWithAllProducts();
 
     // Débounce pour la recherche
@@ -24,25 +24,21 @@ class ProductSearchController extends GetxController {
         time: const Duration(milliseconds: 300));
   }
 
-  // 🔧 CORRECTION : Méthode d'initialisation améliorée
+  // Méthode d'initialisation améliorée
   void _initializeWithAllProducts() {
     if (allProductsController.products.isNotEmpty) {
       searchedProducts.assignAll(allProductsController.products);
-      print(
-          '✅ Produits initialisés pour la recherche: ${searchedProducts.length}');
     } else {
-      // 🔧 CORRECTION : Attendre que les produits soient chargés
+      // Attendre que les produits soient chargés
       ever(allProductsController.products, (List<ProduitModel> products) {
         if (products.isNotEmpty) {
           searchedProducts.assignAll(products);
-          print(
-              '✅ Produits chargés et initialisés: ${searchedProducts.length}');
         }
       });
     }
   }
 
-  /// 🔥 CORRECTION : Ajout de la méthode refreshSearch manquante
+  /// Ajout de la méthode refreshSearch manquante
   void refreshSearch() {
     query.value = '';
     searchController.clear();
@@ -72,8 +68,6 @@ class ProductSearchController extends GetxController {
     // Mettre à jour les résultats
     searchedProducts.assignAll(results);
     isLoading.value = false;
-
-    print('🔍 Recherche "$text": ${results.length} résultats');
   }
 
   // Logique de matching améliorée

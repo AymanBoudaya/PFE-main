@@ -73,7 +73,7 @@ class ProduitModel {
       etablissement = Etablissement.fromJson(
           Map<String, dynamic>.from(map['etablissement']));
     }
-    // --- ✅ Gestion de is_featured ---
+    // --- Gestion de is_featured ---
     bool? isFeatured;
     if (map['is_featured'] != null) {
       final featured = map['is_featured'];
@@ -88,7 +88,7 @@ class ProduitModel {
         isFeatured = featured.toString().toLowerCase() == 'true';
       }
     }
-    // --- ✅ Gestion des tailles_prix (jsonb) ---
+    // --- Gestion des tailles_prix (jsonb) ---
     List<ProductSizePrice> sizesPrices = [];
     if (map['tailles_prix'] != null) {
       final taillesPrix = map['tailles_prix'];
@@ -132,7 +132,7 @@ class ProduitModel {
       }
     }
 
-    // --- ✅ Gestion des supplements (text[] ou string JSON) ---
+    // --- Gestion des supplements (text[] ou string JSON) ---
     List<String> supplements = [];
     if (map['supplements'] != null) {
       final supp = map['supplements'];
@@ -147,7 +147,7 @@ class ProduitModel {
       }
     }
 
-    // --- ✅ Gestion des images (text[] ou jsonb ou string) ---
+    // --- Gestion des images (text[] ou jsonb ou string) ---
     List<String>? images;
     if (map['images'] != null) {
       final imgs = map['images'];
@@ -162,7 +162,7 @@ class ProduitModel {
       }
     }
 
-    // --- ✅ Gestion des dates ---
+    // --- Gestion des dates ---
     DateTime parseDate(dynamic date) {
       if (date == null) return DateTime.now();
       if (date is DateTime) return date;

@@ -153,7 +153,7 @@ class CategoryController extends GetxController
       isLoading.value = true;
       String imageUrl = TImages.pasdimage;
 
-      // ✅ Upload image Web/Mobile
+      // Upload image Web/Mobile
       if ((kIsWeb && pickedImageBytes.value != null) ||
           (!kIsWeb && pickedImage.value != null)) {
         final dynamic file =
@@ -204,7 +204,7 @@ class CategoryController extends GetxController
       isLoading.value = true;
       String imageUrl = originalCategory.image;
 
-      // ✅ Upload image Web/Mobile
+      // Upload image Web/Mobile
       if ((kIsWeb && pickedImageBytes.value != null) ||
           (!kIsWeb && pickedImage.value != null)) {
         final dynamic file =

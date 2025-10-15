@@ -67,7 +67,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen> {
     );
 
     try {
-      // CORRECTION : Créer l'établissement SANS horaires
+      // Créer l'établissement SANS horaires
       final id = await _controller.createEtablissement(etab); // Sans horaires
       Get.back(result: true);
 

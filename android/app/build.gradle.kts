@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.cmandi_supabase"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973" // ✅ Fix NDK version
+    ndkVersion = "27.0.12077973" // Fix NDK version
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -22,7 +22,7 @@ android {
     defaultConfig {
         applicationId = "com.example.cmandi_supabase"
 
-        // ✅ Override ici
+        // Override ici
         minSdk = 23 // minimum requis par plusieurs plugins
         targetSdk = flutter.targetSdkVersion
 

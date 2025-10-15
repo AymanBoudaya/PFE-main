@@ -7,10 +7,8 @@ import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../common/widgets/chips/choice_chip.dart';
 import '../../../../../common/widgets/products/product_cards/widgets/rounded_container.dart';
 import '../../../../../utils/constants/sizes.dart';
-import '../../../models/product_model.dart';
 import '../../../models/produit_model.dart';
 
 class TProductAttributes extends StatelessWidget {

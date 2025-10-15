@@ -37,7 +37,7 @@ class SubCategoriesScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              /// ✅ Banner Responsive
+              /// Banner Responsive
               _buildResponsiveBanner(screenWidth, screenHeight),
               SizedBox(
                 height: isLargeScreen
@@ -45,7 +45,7 @@ class SubCategoriesScreen extends StatelessWidget {
                     : AppSizes.spaceBtwSections,
               ),
 
-              /// ✅ Subcategories
+              /// Subcategories
               FutureBuilder(
                 future: controller.getSubCategories(category.id),
                 builder: (context, snapshot) {
@@ -222,7 +222,7 @@ class SubCategoriesScreen extends StatelessWidget {
     final cardWidth = _getCardWidth(screenWidth);
     final cardHeight = _getCardHeight(screenWidth);
 
-    // ✅ Flèches visibles uniquement sur petits écrans
+    // Flèches visibles uniquement sur petits écrans
     final showArrows = products.length > 1 && !isLargeScreen;
 
     return Stack(
@@ -274,7 +274,7 @@ class SubCategoriesScreen extends StatelessWidget {
           ),
         ),
 
-        /// ✅ Flèches uniquement sur mobile/tablette
+        /// Flèches uniquement sur mobile/tablette
         if (showArrows) ...[
           Positioned(
             left: 4,

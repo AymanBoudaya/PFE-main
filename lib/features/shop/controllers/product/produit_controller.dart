@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:caferesto/data/repositories/product/produit_repository.dart';
 import 'package:caferesto/features/personalization/controllers/user_controller.dart';
 import 'package:caferesto/features/shop/models/produit_model.dart';
@@ -137,12 +136,11 @@ class ProduitController extends GetxController {
                   "Impossible de récupérer les produits de votre établissement");
         }
       } else {
-        // Autres rôles - liste vide ou logique spécifique
         allProducts.clear();
         filteredProducts.clear();
       }
 
-      applyFilters(); // Appliquer les filtres après le chargement
+      applyFilters(); 
     } catch (e) {
       TLoaders.errorSnackBar(
           message: 'Erreur lors du chargement des produits: $e');
@@ -384,7 +382,7 @@ class ProduitController extends GetxController {
     if (salePrice <= 0 || salePrice >= originalPrice) return null;
 
     final percent = ((originalPrice - salePrice) / originalPrice) * 100;
-    return percent.toStringAsFixed(0); // Renvoie "20" (sans le symbole %)
+    return percent.toStringAsFixed(0); 
   }
 
   /// -- check product stock status
@@ -394,7 +392,7 @@ class ProduitController extends GetxController {
 
   String getProductPrice(ProduitModel product) {
     try {
-      // 🔹 PRODUIT SIMPLE
+      // PRODUIT SIMPLE
       if (product.productType == ProductType.single.toString()) {
         // Si promo active
         if (product.salePrice > 0 && product.salePrice < product.price) {
@@ -403,10 +401,10 @@ class ProduitController extends GetxController {
         return "${product.price.toStringAsFixed(2)}";
       }
 
-      // 🔹 PRODUIT AVEC VARIANTES / TAILLES
+      // PRODUIT AVEC VARIANTES / TAILLES
       if (product.sizesPrices.isNotEmpty) {
         final prices = product.sizesPrices.map((e) => e.price).toList();
-        prices.sort(); // du plus petit au plus grand
+        prices.sort(); 
         final minPrice = prices.first;
         final maxPrice = prices.last;
 
@@ -419,10 +417,8 @@ class ProduitController extends GetxController {
         return "${minPrice.toStringAsFixed(2)} - ${maxPrice.toStringAsFixed(2)}";
       }
 
-      // 🔹 PAR DÉFAUT
       return "${product.price.toStringAsFixed(2)}";
-    } catch (e, s) {
-      debugPrint("❌ Erreur getProductPrice: $e\n$s");
+    } catch (e) {
       return "0.00";
     }
   }

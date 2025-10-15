@@ -5,43 +5,73 @@ import '../models/produit_model.dart';
 class ResearchController extends GetxController {
   final ProduitRepository _repo = Get.find<ProduitRepository>();
 
+  /// States
   RxList<ProduitModel> searchResults = <ProduitModel>[].obs;
   RxBool isLoading = false.obs;
+  RxBool isPaginating = false.obs;
+  RxBool hasMore = true.obs;
   RxString query = ''.obs;
 
-  /// Fetch all products once and keep them in memory for instant filtering
-  RxList<ProduitModel> allProducts = <ProduitModel>[].obs;
+  /// Pagination vars
+  int _page = 1;
+  final int _limit = 10;
 
   @override
   void onInit() {
     super.onInit();
-    _loadAllProducts();
+    fetchAllProducts(reset: true);
   }
 
-  Future<void> _loadAllProducts() async {
+  /// Load all products with pagination
+  Future<void> fetchAllProducts({bool reset = false}) async {
+    if (isLoading.value || isPaginating.value) return;
+    if (!hasMore.value && !reset) return;
+
+    if (reset) {
+      _page = 1;
+      hasMore.value = true;
+      searchResults.clear();
+    }
+
     try {
-      isLoading.value = true;
-      final products = await _repo.getAllProducts();
-      allProducts.assignAll(products);
+      if (reset) {
+        isLoading.value = true;
+      } else {
+        isPaginating.value = true;
+      }
+
+      final products =
+          await _repo.getAllProductsPaginated(page: _page, limit: _limit);
+
+      if (products.isEmpty) {
+        hasMore.value = false;
+      } else {
+        searchResults.addAll(products);
+        _page++;
+      }
     } catch (e) {
-      print('Error loading products for search: $e');
+      print('Error fetching products: $e');
     } finally {
       isLoading.value = false;
+      isPaginating.value = false;
     }
   }
 
-  /// Called whenever the user types in the search field
+  /// Called whenever the user types
   void onSearchChanged(String text) {
     query.value = text;
     if (text.isEmpty) {
-      searchResults.clear();
+      // Reset to paginated full list
+      fetchAllProducts(reset: true);
       return;
     }
 
-    final results = allProducts.where((p) {
+    // Simple local filtering from current products
+    final results = searchResults.where((p) {
       final name = p.name.toLowerCase();
       final desc = p.description?.toLowerCase() ?? '';
-      return name.contains(text.toLowerCase()) || desc.contains(text.toLowerCase());
+      return name.contains(text.toLowerCase()) ||
+          desc.contains(text.toLowerCase());
     }).toList();
 
     searchResults.assignAll(results);
@@ -49,6 +79,6 @@ class ResearchController extends GetxController {
 
   void clearSearch() {
     query.value = '';
-    searchResults.clear();
+    fetchAllProducts(reset: true);
   }
 }

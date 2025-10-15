@@ -24,7 +24,6 @@ class BrandRepository extends GetxController {
     } on PostgrestException catch (e) {
       throw 'Erreur base de données : ${e.code} - ${e.message}';
     } catch (e) {
-      print(e);
       throw 'Erreur lors ajout etablissement : $e }';
     }
   }
@@ -45,7 +44,6 @@ class BrandRepository extends GetxController {
     } on PostgrestException catch (e) {
       throw 'Erreur Supabase: ${e.message}';
     } catch (e) {
-      print(e);
       throw 'Quelque chose s\'est mal passée lors de la récupération des marques $e';
     }
   }

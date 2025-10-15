@@ -21,10 +21,10 @@ class EtablissementRepository {
       String? id, Map<String, dynamic> data) async {
     try {
       await supabase.from('etablissements').update(data).eq('id', id!);
-      return true; // Retourne true si succès
+      return true; 
     } catch (e) {
       print('Erreur mise à jour établissement: $e');
-      return false; // Retourne false si erreur
+      return false; 
     }
   }
 

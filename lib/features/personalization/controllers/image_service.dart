@@ -23,7 +23,7 @@ class ImageService {
       }
       return null;
     } catch (e) {
-      print('❌ Erreur lors de la sélection d\'image: $e');
+      print('Erreur lors de la sélection d\'image: $e');
       return null;
     }
   }
@@ -54,7 +54,7 @@ class ImageService {
 
       return imageUrl;
     } catch (e) {
-      print('❌ Erreur lors du téléchargement: $e');
+      print('Erreur lors du téléchargement: $e');
       return null;
     }
   }
@@ -72,7 +72,7 @@ class ImageService {
         }
       }
     } catch (e) {
-      print('❌ Erreur lors de la suppression de l\'ancienne image: $e');
+      print('Erreur lors de la suppression de l\'ancienne image: $e');
     }
   }
 }

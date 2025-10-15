@@ -43,7 +43,7 @@ class SignupController extends GetxController {
         "Création du compte...",
         TImages.docerAnimation,
       );
-      // 1. Check internet connection
+      // Check internet connection
       final isConnected = await NetworkManager.instance.isConnected();
       if (!isConnected) {
         TFullScreenLoader.stopLoading();
@@ -54,13 +54,13 @@ class SignupController extends GetxController {
         return;
       }
 
-      // 2. Valider formulaire
+      // Valider formulaire
       if (!signupFormKey.currentState!.validate()) {
         TFullScreenLoader.stopLoading();
         return;
       }
 
-      // 3. vérfier privacy policy
+      // vérfier privacy policy
       if (!privacyPolicy.value) {
         TFullScreenLoader.stopLoading();
         TLoaders.warningSnackBar(
@@ -70,9 +70,7 @@ class SignupController extends GetxController {
         return;
       }
 
-      // 4. Register with Supabase
-      print('🔄 Début de l\'inscription...');
-      // 6. Enregistrer les donnés utilisateurs dans la table Supabase
+      // Enregistrer les donnés utilisateurs dans la table Supabase
       final userData = {
         'first_name': firstName.text.trim(),
         'last_name': lastName.text.trim(),

@@ -27,17 +27,16 @@ class AllProductsController extends GetxController {
     try {
       isLoading.value = true;
       final all = await repository.getAllProducts();
-      
-      // 🔥 CORRECTION : S'assurer que la liste n'est pas null
+
+      // S'assurer que la liste n'est pas null
       products.assignAll(all ?? []);
-      
-      // 🔥 CORRECTION : Trier après assignation
+
+      // Trier après assignation
       sortProducts(selectedSortOption.value);
-      
-      print('✅ ${products.length} produits chargés avec succès');
+
     } catch (e) {
-      print("❌ Erreur chargement produits : $e");
-      // 🔥 CORRECTION : Assigner une liste vide en cas d'erreur
+      print("Erreur chargement produits : $e");
+      // Assigner une liste vide en cas d'erreur
       products.assignAll([]);
     } finally {
       isLoading.value = false;
@@ -71,7 +70,7 @@ class AllProductsController extends GetxController {
         break;
       case 'Ventes':
         products.sort((a, b) {
-          // 🔥 CORRECTION : Logique de tri par ventes améliorée
+          // 🔥 Logique de tri par ventes améliorée
           final salesA = a.salePrice ?? 0.0;
           final salesB = b.salePrice ?? 0.0;
           return salesB.compareTo(salesA);
@@ -80,8 +79,8 @@ class AllProductsController extends GetxController {
       default:
         products.sort((a, b) => a.name.compareTo(b.name));
     }
-    
-    print('🔄 Produits triés par: $sortOption');
+
+    print('Produits triés par: $sortOption');
   }
 
   /// Permet d'assigner une nouvelle liste (utilisé dans la recherche)
@@ -93,12 +92,12 @@ class AllProductsController extends GetxController {
   // Recherche rapide
   List<ProduitModel> searchProducts(String query) {
     if (query.isEmpty) return products;
-    
+
     final searchText = query.toLowerCase();
     return products.where((product) {
       return product.name.toLowerCase().contains(searchText) ||
-          (product.description ?? '').toLowerCase().contains(searchText);// ||
-          // (product.categoryName ?? '').toLowerCase().contains(searchText);
+          (product.description ?? '').toLowerCase().contains(searchText); // ||
+      // (product.categoryName ?? '').toLowerCase().contains(searchText);
     }).toList();
   }
 }

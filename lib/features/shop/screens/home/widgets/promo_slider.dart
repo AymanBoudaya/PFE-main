@@ -188,7 +188,7 @@ class _TPromoSliderState extends State<TPromoSlider> {
                 banner,
                 width: double.infinity,
                 height: double.infinity,
-                fit: BoxFit.cover, // ✅ Utilise cover pour remplir l'espace
+                fit: BoxFit.cover, // Utilise cover pour remplir l'espace
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: AppColors.primary,
@@ -292,7 +292,7 @@ class _TPromoSliderState extends State<TPromoSlider> {
   /// Détermine le padding du banner selon la largeur de l'écran
   EdgeInsets _getBannerPadding(double screenWidth) {
     if (screenWidth < 480) {
-      return const EdgeInsets.symmetric(horizontal: 4); // ✅ Réduit le padding
+      return const EdgeInsets.symmetric(horizontal: 4); // Réduit le padding
     } else if (screenWidth < 768) {
       return const EdgeInsets.symmetric(horizontal: 6);
     } else if (screenWidth < 1024) {
@@ -305,7 +305,7 @@ class _TPromoSliderState extends State<TPromoSlider> {
   /// Détermine le border radius selon la largeur de l'écran
   BorderRadius _getBannerBorderRadius(double screenWidth) {
     if (screenWidth < 480) {
-      return BorderRadius.circular(16); // ✅ Légèrement plus grand
+      return BorderRadius.circular(16);
     } else if (screenWidth < 768) {
       return BorderRadius.circular(20);
     } else {

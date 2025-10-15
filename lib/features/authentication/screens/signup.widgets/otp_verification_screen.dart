@@ -143,7 +143,7 @@ class OTPVerificationScreen extends StatelessWidget {
       ],
     );
 
-    // ✅ Layouts adaptatifs selon le device
+    // Layouts adaptatifs selon le device
     switch (deviceType) {
       case DeviceType.mobile:
         return SingleChildScrollView(

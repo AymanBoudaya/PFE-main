@@ -20,8 +20,11 @@ class CategoryRepository extends GetxController {
   /// Charger toutes les catégories
   Future<List<CategoryModel>> getAllCategories() async {
     try {
-      final response = await _db.from(_table).select().order('name', ascending: true);
-      return response.map((category) => CategoryModel.fromJson(category)).toList();
+      final response =
+          await _db.from(_table).select().order('name', ascending: true);
+      return response
+          .map((category) => CategoryModel.fromJson(category))
+          .toList();
     } on PlatformException catch (e) {
       throw TPlatformException(e.code).message;
     } catch (e) {
@@ -37,7 +40,9 @@ class CategoryRepository extends GetxController {
           .select()
           .eq('parentId', categoryId)
           .order('name', ascending: true);
-      return response.map((category) => CategoryModel.fromJson(category)).toList();
+      return response
+          .map((category) => CategoryModel.fromJson(category))
+          .toList();
     } on PlatformException catch (e) {
       throw TPlatformException(e.code).message;
     } catch (e) {
@@ -58,7 +63,7 @@ class CategoryRepository extends GetxController {
     }
   }
 
-  /// ✅ Upload d'image compatible Web & Mobile
+  /// Upload d'image compatible Web & Mobile
   Future<String> uploadCategoryImage(dynamic file) async {
     try {
       final bucket = 'categories';
@@ -79,16 +84,14 @@ class CategoryRepository extends GetxController {
       }
 
       // Récupérer l’URL publique
-      final publicUrl = Supabase.instance.client.storage
-          .from(bucket)
-          .getPublicUrl(fileName);
+      final publicUrl =
+          Supabase.instance.client.storage.from(bucket).getPublicUrl(fileName);
 
       return publicUrl;
     } catch (e) {
       throw 'Erreur lors de l’upload de l’image : $e';
     }
   }
-
 
   /// Modifier une catégorie
   Future<void> updateCategory(CategoryModel category) async {

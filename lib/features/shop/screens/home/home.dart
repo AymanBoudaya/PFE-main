@@ -41,7 +41,7 @@ class HomeScreen extends StatelessWidget {
                   TSectionHeading(
                     title: 'Catégories Populaires',
                     showActionButton: true,
-                  ),
+                    whiteTextColor : true                  ),
                   const SizedBox(height: AppSizes.spaceBtwItems),
 
                   /// Categories List

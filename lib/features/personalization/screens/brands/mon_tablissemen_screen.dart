@@ -24,7 +24,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   late final UserController _userController;
   String _userRole = '';
   bool _chargement = true;
-  List<Etablissement> _etablissements = []; // ✅ Stockage local
+  List<Etablissement> _etablissements = []; // Stockage local
 
   @override
   void initState() {

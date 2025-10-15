@@ -14,33 +14,33 @@ class EtablissementController extends GetxController {
   EtablissementController(this.repo);
 
   // Ajouter établissement sans horaires
- Future<String?> createEtablissement(Etablissement e) async {
-  try {
-    if (!_isUserGerant()) {
-      _logError('création',
-          'Permission refusée : seul un Gérant peut créer un établissement');
+  Future<String?> createEtablissement(Etablissement e) async {
+    try {
+      if (!_isUserGerant()) {
+        _logError('création',
+            'Permission refusée : seul un Gérant peut créer un établissement');
+        return null;
+      }
+
+      final id = await repo.createEtablissement(e);
+
+      if (id != null && id.isNotEmpty) {
+        // Ajouter localement
+        etablissements.add(e.copyWith(id: id));
+
+        // Et rafraîchir depuis la base pour être sûr d’avoir les dernières données
+        final user = userController.user.value;
+        if (user.id.isNotEmpty) {
+          await fetchEtablissementsByOwner(user.id);
+        }
+      }
+
+      return id;
+    } catch (err, stack) {
+      _logError('création', err, stack);
       return null;
     }
-
-    final id = await repo.createEtablissement(e);
-
-    if (id != null && id.isNotEmpty) {
-      // ✅ Ajouter localement
-      etablissements.add(e.copyWith(id: id));
-
-      // ✅ Et rafraîchir depuis la base pour être sûr d’avoir les dernières données
-      final user = userController.user.value;
-      if (user.id.isNotEmpty) {
-        await fetchEtablissementsByOwner(user.id);
-      }
-    }
-
-    return id;
-  } catch (err, stack) {
-    _logError('création', err, stack);
-    return null;
   }
-}
 
   // Mettre à jour un établissement
   Future<bool> updateEtablissement(
@@ -109,7 +109,7 @@ class EtablissementController extends GetxController {
       String ownerId) async {
     try {
       final data = await repo.getEtablissementsByOwner(ownerId);
-      etablissements.assignAll(data); 
+      etablissements.assignAll(data);
       return data;
     } catch (e, stack) {
       _logError('récupération', e, stack);
@@ -208,8 +208,7 @@ class EtablissementController extends GetxController {
 
   // Méthode utilitaire pour vérifier si l'utilisateur est admin
   bool _isUserAdmin() {
-    final userRole = userController.userRole; //  Utilise le getter userRole
-    print('Rôle utilisateur détecté: $userRole');
+    final userRole = userController.userRole;
 
     if (userRole.isEmpty) {
       _logError('vérification admin', 'Utilisateur non connecté');
@@ -218,7 +217,6 @@ class EtablissementController extends GetxController {
 
     // Vérifie si le rôle est "Admin" (avec majuscule comme dans votre UserModel)
     final isAdmin = userRole == 'Admin';
-    print('Est admin: $isAdmin');
 
     return isAdmin;
   }
@@ -252,14 +250,11 @@ class EtablissementController extends GetxController {
 
       if (etablissementsUtilisateur == null ||
           etablissementsUtilisateur.isEmpty) {
-        print('Aucun établissement trouvé pour l\'utilisateur: ${user.id}');
         return null;
       }
 
       // Retourner le premier établissement (ou le seul établissement)
       final etablissement = etablissementsUtilisateur.first;
-      print(
-          'Établissement trouvé: ${etablissement.name} (${etablissement.id})');
       return etablissement;
     } catch (e, stack) {
       _logError('récupération établissement utilisateur', e, stack);
@@ -268,7 +263,6 @@ class EtablissementController extends GetxController {
   }
 
   void _logError(String action, Object error, [StackTrace? stack]) {
-    print('Erreur lors de la $action de l\'établissement : $error');
     if (stack != null) {
       print(stack);
     }
@@ -279,7 +273,6 @@ class EtablissementController extends GetxController {
   Future<List<Etablissement>> getTousEtablissementsPourProduit() async {
     try {
       final data = await repo.getAllEtablissements();
-      print('✅ ${data.length} établissements chargés pour les produits.');
       return data;
     } catch (e, stack) {
       _logError('récupération établissements pour produit', e, stack);
