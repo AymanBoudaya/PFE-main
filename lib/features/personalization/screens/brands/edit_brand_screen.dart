@@ -1,7 +1,9 @@
+import 'package:caferesto/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/widgets/appbar/appbar.dart';
 import '../../../../data/repositories/horaire/horaire_repository.dart';
+import '../../../../utils/helpers/helper_functions.dart';
 import '../../../../utils/popups/loaders.dart';
 import '../../../shop/controllers/etablissement_controller.dart';
 import '../../../shop/controllers/product/horaire_controller.dart';
@@ -182,11 +184,12 @@ class _EditEtablissementScreenState extends State<EditEtablissementScreen> {
   }
 
   Widget _buildHorairePreview(Horaire horaire) {
+    final dark = THelperFunctions.isDarkMode(context);
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: dark ? AppColors.eerieBlack : Colors.grey[50],
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[200]!),
       ),

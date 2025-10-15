@@ -29,6 +29,7 @@ class EtablissementController extends GetxController {
 
       isLoading.value = true;
       final id = await repo.createEtablissement(e);
+      Get.back(result: true);
 
       if (id != null && id.isNotEmpty) {
         // Rafraîchir selon le rôle
@@ -64,16 +65,16 @@ class EtablissementController extends GetxController {
       isLoading.value = true;
 
       // S'assurer que le statut est converti correctement
-      if (data.containsKey('statut') && data['statut'] is StatutEtablissement) {
+      /* if (data.containsKey('statut') && data['statut'] is StatutEtablissement) {
         data['statut'] = (data['statut'] as StatutEtablissement).value;
       }
-
+*/
       final success = await repo.updateEtablissement(id, data);
-      Get.back(result: true);
       if (success) {
         await _refreshEtablissementsAfterAction();
         TLoaders.successSnackBar(
             message: 'Établissement mis à jour avec succès');
+        Get.back(result: true);
       } else {
         TLoaders.errorSnackBar(message: 'Échec de la mise à jour');
       }
@@ -135,7 +136,7 @@ class EtablissementController extends GetxController {
     }
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Vérification de permission unifiée
+  // Vérification de permission unifiée
   bool _hasPermissionForAction(String action) {
     final userRole = userController.userRole;
 
@@ -146,7 +147,7 @@ class EtablissementController extends GetxController {
 
     if (action == 'création' && userRole != 'Gérant' && userRole != 'Admin') {
       TLoaders.errorSnackBar(
-          message: 'Seuls les Gérants peuvent créer des établissements');
+          message: 'Seuls les Admins/Gérants peuvent créer des établissements');
       return false;
     }
 
