@@ -23,44 +23,44 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   late final EtablissementController _controller;
   late final UserController _userController;
   String _userRole = '';
-  bool _chargement = true;
-  List<Etablissement> _etablissements = []; // Stockage local
-
   @override
   void initState() {
     super.initState();
-    _initializeControllers();
-    _chargerEtablissements();
-  }
-
-  void _initializeControllers() {
-    try {
-      _controller = Get.find<EtablissementController>();
-    } catch (e) {
-      _controller = Get.put(EtablissementController(EtablissementRepository()));
+    if (!Get.isRegistered<EtablissementController>()) {
+      Get.put(EtablissementController(EtablissementRepository()));
     }
+    _controller = Get.find<EtablissementController>();
 
-    try {
-      _userController = Get.find<UserController>();
-    } catch (e) {
-      _userController = Get.put(UserController());
+    if (!Get.isRegistered<UserController>()) {
+      Get.put(UserController());
     }
+    _userController = Get.find<UserController>();
 
     _userRole = _userController.userRole;
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _chargerEtablissements();
+    });
   }
 
-  void _chargerEtablissements() async {
-    setState(() => _chargement = true);
-    final user = _userController.user.value;
+  Future<void> _chargerEtablissements() async {
+    try {
+      _controller.isLoading.value = true;
+      final user = _userController.user.value;
 
-    if (_userRole == 'Gérant' && user.id.isNotEmpty) {
-      await _controller.fetchEtablissementsByOwner(user.id);
-    } else if (_userRole == 'Admin') {
-      final data = await _controller.getTousEtablissements();
-      _controller.etablissements.assignAll(data);
+      if (_userRole == 'Gérant' && user.id.isNotEmpty) {
+        await _controller.fetchEtablissementsByOwner(user.id);
+      } else if (_userRole == 'Admin') {
+        await _controller.getTousEtablissements();
+      }
+    } catch (e) {
+      print('❌ Erreur chargement établissements: $e');
+      TLoaders.errorSnackBar(
+          title: 'Erreur',
+          message: 'Impossible de charger les établissements: $e');
+    } finally {
+      _controller.isLoading.value = false;
     }
-
-    setState(() => _chargement = false);
   }
 
   @override
@@ -83,7 +83,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   }
 
   Widget _buildBody() {
-    if (_chargement) return _buildLoadingState();
+    if (_controller.isLoading.value) return _buildLoadingState();
 
     if (_userRole != 'Admin' && _userRole != 'Gérant') {
       return _buildAccesRefuse();

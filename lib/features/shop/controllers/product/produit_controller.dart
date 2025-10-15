@@ -279,7 +279,7 @@ class ProduitController extends GetxController {
       isLoading.value = true;
 
       // Fetch products from an API or database
-      final products = await produitRepository.getFeaturedProducts(8);
+      final products = await produitRepository.getFeaturedProducts();
       // Assign products
       featuredProducts.assignAll(products);
     } catch (e) {

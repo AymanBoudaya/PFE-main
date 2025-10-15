@@ -45,7 +45,7 @@ class ProductController extends GetxController {
   Future<List<ProduitModel>> fetchAllFeaturedProducts() async {
     try {
       // Fetch products from an API or database
-      final products = await produitRepository.getFeaturedProducts();
+      final products = await produitRepository.getAllFeaturedProducts();
       return products;
     } catch (e) {
       // Handle error

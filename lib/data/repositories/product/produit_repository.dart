@@ -253,13 +253,13 @@ class ProduitRepository extends GetxController {
     return publicUrl;
   }
 
-  Future<List<ProduitModel>> getFeaturedProducts(int limit) async {
+  Future<List<ProduitModel>> getFeaturedProducts() async {
     try {
       final response = await _db
           .from(_table)
           .select('*, etablissement:etablissement_id(*)')
           .eq('is_featured', true)
-          .limit(limit)
+          .limit(8)
           .order('created_at', ascending: false);
 
       if (response == null) {

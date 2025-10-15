@@ -9,6 +9,7 @@ import '../models/statut_etablissement_model.dart';
 class EtablissementController extends GetxController {
   final EtablissementRepository repo;
   final UserController userController = Get.find<UserController>();
+  final isLoading = false.obs;
   final etablissements = <Etablissement>[].obs;
 
   EtablissementController(this.repo);
@@ -25,10 +26,10 @@ class EtablissementController extends GetxController {
       final id = await repo.createEtablissement(e);
 
       if (id != null && id.isNotEmpty) {
-        // Ajouter localement
+        // ✅ Ajouter localement
         etablissements.add(e.copyWith(id: id));
 
-        // Et rafraîchir depuis la base pour être sûr d’avoir les dernières données
+        // ✅ Et rafraîchir depuis la base pour être sûr d’avoir les dernières données
         final user = userController.user.value;
         if (user.id.isNotEmpty) {
           await fetchEtablissementsByOwner(user.id);
@@ -108,12 +109,15 @@ class EtablissementController extends GetxController {
   Future<List<Etablissement>?> fetchEtablissementsByOwner(
       String ownerId) async {
     try {
+      isLoading.value = true;
       final data = await repo.getEtablissementsByOwner(ownerId);
       etablissements.assignAll(data);
       return data;
-    } catch (e, stack) {
-      _logError('récupération', e, stack);
+    } catch (e) {
+      print('❌ Erreur fetchEtablissementsByOwner: $e');
       return null;
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -143,15 +147,15 @@ class EtablissementController extends GetxController {
   /// 2. Pour Admin - tous les établissements (liste complète)
   Future<List<Etablissement>> getTousEtablissements() async {
     try {
-      final userRole = userController.userRole;
-      if (userRole.isEmpty || userRole != 'Admin') {
-        return [];
-      }
-
-      return await repo.getAllEtablissements();
-    } catch (e, stack) {
-      _logError('récupération établissements', e, stack);
-      return [];
+      isLoading.value = true;
+      final data = await repo.getAllEtablissements();
+      etablissements.assignAll(data);
+      return data;
+    } catch (e) {
+      print('❌ Erreur getTousEtablissements: $e');
+      rethrow;
+    } finally {
+      isLoading.value = false;
     }
   }
 
