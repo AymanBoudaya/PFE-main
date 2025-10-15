@@ -63,7 +63,7 @@ class Etablissement {
     };
   }
 
-  /// ✅ Ajout du copyWith
+  /// Ajout du copyWith
   Etablissement copyWith({
     String? id,
     String? name,

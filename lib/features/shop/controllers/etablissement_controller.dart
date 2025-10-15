@@ -20,7 +20,7 @@ class EtablissementController extends GetxController {
     print('EtablissementController initialisé');
   }
 
-  // 🔥 CORRECTION : Méthode de création améliorée
+  // Méthode de création améliorée
   Future<String?> createEtablissement(Etablissement e) async {
     try {
       if (!_hasPermissionForAction('création')) {
@@ -31,7 +31,7 @@ class EtablissementController extends GetxController {
       final id = await repo.createEtablissement(e);
 
       if (id != null && id.isNotEmpty) {
-        // 🔥 CORRECTION : Rafraîchir selon le rôle
+        // Rafraîchir selon le rôle
         await _refreshEtablissementsAfterAction();
         TLoaders.successSnackBar(message: 'Établissement créé avec succès');
       } else {
@@ -88,7 +88,7 @@ class EtablissementController extends GetxController {
     }
   }
 
-  // 🔥 CORRECTION : Méthode pour changer le statut
+  // Méthode pour changer le statut
   Future<bool> changeStatutEtablissement(
       String id, StatutEtablissement newStatut) async {
     try {
@@ -99,7 +99,7 @@ class EtablissementController extends GetxController {
 
       isLoading.value = true;
 
-      // 🔥 CORRECTION : Utiliser la valeur correcte pour l'enum
+      // Utiliser la valeur correcte pour l'enum
       final success = await repo.changeStatut(id, newStatut);
 
       if (success) {
@@ -169,7 +169,7 @@ class EtablissementController extends GetxController {
       etablissements.assignAll(data);
       return data;
     } catch (e) {
-      print('❌ Erreur fetchEtablissementsByOwner: $e');
+      print('Erreur fetchEtablissementsByOwner: $e');
       TLoaders.errorSnackBar(message: 'Erreur chargement établissements: $e');
       return null;
     } finally {
@@ -185,7 +185,7 @@ class EtablissementController extends GetxController {
       etablissements.assignAll(data);
       return data;
     } catch (e) {
-      print('❌ Erreur getTousEtablissements: $e');
+      print('Erreur getTousEtablissements: $e');
       TLoaders.errorSnackBar(message: 'Erreur chargement établissements: $e');
       rethrow;
     } finally {
@@ -193,14 +193,14 @@ class EtablissementController extends GetxController {
     }
   }
 
-  // 🔥 CORRECTION : Suppression améliorée
+  // Suppression améliorée
   Future<bool> deleteEtablissement(String id) async {
     try {
       if (!_hasPermissionForAction('suppression')) {
         return false;
       }
 
-      // 🔥 CORRECTION : Confirmation avant suppression
+      // Confirmation avant suppression
       final shouldDelete = await _showDeleteConfirmation();
       if (!shouldDelete) return false;
 
@@ -304,7 +304,7 @@ class EtablissementController extends GetxController {
   }
 
   void _logError(String action, Object error, [StackTrace? stack]) {
-    print('❌ Erreur $action: $error');
+    print('Erreur $action: $error');
     if (stack != null) {
       print('Stack: $stack');
     }

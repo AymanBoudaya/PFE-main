@@ -30,7 +30,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
     _initializeControllers();
   }
 
-  // 🔥 CORRECTION : Initialisation améliorée
+  // Initialisation
   void _initializeControllers() {
     // Initialiser UserController
     if (!Get.isRegistered<UserController>()) {
@@ -52,7 +52,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
     });
   }
 
-  // 🔥 CORRECTION : Chargement amélioré
+  // Chargement
   Future<void> _chargerEtablissements() async {
     try {
       _controller.isLoading.value = true;
@@ -64,7 +64,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
         await _controller.getTousEtablissements();
       }
     } catch (e) {
-      print('❌ Erreur chargement établissements: $e');
+      print('Erreur chargement établissements: $e');
       TLoaders.errorSnackBar(
           title: 'Erreur', message: 'Impossible de charger les établissements');
     } finally {
@@ -72,7 +72,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
     }
   }
 
-  // 🔥 CORRECTION : Suppression avec confirmation
+  // Suppression avec confirmation
   Future<void> _deleteEtablissement(Etablissement etablissement) async {
     if (etablissement.id == null) {
       TLoaders.errorSnackBar(message: 'ID établissement manquant');
@@ -83,10 +83,10 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
       final success = await _controller.deleteEtablissement(etablissement.id!);
       if (success) {
         // La liste se met à jour automatiquement via les observables
-        print('✅ Établissement supprimé avec succès');
+        print('Établissement supprimé avec succès');
       }
     } catch (e) {
-      print('❌ Erreur suppression: $e');
+      print('Erreur suppression: $e');
     }
   }
 
