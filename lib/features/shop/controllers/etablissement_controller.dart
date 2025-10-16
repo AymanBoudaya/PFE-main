@@ -23,11 +23,14 @@ class EtablissementController extends GetxController {
     print('EtablissementController initialisé');
   }
 
-    Future<String?> uploadEtablissementImage(XFile file) async {
+  Future<String?> uploadEtablissementImage(XFile file) async {
     try {
       final bytes = await file.readAsBytes();
-      final filePath = 'etablissements/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
-      await _supabase.storage.from('etablissements').uploadBinary(filePath, bytes);
+      final filePath =
+          'etablissements/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+      await _supabase.storage
+          .from('etablissements')
+          .uploadBinary(filePath, bytes);
       return _supabase.storage.from('etablissements').getPublicUrl(filePath);
     } catch (e) {
       TLoaders.errorSnackBar(message: 'Erreur upload image: $e');
@@ -135,7 +138,7 @@ class EtablissementController extends GetxController {
     }
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Rafraîchissement après action
+  // Rafraîchissement après action
   Future<void> _refreshEtablissementsAfterAction() async {
     try {
       final userRole = userController.userRole;

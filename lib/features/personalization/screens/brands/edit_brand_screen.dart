@@ -49,7 +49,7 @@ class _EditEtablissementScreenState extends State<EditEtablissementScreen>
   bool _horairesLoaded = false;
   StatutEtablissement _selectedStatut = StatutEtablissement.en_attente;
 
-  // 🔥 NOUVEAU : Gestion de l'image
+  // Gestion de l'image
   XFile? _selectedImage;
   String? _currentImageUrl;
   AnimationController? _animationController;
@@ -100,7 +100,7 @@ class _EditEtablissementScreenState extends State<EditEtablissementScreen>
     _currentImageUrl = widget.etablissement.imageUrl;
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Sélection d'image
+  // Sélection d'image
   Future<void> _pickMainImage() async {
     try {
       final picked = await ImagePicker()
@@ -173,7 +173,7 @@ class _EditEtablissementScreenState extends State<EditEtablissementScreen>
       final updateData = <String, dynamic>{
         'name': _nameController.text.trim(),
         'address': _addressController.text.trim(),
-        'image_url': imageUrl, // 🔥 Mise à jour de l'image
+        'image_url': imageUrl, 
       };
 
       // Inclure le statut si l'utilisateur est Admin

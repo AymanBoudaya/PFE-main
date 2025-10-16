@@ -78,7 +78,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     }
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Upload d'image
+  // Upload d'image
   Future<void> _pickMainImage() async {
     try {
       final picked = await ImagePicker()
@@ -91,7 +91,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     }
   }
 
-  // 🔥 CORRECTION : Création avec upload d'image
+  // Création avec upload d'image
   void _addEtablissement() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -99,7 +99,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
 
     final user = userController.user.value;
 
-    // 🔥 NOUVEAU : Upload de l'image si sélectionnée
+    // Upload de l'image si sélectionnée
     String? imageUrl;
     if (_selectedImage != null) {
       imageUrl = await _controller.uploadEtablissementImage(_selectedImage!);
@@ -113,7 +113,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     final etab = Etablissement(
       name: _nameController.text.trim(),
       address: _addressController.text.trim(),
-      imageUrl: imageUrl, // 🔥 Image uploadée
+      imageUrl: imageUrl, 
       latitude: _latitudeController.text.isNotEmpty
           ? double.tryParse(_latitudeController.text)
           : null,
@@ -140,7 +140,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     }
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Section image (design similaire à AddProduitScreen)
+  // Section image
   Widget _buildImageSection(double width) {
     final previewHeight =
         (width >= 900) ? 220.0 : (width >= 600 ? 200.0 : 160.0);
@@ -215,7 +215,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     );
   }
 
-  // 🔥 CORRECTION : Section informations de base
+  // Section informations de base
   Widget _buildBasicInfoSection(double width) {
     final isWide = width >= 900;
 
@@ -281,7 +281,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     ]);
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Section coordonnées GPS
+  // Section coordonnées GPS
   Widget _buildCoordinatesSection(double width) {
     final isWide = width >= 900;
 
@@ -324,7 +324,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     ]);
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Section rôle utilisateur
+  // Section rôle utilisateur
   Widget _buildUserRoleSection() {
     final user = userController.user.value;
 

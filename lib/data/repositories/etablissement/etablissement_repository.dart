@@ -35,7 +35,7 @@ class EtablissementRepository {
         throw 'ID établissement manquant';
       }
 
-      print('🔄 Mise à jour établissement $id: $data');
+      print('Mise à jour établissement $id: $data');
 
       // S'assurer que le statut est bien converti
       if (data.containsKey('statut') && data['statut'] is String) {

@@ -70,7 +70,7 @@ class AllProductsController extends GetxController {
         break;
       case 'Ventes':
         products.sort((a, b) {
-          // 🔥 Logique de tri par ventes améliorée
+          // Logique de tri par ventes
           final salesA = a.salePrice ?? 0.0;
           final salesB = b.salePrice ?? 0.0;
           return salesB.compareTo(salesA);

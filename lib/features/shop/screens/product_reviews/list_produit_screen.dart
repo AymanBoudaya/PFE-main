@@ -413,7 +413,7 @@ class _ListProduitScreenState extends State<ListProduitScreen> {
     );
   }
 
-  // NOUVELLE MÉTHODE POUR L'AFFICHAGE DES PRIX
+  // AFFICHAGE DES PRIX
   Widget _buildPriceDisplay(ProduitModel produit) {
     // Si le produit est de type single ET a un prix soldé
     if (produit.productType == ProductType.single.toString() &&
