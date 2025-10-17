@@ -4,7 +4,7 @@ import 'package:caferesto/common/widgets/products/cart/cart_menu_icon.dart';
 import 'package:caferesto/common/widgets/brands/brand_card.dart';
 import 'package:caferesto/common/widgets/shimmer/brands_shimmer.dart';
 import 'package:caferesto/common/widgets/texts/section_heading.dart';
-import 'package:caferesto/features/shop/controllers/brand_controller.dart';
+import 'package:caferesto/features/shop/controllers/etablissement_controller.dart';
 import 'package:caferesto/features/shop/screens/brand/all_brands.dart';
 import 'package:caferesto/features/shop/screens/brand/brand_products.dart';
 import 'package:caferesto/utils/constants/sizes.dart';
@@ -22,7 +22,8 @@ class StoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brandController = Get.put(BrandController());
+    
+    final etablissementController = EtablissementController.instance;
     final categories = CategoryController.instance.featuredCategories;
     return DefaultTabController(
       length: categories.length,
@@ -87,11 +88,11 @@ class StoreScreen extends StatelessWidget {
 
                           /// -- Brands Grid
                           Obx(() {
-                            if (brandController.isLoading.value) {
+                            if (etablissementController.isLoading.value) {
                               return const TbrandsShimmer();
                             }
 
-                            if (brandController.featuredBrands.isEmpty) {
+                            if (etablissementController.featuredBrands.isEmpty) {
                               return Center(
                                   child: Text('Aucune marque trouvée',
                                       style: Theme.of(context)
@@ -101,11 +102,11 @@ class StoreScreen extends StatelessWidget {
                             }
                             return GridLayout(
                                 itemCount:
-                                    brandController.featuredBrands.length,
+                                    etablissementController.featuredBrands.length,
                                 mainAxisExtent: 80,
                                 itemBuilder: (_, index) {
                                   final brand =
-                                      brandController.featuredBrands[index];
+                                      etablissementController.featuredBrands[index];
                                   return BrandCard(
                                       showBorder: true,
                                       brand: brand,

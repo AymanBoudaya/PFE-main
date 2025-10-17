@@ -3,6 +3,7 @@
 import 'dart:ui';
 
 import 'package:caferesto/common/widgets/products/favorite_icon/favorite_icon.dart';
+import 'package:caferesto/common/widgets/products/product_cards/widgets/aucune_image.dart';
 import 'package:caferesto/utils/constants/colors.dart';
 import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
@@ -243,7 +244,7 @@ class ProductCardVertical extends StatelessWidget {
     }
 
     // Si aucune image n'est disponible
-    return _buildImagePlaceholderWidget();
+    return AucuneImageWidget(height: 150, iconSize: 40, textSize: 12);
   }
 
   Widget _buildImageErrorWidget() {
@@ -277,25 +278,6 @@ class ProductCardVertical extends StatelessWidget {
                   loadingProgress.expectedTotalBytes!
               : null,
         ),
-      ),
-    );
-  }
-
-  Widget _buildImagePlaceholderWidget() {
-    return Container(
-      height: 150,
-      width: double.infinity,
-      color: Colors.grey[200],
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.fastfood, color: Colors.grey, size: 40),
-          SizedBox(height: 8),
-          Text(
-            'Aucune image',
-            style: TextStyle(color: Colors.grey, fontSize: 12),
-          ),
-        ],
       ),
     );
   }

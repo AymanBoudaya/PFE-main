@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:caferesto/features/shop/models/etablissement_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../utils/constants/colors.dart';
-import '../../../features/shop/models/brand_model.dart';
 import '../../../features/shop/screens/brand/brand_products.dart';
 import '../../../utils/constants/sizes.dart';
 import '../../../utils/helpers/helper_functions.dart';
@@ -14,7 +14,7 @@ import 'brand_card.dart';
 class BrandShowcase extends StatelessWidget {
   const BrandShowcase({super.key, required this.images, required this.brand});
 
-  final BrandModel brand;
+  final Etablissement brand;
   final List<String> images;
 
   @override

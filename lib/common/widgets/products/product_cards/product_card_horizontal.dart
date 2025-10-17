@@ -270,6 +270,6 @@ class TProductCardHorizontal extends StatelessWidget {
     }
 
     // Si aucune image n'est disponible
-    return aucuneImageWidget();
+    return AucuneImageWidget();
   }
 }

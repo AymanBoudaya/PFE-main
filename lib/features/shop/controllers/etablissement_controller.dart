@@ -6,14 +6,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/repositories/etablissement/etablissement_repository.dart';
 import '../../personalization/controllers/user_controller.dart';
 import '../models/etablissement_model.dart';
+import '../models/produit_model.dart';
 import '../models/statut_etablissement_model.dart';
 
 class EtablissementController extends GetxController {
+  static EtablissementController get instance => Get.find();
+
   final EtablissementRepository repo;
   final UserController userController = Get.find<UserController>();
   final isLoading = false.obs;
   final etablissements = <Etablissement>[].obs;
   final SupabaseClient _supabase = Supabase.instance.client;
+  RxList<Etablissement> featuredBrands = <Etablissement>[].obs;
+  final RxList<Etablissement> allEtablissements = <Etablissement>[].obs;
 
   EtablissementController(this.repo);
 
@@ -21,6 +26,7 @@ class EtablissementController extends GetxController {
   void onInit() {
     super.onInit();
     print('EtablissementController initialisé');
+    fetchFeaturedEtablissements();
   }
 
   Future<String?> uploadEtablissementImage(XFile file) async {
@@ -38,7 +44,6 @@ class EtablissementController extends GetxController {
     }
   }
 
-  // Méthode de création améliorée
   Future<String?> createEtablissement(Etablissement e) async {
     try {
       if (!_hasPermissionForAction('création')) {
@@ -67,7 +72,6 @@ class EtablissementController extends GetxController {
     }
   }
 
-  // Méthode de mise à jour améliorée
   Future<bool> updateEtablissement(
       String? id, Map<String, dynamic> data) async {
     try {
@@ -329,9 +333,76 @@ class EtablissementController extends GetxController {
     }
   }
 
+  /// Fetch etablissements
+  void fetchFeaturedEtablissements() async {
+    try {
+      // Show loader while loading etablissements
+      isLoading.value = true;
+
+      // Fetch etablissements from an API or database
+      final etablissements = await repo.getFeaturedEtablissements();
+      // Assign etablissements
+      featuredBrands.assignAll(etablissements);
+      print(featuredBrands.toString());
+    } catch (e) {
+      // Handle error
+      TLoaders.errorSnackBar(title: 'Erreur!', message: e.toString());
+    } finally {
+      // Hide loader after loading etablissements
+      isLoading.value = false;
+    }
+  }
+
+  /// Fetch etablissements
+  void fetchAllEtablissements() async {
+    try {
+      // Show loader while loading etablissements
+      isLoading.value = true;
+
+      // Fetch etablissements from an API or database
+      final etablissements = await repo.getAllEtablissements();
+      // Assign etablissements
+      allEtablissements.assignAll(etablissements);
+    } catch (e) {
+      // Handle error
+      TLoaders.errorSnackBar(title: 'Erreur!', message: e.toString());
+    } finally {
+      // Hide loader after loading etablissements
+      isLoading.value = false;
+    }
+  }
+
   @override
   void onClose() {
-    print('🔄 EtablissementController fermé');
+    print('EtablissementController fermé');
     super.onClose();
+  }
+
+  Future<List<ProduitModel>> getProduitsEtablissement({
+    required String etablissementId,
+  }) async {
+    try {
+      isLoading.value = true;
+      final produits = await repo.getProduitsEtablissement(etablissementId);
+      return produits;
+    } catch (e) {
+      TLoaders.errorSnackBar(
+          title: 'Erreur', message: 'Impossible de charger les produits: $e');
+      return [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// -- Charger ETS pour une catégorie
+  Future<List<Etablissement>> getBrandsForCategory(String categoryId) async {
+    try {
+      final brands = await repo.getBrandsForCategory(categoryId);
+
+      return brands;
+    } catch (e) {
+      TLoaders.errorSnackBar(title: 'Erreur', message: e.toString());
+      return [];
+    }
   }
 }

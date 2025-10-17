@@ -3,6 +3,7 @@ import 'package:caferesto/common/widgets/brands/brand_card.dart';
 import 'package:caferesto/common/widgets/layouts/grid_layout.dart';
 import 'package:caferesto/common/widgets/texts/section_heading.dart';
 import 'package:caferesto/features/shop/controllers/brand_controller.dart';
+import 'package:caferesto/features/shop/controllers/etablissement_controller.dart';
 import 'package:caferesto/features/shop/screens/brand/brand_products.dart';
 import 'package:caferesto/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ class AllBrandsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brandController = BrandController.instance;
+    final etablissementController = EtablissementController.instance;
     return Scaffold(
         appBar: TAppBar(
           title: Text("Marques"),
@@ -34,14 +35,13 @@ class AllBrandsScreen extends StatelessWidget {
                   height: AppSizes.spaceBtwItems,
                 ),
 
-                /// Etablissements
-                /// -- Grid
+                /// Etablissements  Grid
                 Obx(() {
-                  if (brandController.isLoading.value) {
+                  if (etablissementController.isLoading.value) {
                     return const TbrandsShimmer();
                   }
 
-                  if (brandController.allBrands.isEmpty) {
+                  if (etablissementController.allEtablissements.isEmpty) {
                     return Center(
                         child: Text('Aucune marque trouvée',
                             style: Theme.of(context)
@@ -50,10 +50,12 @@ class AllBrandsScreen extends StatelessWidget {
                                 .apply(color: Colors.white)));
                   }
                   return GridLayout(
-                      itemCount: brandController.allBrands.length,
+                      itemCount:
+                          etablissementController.allEtablissements.length,
                       mainAxisExtent: 80,
                       itemBuilder: (_, index) {
-                        final brand = brandController.allBrands[index];
+                        final brand =
+                            etablissementController.allEtablissements[index];
                         return BrandCard(
                             showBorder: true,
                             brand: brand,

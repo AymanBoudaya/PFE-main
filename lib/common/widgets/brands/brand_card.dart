@@ -1,6 +1,6 @@
+import 'package:caferesto/features/shop/models/etablissement_model.dart';
 import 'package:flutter/material.dart';
 
-import '../../../features/shop/models/brand_model.dart';
 import '../../../utils/constants/enums.dart';
 import '../../../utils/constants/sizes.dart';
 import '../images/circular_image.dart';
@@ -15,7 +15,7 @@ class BrandCard extends StatelessWidget {
     required this.brand,
   });
 
-  final BrandModel brand;
+  final Etablissement brand;
   final bool showBorder;
   final void Function()? onTap;
 
@@ -33,7 +33,7 @@ class BrandCard extends StatelessWidget {
             /// Icone
             CircularImage(
               isNetworkImage: true,
-              image: brand.image,
+              image: brand.imageUrl ?? '',
               backgroundColor: Colors.transparent,
               width: 50,
               height: 50,
@@ -67,7 +67,7 @@ class BrandCard extends StatelessWidget {
                       return SizedBox(
                         width: constraints.maxWidth,
                         child: Text(
-                          '${brand.productsCount ?? 0} produits',
+                          '${brand.nbProduits ?? 0} produits',
                           style: Theme.of(context).textTheme.labelMedium,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,

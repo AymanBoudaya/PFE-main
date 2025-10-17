@@ -1,5 +1,6 @@
 import 'package:caferesto/common/widgets/brands/brand_show_case.dart';
 import 'package:caferesto/features/shop/controllers/brand_controller.dart';
+import 'package:caferesto/features/shop/controllers/etablissement_controller.dart';
 import 'package:caferesto/features/shop/models/category_model.dart';
 import 'package:caferesto/utils/constants/sizes.dart';
 import 'package:caferesto/utils/helpers/cloud_helper_functions.dart';
@@ -15,7 +16,7 @@ class CategoryBrands extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = BrandController.instance;
+    final controller = EtablissementController.instance;
     return FutureBuilder(
         future: controller.getBrandsForCategory(category.id),
         builder: (context, snapshot) {
@@ -41,8 +42,9 @@ class CategoryBrands extends StatelessWidget {
             itemBuilder: (_, index) {
               final brand = brands[index];
               return FutureBuilder(
-                  future:
-                      controller.getBrandProducts(etablissementId: brand.id, limit: 3),
+                  future: controller.getProduitsEtablissement(
+                    etablissementId: brand.id!, /*limit: 3*/
+                  ),
                   builder: (context, snapshot) {
                     /// Handle loader , No record, Or Error Message
                     final widget = TCloudHelperFunctions.checkMultiRecordState(
