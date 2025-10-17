@@ -229,8 +229,10 @@ class ProduitController extends GetxController {
 
     try {
       isLoading.value = true;
-      await produitRepository.addProduct(produit);
-      await loadProductsByRole();
+      final newProduct = await produitRepository.addProduct(produit);
+      featuredProducts.add(newProduct);
+      fetchFeaturedProducts();
+      loadProductsByRole();
       Get.back(result: true);
       TLoaders.successSnackBar(
           message: 'Produit "${produit.name}" ajouté avec succès');

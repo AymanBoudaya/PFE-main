@@ -7,6 +7,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../../common/widgets/appbar/appbar.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../shop/controllers/category_controller.dart';
+import '../widgets/loading_screen.dart';
 import 'add_category_screen.dart';
 import 'edit_category_screen.dart';
 
@@ -42,7 +43,10 @@ class CategoryManagementPage extends StatelessWidget {
 
   Widget _buildBody(BuildContext context) {
     return Obx(() {
-      if (controller.isLoading.value) return _buildLoadingState();
+      if (controller.isLoading.value)
+        return LoadingScreen(
+          screenName: 'Catégories',
+        );
       if (controller.allCategories.isEmpty) {
         return _buildEmptyState();
       }
@@ -56,20 +60,6 @@ class CategoryManagementPage extends StatelessWidget {
       );
     });
   }
-
-  Widget _buildLoadingState() => const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text(
-              "Chargement des catégories...",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          ],
-        ),
-      );
 
   Widget _buildEmptyState() {
     return Center(

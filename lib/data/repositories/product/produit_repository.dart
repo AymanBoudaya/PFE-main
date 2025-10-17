@@ -195,13 +195,15 @@ class ProduitRepository extends GetxController {
   }
 
   /// Ajouter un nouveau produit
-  Future<void> addProduct(ProduitModel produit) async {
+  Future<ProduitModel> addProduct(ProduitModel produit) async {
     try {
-      await _db.from(_table).insert(produit.toJson());
-    } on PostgrestException catch (e) {
-      throw 'Erreur base de données : ${e.code} - ${e.message}';
+      final response =
+          await _db.from('produits').insert(produit.toJson()).select().single();
+      final createdProduct = ProduitModel.fromMap(response);
+
+      return createdProduct;
     } catch (e) {
-      throw 'Erreur lors de l\'ajout du produit : $e';
+      throw Exception('Erreur lors de l’ajout du produit: $e');
     }
   }
 
