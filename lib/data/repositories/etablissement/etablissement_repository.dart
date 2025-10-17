@@ -57,7 +57,7 @@ class EtablissementRepository {
   // Changement de statut
   Future<bool> changeStatut(String id, StatutEtablissement newStatut) async {
     try {
-      print('🔄 Changement statut établissement $id: ${newStatut.value}');
+      print('Changement statut établissement $id: ${newStatut.value}');
 
       final response = await supabase
           .from('etablissements')

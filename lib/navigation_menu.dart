@@ -46,7 +46,7 @@ class NavigationMenu extends StatelessWidget {
               NavigationDestination(
                 icon: Icon(Iconsax.home, color: playStoreUnselected),
                 selectedIcon: Icon(Iconsax.home5, color: Colors.blue[100]),
-                label: 'Home',
+                label: 'Accueil',
               ),
               NavigationDestination(
                 icon: Icon(Iconsax.shop, color: playStoreUnselected),
@@ -56,13 +56,13 @@ class NavigationMenu extends StatelessWidget {
               NavigationDestination(
                 icon: Icon(Iconsax.heart, color: playStoreUnselected),
                 selectedIcon: Icon(Iconsax.heart5, color: Colors.blue[300]),
-                label: 'Wishlist',
+                label: 'Favoris',
               ),
               NavigationDestination(
                 icon: Icon(Iconsax.profile_circle, color: playStoreUnselected),
                 selectedIcon:
                     Icon(Iconsax.profile_circle5, color: Colors.blue[300]),
-                label: 'Profile',
+                label: 'Profil',
               ),
             ],
           ),

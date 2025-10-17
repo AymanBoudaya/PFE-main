@@ -16,6 +16,9 @@ import '../../texts/brand_title_text_with_verified_icon.dart';
 import '../../texts/product_price_text.dart';
 import '../../texts/product_title_text.dart';
 import 'widgets/add_to_cart_button.dart';
+import 'widgets/aucune_image.dart';
+import 'widgets/chargement_image_widget.dart';
+import 'widgets/erreur_image_widget.dart';
 import 'widgets/rounded_container.dart';
 
 class TProductCardHorizontal extends StatelessWidget {
@@ -240,11 +243,11 @@ class TProductCardHorizontal extends StatelessWidget {
           height: double.infinity,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            return _buildImageErrorWidget();
+            return imageErreurWidget();
           },
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
-            return _buildImageLoadingWidget(loadingProgress);
+            return chargementImageWidget(loadingProgress);
           },
         ),
       );
@@ -260,77 +263,13 @@ class TProductCardHorizontal extends StatelessWidget {
           height: double.infinity,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            return _buildImageErrorWidget();
+            return imageErreurWidget();
           },
         ),
       );
     }
 
     // Si aucune image n'est disponible
-    return _buildImagePlaceholderWidget();
-  }
-
-  Widget _buildImageErrorWidget() {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(AppSizes.productImageRadius),
-      ),
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, color: Colors.grey, size: 24),
-          SizedBox(height: 4),
-          Text(
-            'Erreur',
-            style: TextStyle(color: Colors.grey, fontSize: 10),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImageLoadingWidget(ImageChunkEvent loadingProgress) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(AppSizes.productImageRadius),
-      ),
-      child: Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          value: loadingProgress.expectedTotalBytes != null
-              ? loadingProgress.cumulativeBytesLoaded /
-                  loadingProgress.expectedTotalBytes!
-              : null,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImagePlaceholderWidget() {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(AppSizes.productImageRadius),
-      ),
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.fastfood, color: Colors.grey, size: 24),
-          SizedBox(height: 4),
-          Text(
-            'Aucune image',
-            style: TextStyle(color: Colors.grey, fontSize: 10),
-          ),
-        ],
-      ),
-    );
+    return aucuneImageWidget();
   }
 }

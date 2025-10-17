@@ -13,7 +13,7 @@ import 'edit_category_screen.dart';
 class CategoryManagementPage extends StatelessWidget {
   CategoryManagementPage({super.key});
 
-  final CategoryController controller = Get.put(CategoryController());
+  final controller = Get.find<CategoryController>();
 
   @override
   Widget build(BuildContext context) {
