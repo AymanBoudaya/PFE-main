@@ -2,14 +2,14 @@ class CategoryModel {
   final String id;
   final String name;
   late final String image;
-  final String? parentId; 
+  final String? parentId;
   final bool isFeatured;
 
   CategoryModel({
     this.id = '',
     required this.name,
     required this.image,
-    this.parentId, 
+    this.parentId,
     this.isFeatured = false,
   });
 
@@ -55,7 +55,8 @@ class CategoryModel {
       name: json['name']?.toString() ?? '',
       image: json['image']?.toString() ?? '',
       // Si parentId est vide ou null, on met null
-      parentId: (json['parentId'] == null || json['parentId'].toString().trim().isEmpty)
+      parentId: (json['parentId'] == null ||
+              json['parentId'].toString().trim().isEmpty)
           ? null
           : json['parentId'].toString(),
       isFeatured: json['isFeatured'] is bool
@@ -70,9 +71,10 @@ class CategoryModel {
       id: row['id']?.toString() ?? '',
       name: row['name']?.toString() ?? '',
       image: row['image']?.toString() ?? '',
-      parentId: (row['parentId'] == null || row['parentId'].toString().trim().isEmpty)
-          ? null
-          : row['parentId'].toString(),
+      parentId:
+          (row['parentId'] == null || row['parentId'].toString().trim().isEmpty)
+              ? null
+              : row['parentId'].toString(),
       isFeatured: row['isFeatured'] is bool
           ? row['isFeatured']
           : (row['isFeatured']?.toString().toLowerCase() == 'true'),
@@ -93,6 +95,15 @@ class CategoryModel {
       image: image ?? this.image,
       parentId: parentId ?? this.parentId,
       isFeatured: isFeatured ?? this.isFeatured,
+    );
+  }
+
+  factory CategoryModel.fromBasicData(
+      {required String id, required String name}) {
+    return CategoryModel(
+      id: id,
+      name: name,
+      image: 'assets/images/default_category.png', // 🔥 Valeur par défaut
     );
   }
 }

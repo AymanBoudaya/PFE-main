@@ -4,7 +4,10 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../features/shop/models/category_model.dart';
+import '../../../features/shop/models/etablissement_model.dart';
 import '../../../features/shop/models/produit_model.dart';
+import '../../../features/shop/models/statut_etablissement_model.dart';
 import '../../../utils/exceptions/platform_exceptions.dart';
 
 class ProduitRepository extends GetxController {
@@ -320,4 +323,97 @@ Future<List<String>> getAllEtablissementsNames() async {
       rethrow; // important pour que Flutter te montre l’exception dans la console
     }
   }
+
+  // 🔥 NOUVELLES MÉTHODES : Récupération avec IDs
+Future<List<CategoryModel>> getAllCategoriesWithIds() async {
+  try {
+    final data = await _db.from('categories').select('id, name, image'); // 🔥 Inclure image si disponible
+    
+    return data.map<CategoryModel>((c) {
+      // 🔥 CORRECTION : Utiliser fromJson ou fromBasicData selon les données disponibles
+      if (c['image'] != null) {
+        return CategoryModel.fromJson(c);
+      } else {
+        return CategoryModel.fromBasicData(
+          id: c['id']?.toString() ?? '',
+          name: c['name']?.toString() ?? '',
+        );
+      }
+    }).toList();
+  } catch (e) {
+    print('❌ Erreur getAllCategoriesWithIds: $e');
+    return [];
+  }
+}
+
+Future<List<Etablissement>> getAllEtablissementsWithIds() async {
+  try {
+    final data = await _db.from('etablissements').select('id, name, statut');
+    return data.map<Etablissement>((e) => Etablissement(
+      id: e['id']?.toString(),
+      name: e['name']?.toString() ?? '',
+      address: '',
+      idOwner: '',
+      statut: StatutEtablissementExt.fromString(e['statut']?.toString()),
+      createdAt: DateTime.now(),
+    )).toList();
+  } catch (e) {
+    print('❌ Erreur getAllEtablissementsWithIds: $e');
+    return [];
+  }
+}
+
+// 🔥 CORRECTION : Recherche améliorée avec gestion correcte des types
+Future<List<ProduitModel>> searchProductsWithFilters({
+  String? query,
+  String? categoryId,
+  String? etablissementId,
+  String? sortBy,
+}) async {
+  try {
+    // 🔥 CORRECTION : Utiliser dynamic pour éviter les conflits de types
+    dynamic request = _db.from(_table).select('''
+      *, 
+      etablissement:etablissement_id(*),
+      category:categorie_id(*)
+    ''');
+
+    // Appliquer les filtres
+    if (query != null && query.isNotEmpty) {
+      request = request.or('nom.ilike.%$query%,description.ilike.%$query%');
+    }
+    
+    if (categoryId != null && categoryId.isNotEmpty) {
+      request = request.eq('categorie_id', categoryId);
+    }
+    
+    if (etablissementId != null && etablissementId.isNotEmpty) {
+      request = request.eq('etablissement_id', etablissementId);
+    }
+
+    // 🔥 CORRECTION : Appliquer le tri avec gestion de type
+    switch (sortBy) {
+      case 'Prix ↑':
+        request = (request as dynamic).order('prix', ascending: true);
+        break;
+      case 'Prix ↓':
+        request = (request as dynamic).order('prix', ascending: false);
+        break;
+      case 'Nom A-Z':
+        request = (request as dynamic).order('nom', ascending: true);
+        break;
+      case 'Popularité':
+        request = (request as dynamic).order('is_featured', ascending: false);
+        break;
+      default:
+        request = (request as dynamic).order('created_at', ascending: false);
+    }
+
+    final response = await request;
+    return response.map((e) => ProduitModel.fromMap(e)).toList();
+  } catch (e) {
+    print('❌ Erreur searchProductsWithFilters: $e');
+    return [];
+  }
+}
 }
