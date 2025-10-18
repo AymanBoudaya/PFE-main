@@ -5,7 +5,7 @@ import '../../../../common/widgets/success_screen/success_screen.dart';
 import '../../../../data/repositories/authentication/authentication_repository.dart';
 import '../../../../data/repositories/order/order_repository.dart';
 import '../../../../navigation_menu.dart';
-import '../../../../utils/constants/enums.dart';
+import '../../../../utils/constants/enums.dart' hide OrderStatus;
 import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../../utils/popups/loaders.dart';
@@ -32,17 +32,19 @@ class OrderController extends GetxController {
     }
   }
 
-  void processOrder(double totalAmount) async {
+  Future<void> processOrder({
+    required double totalAmount,
+    DateTime? pickupDateTime,
+    String? pickupDay,
+    String? pickupTimeRange,
+  }) async {
     try {
       TFullScreenLoader.openLoadingDialog(
           'Processing your order', TImages.pencilAnimation);
 
       final userId = AuthenticationRepository.instance.authUser!.id;
-      if (userId.isEmpty) {
-        return;
-      }
+      if (userId.isEmpty) return;
 
-      // Add details
       final order = OrderModel(
         id: UniqueKey().toString(),
         userId: userId,
@@ -51,19 +53,20 @@ class OrderController extends GetxController {
         orderDate: DateTime.now(),
         paymentMethod: checkoutController.selectedPaymentMethod.value.name,
         address: addressController.selectedAddress.value,
-        // Set date as needed
         deliveryDate: DateTime.now(),
         items: cartController.cartItems.toList(),
+        pickupDateTime: pickupDateTime,
+        pickupDay: pickupDay,
+        pickupTimeRange: pickupTimeRange,
       );
 
-      // Save the order to firestore
       await orderRepository.saveOrder(order, userId);
 
       cartController.clearCart();
 
       Get.off(() => SuccessScreen(
           image: TImages.orderCompletedAnimation,
-          title: 'Payment effectué !',
+          title: 'Produits commandés !',
           subTitle: 'Votre commande est en cours de traitement',
           onPressed: () => Get.offAll(() => const NavigationMenu())));
     } catch (e) {

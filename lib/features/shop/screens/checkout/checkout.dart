@@ -81,7 +81,7 @@ class CheckoutScreen extends StatelessWidget {
         padding: const EdgeInsets.all(AppSizes.defaultSpace),
         child: ElevatedButton(
             onPressed: subTotal > 0
-                ? () => orderController.processOrder(totalAmount)
+                ? () => orderController.processOrder(totalAmount : totalAmount)
                 : () => TLoaders.warningSnackBar(
                     title: 'Panier vide',
                     message:

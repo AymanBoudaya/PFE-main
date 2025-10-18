@@ -56,7 +56,7 @@ class AddressModel {
     };
   }
 
-  factory AddressModel.fromJson2(Map<String, dynamic> data) {
+  factory AddressModel.fromJson(Map<String, dynamic> data) {
     if (data.isEmpty) return AddressModel.empty();
 
     return AddressModel(

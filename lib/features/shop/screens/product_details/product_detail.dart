@@ -1,4 +1,5 @@
 import 'package:caferesto/common/widgets/texts/section_heading.dart';
+import 'package:caferesto/features/shop/controllers/product/horaire_controller.dart';
 import 'package:caferesto/features/shop/screens/product_details/widgets/product_meta_data.dart';
 import 'package:caferesto/features/shop/screens/product_reviews/product_reviews.dart';
 import 'package:caferesto/utils/constants/sizes.dart';
@@ -7,8 +8,12 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:readmore/readmore.dart';
 
+import '../../../../data/repositories/horaire/horaire_repository.dart';
 import '../../../../utils/constants/enums.dart';
+import '../../controllers/product/cart_controller.dart';
+import '../../controllers/product/order_controller.dart';
 import '../../models/produit_model.dart';
+import '../order/pick_up_slot_picker.dart';
 import 'widgets/bottom_add_to_cart_widget.dart';
 import 'widgets/product_attributes.dart';
 import 'widgets/product_detail_image_slider.dart';
@@ -27,7 +32,7 @@ class ProductDetailScreen extends StatelessWidget {
             child: Column(
           children: [
             /// 1 - Product Image Slider
-             TProductImageSlider(product: product),
+            TProductImageSlider(product: product),
 
             /// 2 - Product Details
             Padding(
@@ -59,7 +64,35 @@ class ProductDetailScreen extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                          onPressed: () {}, child: Text('Cmandi -  كماندي')),
+                        onPressed: () async {
+                          final orderController = Get.put(OrderController());
+                          final cartController = CartController.instance;
+                          final horaireController =
+                              Get.put(HoraireController(HoraireRepository()));
+
+                          // Ouvrir bottom sheet pour choisir créneau
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (_) {
+                              return PickUpSlotPicker(
+                                onSlotSelected: (pickupDateTime, dayLabel,
+                                    timeRange) async {
+                                  // Ici vous pouvez valider la disponibilité réelle via HoraireController
+                                  await orderController.processOrder(
+                                    totalAmount:
+                                        cartController.totalCartPrice.value,
+                                    pickupDateTime: pickupDateTime,
+                                    pickupDay: dayLabel,
+                                    pickupTimeRange: timeRange,
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                        child: Text('Cmandi -  كماندي'),
+                      ),
                     ),
                     const SizedBox(
                       height: AppSizes.spaceBtwSections,

@@ -1,9 +1,9 @@
 import 'package:caferesto/features/shop/models/cart_item_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:caferesto/utils/helpers/helper_functions.dart';
 
-import '../../../utils/constants/enums.dart';
-import '../../../utils/helpers/helper_functions.dart';
 import '../../personalization/models/address_model.dart';
+
+enum OrderStatus { pending, shipped, delivered }
 
 class OrderModel {
   final String id;
@@ -15,62 +15,113 @@ class OrderModel {
   final AddressModel? address;
   final DateTime? deliveryDate;
   final List<CartItemModel> items;
+  final DateTime? pickupDateTime;
+  final String? pickupDay;
+  final String? pickupTimeRange;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   OrderModel({
     required this.id,
-    this.userId = '',
+    required this.userId,
     required this.status,
-    required this.items,
     required this.totalAmount,
     required this.orderDate,
-    this.paymentMethod = 'Payement à la caisse',
-    this.deliveryDate,
+    required this.paymentMethod,
+    required this.items,
     this.address,
+    this.deliveryDate,
+    this.pickupDateTime,
+    this.pickupDay,
+    this.pickupTimeRange,
+    this.createdAt,
+    this.updatedAt,
   });
 
+  // -------------------------
+  // Computed / helper getters
+  // -------------------------
   String get formattedOrderDate => THelperFunctions.getFormattedDate(orderDate);
 
   String get formattedDeliveryDate => deliveryDate != null
       ? THelperFunctions.getFormattedDate(deliveryDate!)
       : '';
 
-  String get orderStatusText => status == OrderStatus.delivered
-      ? 'Livrée'
-      : status == OrderStatus.shipped
-          ? 'Livraison en cours'
-          : 'En cours de traitement';
+  String get orderStatusText {
+    switch (status) {
+      case OrderStatus.delivered:
+        return 'Livrée';
+      case OrderStatus.shipped:
+        return 'Livraison en cours';
+      default:
+        return 'En cours de traitement';
+    }
+  }
 
+  // -------------------------
+  // Serialization
+  // -------------------------
+
+  /// Converts Dart model → JSON (for Supabase insert/update)
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'userId': userId,
-      'paymentMethod': paymentMethod,
-      'status': status.toString(),
-      'totalAmount': totalAmount,
-      'orderDate': orderDate,
-      'deliveryDate': deliveryDate,
+      'user_id': userId,
+      'status': status.name,
+      'total_amount': totalAmount,
+      'order_date': orderDate.toIso8601String(),
+      'delivery_date': deliveryDate?.toIso8601String(),
+      'payment_method': paymentMethod,
       'address': address?.toJson(),
       'items': items.map((item) => item.toJson()).toList(),
+      'pickup_date_time': pickupDateTime?.toIso8601String(),
+      'pickup_day': pickupDay,
+      'pickup_time_range': pickupTimeRange,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
 
-  factory OrderModel.fromSnapshot(DocumentSnapshot snapshot) {
-    final data = snapshot.data() as Map<String, dynamic>;
+  /// Converts Supabase JSON → Dart model
+  factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      id: data['id'] as String,
-      userId: data['UserId'] as String,
-      status:
-          OrderStatus.values.firstWhere((e) => e.toString() == data['Status']),
-      totalAmount: data['totalAmount'] as double,
-      orderDate: (data['orderDate'] as Timestamp).toDate(),
-      paymentMethod: data['PaymentMethod'] as String,
-      address: AddressModel.fromJson2(data['address'] as Map<String, dynamic>),
-      deliveryDate: data['deliveryDate'] != null
-          ? (data['deliveryDate'] as Timestamp).toDate()
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      status: _parseStatus(json['status']),
+      totalAmount: (json['total_amount'] as num).toDouble(),
+      orderDate: DateTime.parse(json['order_date'] as String),
+      deliveryDate: json['delivery_date'] != null
+          ? DateTime.parse(json['delivery_date'] as String)
           : null,
-      items: (data['items'] as List<dynamic>)
-          .map((item) => CartItemModel.fromJson(item as Map<String, dynamic>))
+      paymentMethod: json['payment_method'] as String,
+      address: json['address'] != null
+          ? AddressModel.fromJson(Map<String, dynamic>.from(json['address']))
+          : null,
+      items: (json['items'] as List)
+          .map((e) => CartItemModel.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
+      pickupDateTime: json['pickup_date_time'] != null
+          ? DateTime.parse(json['pickup_date_time'] as String)
+          : null,
+      pickupDay: json['pickup_day'] as String?,
+      pickupTimeRange: json['pickup_time_range'] as String?,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
     );
+  }
+
+  static OrderStatus _parseStatus(String? statusStr) {
+    switch (statusStr) {
+      case 'delivered':
+        return OrderStatus.delivered;
+      case 'shipped':
+        return OrderStatus.shipped;
+      default:
+        return OrderStatus.pending;
+    }
   }
 }
