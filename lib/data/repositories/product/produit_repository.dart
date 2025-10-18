@@ -31,6 +31,17 @@ class ProduitRepository extends GetxController {
     }
   }
 
+  Future<List<String>> getAllCategories() async {
+  final data = await _db.from('categories').select('name');
+  return data.map<String>((c) => c['name'] as String).toList();
+}
+
+Future<List<String>> getAllEtablissementsNames() async {
+  final data = await _db.from('etablissements').select('name');
+  return data.map<String>((e) => e['name'] as String).toList();
+}
+
+
   /// Optional: Search directly in Supabase (server-side search)
   Future<List<ProduitModel>> searchProducts(String query) async {
     final response = await _db

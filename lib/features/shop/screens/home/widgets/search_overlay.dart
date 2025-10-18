@@ -93,6 +93,79 @@ class _SearchOverlayState extends State<SearchOverlay> {
 
                   const SizedBox(height: 20),
 
+                  /// --- Filtres --- ///
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Obx(() => DropdownButtonFormField<String>(
+                              value: controller.selectedCategory.value.isEmpty
+                                  ? null
+                                  : controller.selectedCategory.value,
+                              decoration: const InputDecoration(
+                                labelText: 'Catégorie',
+                                labelStyle: TextStyle(color: Colors.white70),
+                                filled: true,
+                                fillColor: Colors.white10,
+                              ),
+                              dropdownColor: Colors.black87,
+                              items: controller.categories
+                                  .map((c) => DropdownMenuItem(
+                                      value: c, child: Text(c)))
+                                  .toList(),
+                              onChanged: controller.onCategorySelected,
+                            )),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Obx(() => DropdownButtonFormField<String>(
+                              value:
+                                  controller.selectedEtablissement.value.isEmpty
+                                      ? null
+                                      : controller.selectedEtablissement.value,
+                              decoration: const InputDecoration(
+                                labelText: 'Établissement',
+                                labelStyle: TextStyle(color: Colors.white70),
+                                filled: true,
+                                fillColor: Colors.white10,
+                              ),
+                              dropdownColor: Colors.black87,
+                              items: controller.etablissements
+                                  .map((e) => DropdownMenuItem(
+                                      value: e, child: Text(e)))
+                                  .toList(),
+                              onChanged: controller.onEtablissementSelected,
+                            )),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  /// --- Tri --- ///
+                  Obx(() => DropdownButtonFormField<String>(
+                        value: controller.selectedSort.value.isEmpty
+                            ? null
+                            : controller.selectedSort.value,
+                        decoration: const InputDecoration(
+                          labelText: 'Trier par',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: Colors.white10,
+                        ),
+                        dropdownColor: Colors.black87,
+                        items: [
+                          'Prix ↑',
+                          'Prix ↓',
+                          'Nom A-Z',
+                          'Popularité',
+                        ]
+                            .map((s) =>
+                                DropdownMenuItem(value: s, child: Text(s)))
+                            .toList(),
+                        onChanged: controller.onSortSelected,
+                      )),
+                  const SizedBox(height: 20),
+
                   /// --- Product Grid (Scrollable Page) ---
                   Expanded(
                     child: Obx(() {

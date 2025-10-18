@@ -7,10 +7,19 @@ class ResearchController extends GetxController {
 
   /// States
   RxList<ProduitModel> searchResults = <ProduitModel>[].obs;
+  RxList<ProduitModel> allProducts = <ProduitModel>[].obs;
+
   RxBool isLoading = false.obs;
   RxBool isPaginating = false.obs;
   RxBool hasMore = true.obs;
   RxString query = ''.obs;
+
+  /// Filtres
+  RxString selectedCategory = ''.obs;
+  RxString selectedEtablissement = ''.obs;
+  RxString selectedSort = ''.obs; // 'Prix ↑', 'Prix ↓', 'Nom A-Z', 'Popularité'
+  RxList<String> categories = <String>[].obs;
+  RxList<String> etablissements = <String>[].obs;
 
   /// Pagination vars
   int _page = 1;
@@ -20,9 +29,21 @@ class ResearchController extends GetxController {
   void onInit() {
     super.onInit();
     fetchAllProducts(reset: true);
+    loadFilterData();
   }
 
-  /// Load all products with pagination
+  Future<void> loadFilterData() async {
+    try {
+      final cats = await _repo.getAllCategories();
+      final ets = await _repo.getAllEtablissementsNames();
+      categories.assignAll(cats);
+      etablissements.assignAll(ets);
+    } catch (e) {
+      print('Erreur chargement filtres: $e');
+    }
+  }
+
+  /// Fetch all products (with pagination)
   Future<void> fetchAllProducts({bool reset = false}) async {
     if (isLoading.value || isPaginating.value) return;
     if (!hasMore.value && !reset) return;
@@ -30,6 +51,7 @@ class ResearchController extends GetxController {
     if (reset) {
       _page = 1;
       hasMore.value = true;
+      allProducts.clear();
       searchResults.clear();
     }
 
@@ -46,39 +68,92 @@ class ResearchController extends GetxController {
       if (products.isEmpty) {
         hasMore.value = false;
       } else {
+        // ✅ Correction : remplir allProducts aussi
+        allProducts.addAll(products);
         searchResults.addAll(products);
         _page++;
       }
+
+      // ✅ Appliquer les filtres après avoir ajouté les produits
+      applyFilters();
     } catch (e) {
-      print('Error fetching products: $e');
+      print('Erreur fetch produits: $e');
     } finally {
       isLoading.value = false;
       isPaginating.value = false;
     }
   }
 
-  /// Called whenever the user types
-  void onSearchChanged(String text) {
-    query.value = text;
-    if (text.isEmpty) {
-      // Reset to paginated full list
-      fetchAllProducts(reset: true);
-      return;
+  /// Filtrage combiné
+  void applyFilters() {
+    List<ProduitModel> results = List.from(allProducts);
+
+    // 🔍 Recherche textuelle
+    if (query.value.isNotEmpty) {
+      results = results.where((p) {
+        final name = p.name.toLowerCase();
+        final desc = p.description?.toLowerCase() ?? '';
+        return name.contains(query.value.toLowerCase()) ||
+            desc.contains(query.value.toLowerCase());
+      }).toList();
     }
 
-    // Simple local filtering from current products
-    final results = searchResults.where((p) {
-      final name = p.name.toLowerCase();
-      final desc = p.description?.toLowerCase() ?? '';
-      return name.contains(text.toLowerCase()) ||
-          desc.contains(text.toLowerCase());
-    }).toList();
+    // 🏷️ Filtre par catégorie (ID)
+    if (selectedCategory.value.isNotEmpty) {
+      results =
+          results.where((p) => p.categoryId == selectedCategory.value).toList();
+    }
+
+    // 🏠 Filtre par établissement (ID)
+    if (selectedEtablissement.value.isNotEmpty) {
+      results = results
+          .where((p) => p.etablissementId == selectedEtablissement.value)
+          .toList();
+    }
+
+    // 🧮 Tri
+    switch (selectedSort.value) {
+      case 'Prix ↑':
+        results.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case 'Prix ↓':
+        results.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case 'Nom A-Z':
+        results.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case 'Popularité':
+        results.sort(
+            (a, b) => (b.isFeatured! ? 1 : 0).compareTo(a.isFeatured! ? 1 : 0));
+        break;
+    }
 
     searchResults.assignAll(results);
   }
 
+  /// 📱 Gestion des changements
+  void onSearchChanged(String text) {
+    query.value = text;
+    applyFilters();
+  }
+
+  void onCategorySelected(String? cat) {
+    selectedCategory.value = cat ?? '';
+    applyFilters();
+  }
+
+  void onEtablissementSelected(String? etab) {
+    selectedEtablissement.value = etab ?? '';
+    applyFilters();
+  }
+
+  void onSortSelected(String? sort) {
+    selectedSort.value = sort ?? '';
+    applyFilters();
+  }
+
   void clearSearch() {
     query.value = '';
-    fetchAllProducts(reset: true);
+    applyFilters();
   }
 }
