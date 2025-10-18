@@ -19,6 +19,7 @@ class EtablissementController extends GetxController {
   final SupabaseClient _supabase = Supabase.instance.client;
   RxList<Etablissement> featuredBrands = <Etablissement>[].obs;
   final RxList<Etablissement> allEtablissements = <Etablissement>[].obs;
+  RealtimeChannel? _channel;
 
   EtablissementController(this.repo);
 
@@ -26,7 +27,57 @@ class EtablissementController extends GetxController {
   void onInit() {
     super.onInit();
     print('EtablissementController initialisé');
+    _subscribeToRealtimeEtablissements();
     fetchFeaturedEtablissements();
+    fetchAllEtablissements();
+  }
+
+  @override
+  void onClose() {
+    print('EtablissementController fermé');
+    _unsubscribeFromRealtime();
+    super.onClose();
+  }
+
+  void _subscribeToRealtimeEtablissements() {
+    _channel = _supabase.channel('etablissements_changes');
+
+    _channel!.onPostgresChanges(
+      event: PostgresChangeEvent.all, // 'INSERT', 'UPDATE', 'DELETE', or all
+      schema: 'public',
+      table: 'etablissements',
+      callback: (payload) {
+        final eventType = payload.eventType;
+        final newData = payload.newRecord;
+        final oldData = payload.oldRecord;
+
+        if (eventType == PostgresChangeEvent.insert) {
+          final etab = Etablissement.fromJson(newData);
+          etablissements.add(etab);
+          etablissements.refresh();
+        } else if (eventType == PostgresChangeEvent.update) {
+          final etab = Etablissement.fromJson(newData);
+          final index = etablissements.indexWhere((e) => e.id == etab.id);
+          if (index != -1) {
+            etablissements[index] = etab;
+            etablissements.refresh();
+          }
+        } else if (eventType == PostgresChangeEvent.delete) {
+          final id = oldData['id'];
+          etablissements.removeWhere((e) => e.id == id);
+          etablissements.refresh();
+        }
+      },
+    );
+
+    _channel!.subscribe();
+  }
+
+  void _unsubscribeFromRealtime() {
+    if (_channel != null) {
+      _supabase.removeChannel(_channel!);
+      _channel = null;
+    }
   }
 
   Future<String?> uploadEtablissementImage(XFile file) async {
@@ -94,7 +145,16 @@ class EtablissementController extends GetxController {
       Get.back(result: true);
       final success = await repo.updateEtablissement(id, data);
       if (success) {
-        await _refreshEtablissementsAfterAction();
+        final index = etablissements.indexWhere((e) => e.id == id);
+        if (index != -1) {
+          final oldEts = etablissements[index];
+          etablissements[index] = oldEts.copyWith(
+              statut: data['statut'] != null
+                  ? StatutEtablissementExt.fromString(data['statut'])
+                  : oldEts.statut);
+          etablissements.refresh();
+        }
+        _refreshEtablissementsAfterAction();
         TLoaders.successSnackBar(
             message: 'Établissement mis à jour avec succès');
       } else {
@@ -126,7 +186,13 @@ class EtablissementController extends GetxController {
       final success = await repo.changeStatut(id, newStatut);
 
       if (success) {
-        await _refreshEtablissementsAfterAction();
+        final index = etablissements.indexWhere((e) => e.id == id);
+        if (index != -1) {
+          etablissements[index] =
+              etablissements[index].copyWith(statut: newStatut);
+          etablissements.refresh();
+        }
+        _refreshEtablissementsAfterAction();
         TLoaders.successSnackBar(message: 'Statut mis à jour avec succès');
       } else {
         TLoaders.errorSnackBar(message: 'Échec de la mise à jour du statut');
@@ -167,9 +233,9 @@ class EtablissementController extends GetxController {
       return false;
     }
 
-    if (action == 'création' && userRole != 'Gérant' && userRole != 'Admin') {
+    if (action == 'création' && userRole != 'Gérant') {
       TLoaders.errorSnackBar(
-          message: 'Seuls les Admins/Gérants peuvent créer des établissements');
+          message: 'Seuls les Gérants peuvent créer des établissements');
       return false;
     }
 
@@ -370,12 +436,6 @@ class EtablissementController extends GetxController {
       // Hide loader after loading etablissements
       isLoading.value = false;
     }
-  }
-
-  @override
-  void onClose() {
-    print('EtablissementController fermé');
-    super.onClose();
   }
 
   Future<List<ProduitModel>> getProduitsEtablissement({

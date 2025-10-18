@@ -164,7 +164,7 @@ class ProductCardVertical extends StatelessWidget {
                   /// Title
                   TProductTitleText(
                     title: product.name,
-                    maxLines: 2,
+                    maxLines: 1,
                     smallSize: true,
                   ),
                 ],

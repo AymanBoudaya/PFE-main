@@ -141,20 +141,23 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
       return const SizedBox();
     }
 
-    // Admin peut toujours créer
-    return FloatingActionButton(
-      onPressed: () async {
-        final result = await Get.to(() => AddEtablissementScreen());
-        if (result == true) {
-          await _chargerEtablissements();
-        }
-      },
-      backgroundColor: Colors.blue.shade600,
-      foregroundColor: Colors.white,
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: const Icon(Icons.add, size: 28),
-    );
+    if (_userRole == 'Gérant') {
+      return FloatingActionButton(
+        onPressed: () async {
+          final result = await Get.to(() => AddEtablissementScreen());
+          if (result == true) {
+            await _chargerEtablissements();
+          }
+        },
+        backgroundColor: Colors.blue.shade600,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add, size: 28),
+      );
+    } else {
+      return const SizedBox();
+    }
   }
 
   Widget _buildLoadingState() {
@@ -314,13 +317,10 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
             overflow: TextOverflow.ellipsis),
         if (_userRole == 'Admin') ...[
           const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(etablissement.owner?.role ?? 'Admin ou Gérant'),
-              Text(' : '),
-              Text(etablissement.owner?.fullName ?? 'inconnu',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-            ],
+          Text(
+            'Gérant : ${etablissement.owner?.fullName}',
+            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ],
