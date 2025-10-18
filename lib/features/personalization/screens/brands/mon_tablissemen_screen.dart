@@ -117,25 +117,94 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
         return _buildAccesRefuse();
       }
 
-      final data = _controller.etablissements;
-
-      if (data.isEmpty) return _buildEmptyState();
-
-      final sortedData = [...data];
-      sortedData.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      final data = _controller.filteredEtablissements;
+      final hasResults = data.isNotEmpty;
 
       return RefreshIndicator(
         onRefresh: _chargerEtablissements,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: sortedData.length,
-          itemBuilder: (context, index) {
-            final e = sortedData[index];
-            return _buildEtablissementCard(e, index);
-          },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 12),
+
+            // 🔹 Filtres stylés avec ChoiceChip
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  _buildFilterChip('Récents'),
+                  _buildFilterChip('Approuvés'),
+                  _buildFilterChip('Rejetés'),
+                  _buildFilterChip('En attente'),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // 🔹 Liste des établissements
+            Expanded(
+              child: hasResults
+                  ? ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        final e = data[index];
+                        return _buildEtablissementCard(e, index);
+                      },
+                    )
+                  : _buildNoResultsState(_controller.selectedFilter.value),
+            ),
+          ],
         ),
       );
     });
+  }
+
+  Widget _buildFilterChip(String label) {
+    return Obx(() {
+      final isSelected = _controller.selectedFilter.value == label;
+      return ChoiceChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        selected: isSelected,
+        selectedColor: Colors.blue,
+        backgroundColor: Colors.grey[200],
+        onSelected: (_) => _controller.selectedFilter.value = label,
+        elevation: 2,
+        pressElevation: 3,
+      );
+    });
+  }
+
+  Widget _buildNoResultsState(String currentFilter) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 50, color: Colors.grey.shade400),
+            const SizedBox(height: 12),
+            Text(
+              'Aucun établissement trouvé pour "$currentFilter".',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildFloatingActionButton() {
@@ -344,7 +413,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
         if (_userRole == 'Admin') ...[
           const SizedBox(height: 4),
           Text(
-            'Gérant : ${etablissement.owner?.fullName}',
+            'Gérant : ${etablissement.ownerDisplayName}',
             style: TextStyle(fontSize: 12, color: Colors.grey[500]),
             overflow: TextOverflow.ellipsis,
           ),

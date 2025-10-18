@@ -113,7 +113,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     final etab = Etablissement(
       name: _nameController.text.trim(),
       address: _addressController.text.trim(),
-      imageUrl: imageUrl, 
+      imageUrl: imageUrl,
       latitude: _latitudeController.text.isNotEmpty
           ? double.tryParse(_latitudeController.text)
           : null,

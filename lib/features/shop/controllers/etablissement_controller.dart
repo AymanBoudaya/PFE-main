@@ -20,6 +20,7 @@ class EtablissementController extends GetxController {
   RxList<Etablissement> featuredBrands = <Etablissement>[].obs;
   final RxList<Etablissement> allEtablissements = <Etablissement>[].obs;
   RealtimeChannel? _channel;
+  final selectedFilter = 'Récents'.obs;
 
   EtablissementController(this.repo);
 
@@ -80,6 +81,28 @@ class EtablissementController extends GetxController {
     }
   }
 
+RxList<Etablissement> get filteredEtablissements {
+  final List<Etablissement> all = etablissements;
+  late List<Etablissement> filtered;
+
+  switch (selectedFilter.value) {
+    case 'Approuvés':
+      filtered = all.where((e) => e.statut == StatutEtablissement.approuve).toList();
+      break;
+    case 'Rejetés':
+      filtered = all.where((e) => e.statut == StatutEtablissement.rejete).toList();
+      break;
+    case 'En attente':
+      filtered = all.where((e) => e.statut == StatutEtablissement.en_attente).toList();
+      break;
+    default:
+      filtered = List.from(all)
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  return filtered.obs;
+}
+
   Future<String?> uploadEtablissementImage(XFile file) async {
     try {
       final bytes = await file.readAsBytes();
@@ -103,6 +126,11 @@ class EtablissementController extends GetxController {
 
       isLoading.value = true;
 
+      final currentUser = userController.user.value;
+      final etabWithOwner = e.copyWith(
+        owner: currentUser, // 🔥 Inclure l'owner immédiatement
+      );
+
       // Create in repo
       final id = await repo.createEtablissement(e);
       Get.back(result: true);
@@ -112,11 +140,9 @@ class EtablissementController extends GetxController {
         TLoaders.successSnackBar(message: 'Établissement créé avec succès');
 
         try {
-          final currentUser = _supabase.auth.currentUser;
-          final gerantName =
-              currentUser?.userMetadata?['full_name'] ?? 'Un gérant';
-          print(currentUser?.toString());
-          print(currentUser?.userMetadata);
+          final gerantName = currentUser.fullName.isNotEmpty
+              ? currentUser.fullName
+              : 'Un gérant';
           final etabName = e.name;
 
           // Fetch all admins
@@ -181,23 +207,24 @@ class EtablissementController extends GetxController {
         if (index != -1) {
           final oldEts = etablissements[index];
           etablissements[index] = oldEts.copyWith(
+              name: data['name'] ?? oldEts.name,
+              address: data['address'] ?? oldEts.address,
+              imageUrl: data['image_url'] ?? oldEts.imageUrl,
               statut: data['statut'] != null
                   ? StatutEtablissementExt.fromString(data['statut'])
                   : oldEts.statut);
           etablissements.refresh();
         }
-        _refreshEtablissementsAfterAction();
+        await _refreshEtablissementsAfterAction();
         TLoaders.successSnackBar(
             message: 'Établissement mis à jour avec succès');
-
-        final gerantId = data['id_owner'] ??
-            etablissements.firstWhereOrNull((e) => e.id == id)?.idOwner;
+        final etablissement =
+            etablissements.firstWhereOrNull((e) => e.id == id);
+        final gerantId = etablissement?.idOwner;
         final newStatut = data['statut'];
-        final etabName = data['name'] ??
-            etablissements.firstWhereOrNull((e) => e.id == id)?.name ??
-            'Établissement';
+        final etabName = data['name'] ?? etablissement?.name ?? 'Établissement';
 
-        if (gerantId != null && gerantId.toString().isNotEmpty) {
+        if (gerantId != null && gerantId.isNotEmpty) {
           await _supabase.from('notifications').insert({
             'user_id': gerantId,
             'title': 'Statut mis à jour',
@@ -206,7 +233,7 @@ class EtablissementController extends GetxController {
             'etablissement_id': id,
           });
         } else {
-          print('⚠️ Impossible d’envoyer notification: id_owner introuvable');
+          print('⚠️ Impossible d\'envoyer notification: id_owner introuvable');
         }
       } else {
         TLoaders.errorSnackBar(message: 'Échec de la mise à jour');
@@ -270,6 +297,7 @@ class EtablissementController extends GetxController {
       } else if (userRole == 'Gérant' && userId.isNotEmpty) {
         await fetchEtablissementsByOwner(userId);
       }
+      etablissements.refresh();
     } catch (e) {
       print('Erreur rafraîchissement: $e');
     }
@@ -306,8 +334,18 @@ class EtablissementController extends GetxController {
     try {
       isLoading.value = true;
       final data = await repo.getEtablissementsByOwner(ownerId);
-      etablissements.assignAll(data);
-      return data;
+
+      // S'assurer que chaque établissement a un owner
+      final dataWithOwner = data.map((etab) {
+        if (etab.owner == null) {
+          // Si l'owner est manquant, utiliser l'utilisateur courant
+          return etab.copyWith(owner: userController.user.value);
+        }
+        return etab;
+      }).toList();
+
+      etablissements.assignAll(dataWithOwner);
+      return dataWithOwner;
     } catch (e) {
       print('Erreur fetchEtablissementsByOwner: $e');
       TLoaders.errorSnackBar(message: 'Erreur chargement établissements: $e');
@@ -330,6 +368,32 @@ class EtablissementController extends GetxController {
       rethrow;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<Etablissement?> getEtablissementWithOwner(String id) async {
+    try {
+      // Chercher d'abord dans la liste locale
+      var etablissement = etablissements.firstWhereOrNull((e) => e.id == id);
+
+      if (etablissement != null && etablissement.owner != null) {
+        return etablissement;
+      }
+
+      // Sinon charger depuis l'API
+      final tousEtablissements = await getTousEtablissementsPourProduit();
+      etablissement = tousEtablissements.firstWhereOrNull((e) => e.id == id);
+
+      // Si toujours pas d'owner, utiliser l'utilisateur courant
+      if (etablissement != null && etablissement.owner == null) {
+        etablissement =
+            etablissement.copyWith(owner: userController.user.value);
+      }
+
+      return etablissement;
+    } catch (e) {
+      _logError('récupération avec owner', e);
+      return null;
     }
   }
 

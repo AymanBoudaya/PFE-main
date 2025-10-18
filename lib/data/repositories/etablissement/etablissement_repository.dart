@@ -15,7 +15,7 @@ class EtablissementRepository {
       final response = await _db
           .from(_table)
           .insert(data)
-          .select('*, id_owner(*)') // ✅ jointure complète dès la création
+          .select('*, id_owner:users!id_owner(*)') // 🔥 Jointure explicite
           .single();
       return response['id']?.toString();
     } catch (e, stack) {
@@ -44,9 +44,8 @@ class EtablissementRepository {
           .from(_table)
           .update(data)
           .eq('id', id)
-          .select('*, id_owner(*)') // ✅ inclure aussi le owner
+          .select('*, id_owner:users!id_owner(*)') // 🔥 Jointure explicite
           .single();
-          
       print('Établissement $id mis à jour avec succès');
       return true;
     } catch (e, stack) {
@@ -78,7 +77,7 @@ class EtablissementRepository {
     try {
       final response = await _db
           .from(_table)
-          .select('*, id_owner(*)')
+          .select('*, id_owner:users!id_owner(*)') // 🔥 Jointure explicite
           .eq('is_featured', true)
           .limit(4)
           .order('created_at', ascending: false);
@@ -95,7 +94,7 @@ class EtablissementRepository {
     try {
       final response = await _db
           .from(_table)
-          .select('*, id_owner(*)')
+          .select('*, id_owner:users!id_owner(*)') // 🔥 Jointure explicite
           .order('created_at', ascending: false);
 
       return response
@@ -113,7 +112,7 @@ class EtablissementRepository {
     try {
       final response = await _db
           .from(_table)
-          .select('*, id_owner(*)')
+          .select('*, id_owner:users!id_owner(*)') // 🔥 Jointure explicite
           .eq('id_owner', ownerId)
           .order('created_at', ascending: false);
 

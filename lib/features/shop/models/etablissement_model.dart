@@ -14,7 +14,7 @@ class Etablissement {
   final String idOwner;
   final DateTime createdAt;
   final List<Horaire>? horaires;
-  UserModel? owner;
+  final UserModel? owner;
   final bool isFeatured;
 
   Etablissement({
@@ -59,7 +59,9 @@ class Etablissement {
           ? DateTime.tryParse(json['created_at']) ?? DateTime.now()
           : DateTime.now(),
       horaires: horaires,
-      owner: ownerData,
+      owner: json['id_owner'] is Map<String, dynamic>
+          ? UserModel.fromJson(json['id_owner'])
+          : null,
       isFeatured: json['is_featured'] ?? false,
       nbProduits: (json['nb_produits'] as num?)?.toDouble() ?? 0,
     );
@@ -74,7 +76,7 @@ class Etablissement {
       'latitude': latitude,
       'longitude': longitude,
       'id_owner': idOwner,
-      'created_at': createdAt.toIso8601String(), 
+      'created_at': createdAt.toIso8601String(),
       'is_featured': isFeatured,
       'nb_produits': nbProduits,
     };
@@ -110,5 +112,12 @@ class Etablissement {
       nbProduits: nbProduits ?? this.nbProduits,
       isFeatured: isFeatured ?? this.isFeatured,
     );
+  }
+
+  String get ownerDisplayName {
+    if (owner != null && owner!.fullName.isNotEmpty) {
+      return owner!.fullName;
+    }
+    return 'Gérant';
   }
 }
