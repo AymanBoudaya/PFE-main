@@ -29,7 +29,7 @@ class EtablissementController extends GetxController {
     print('EtablissementController initialisé');
     _subscribeToRealtimeEtablissements();
     fetchFeaturedEtablissements();
-    fetchAllEtablissements();
+    getTousEtablissements();
   }
 
   @override
@@ -115,6 +115,8 @@ class EtablissementController extends GetxController {
           final currentUser = _supabase.auth.currentUser;
           final gerantName =
               currentUser?.userMetadata?['full_name'] ?? 'Un gérant';
+          print(currentUser?.toString());
+          print(currentUser?.userMetadata);
           final etabName = e.name;
 
           // Fetch all admins
@@ -331,6 +333,12 @@ class EtablissementController extends GetxController {
     }
   }
 
+  bool isRecentEtablissement(Etablissement e) {
+    final now = DateTime.now();
+    final diff = now.difference(e.createdAt); // le "!" car on a déjà vérifié
+    return diff.inDays < 3; // 3 jours = récent
+  }
+
   // Suppression améliorée
   Future<bool> deleteEtablissement(String id) async {
     try {
@@ -459,25 +467,6 @@ class EtablissementController extends GetxController {
       // Assign etablissements
       featuredBrands.assignAll(etablissements);
       print(featuredBrands.toString());
-    } catch (e) {
-      // Handle error
-      TLoaders.errorSnackBar(title: 'Erreur!', message: e.toString());
-    } finally {
-      // Hide loader after loading etablissements
-      isLoading.value = false;
-    }
-  }
-
-  /// Fetch etablissements
-  void fetchAllEtablissements() async {
-    try {
-      // Show loader while loading etablissements
-      isLoading.value = true;
-
-      // Fetch etablissements from an API or database
-      final etablissements = await repo.getAllEtablissements();
-      // Assign etablissements
-      allEtablissements.assignAll(etablissements);
     } catch (e) {
       // Handle error
       TLoaders.errorSnackBar(title: 'Erreur!', message: e.toString());

@@ -1,7 +1,6 @@
 import '../../personalization/models/user_model.dart';
-import 'statut_etablissement_model.dart';
-
 import 'horaire_model.dart';
+import 'statut_etablissement_model.dart';
 
 class Etablissement {
   final String? id;
@@ -13,25 +12,26 @@ class Etablissement {
   final double? nbProduits;
   final double? longitude;
   final String idOwner;
-  final DateTime? createdAt;
+  final DateTime createdAt;
   final List<Horaire>? horaires;
-  final UserModel? owner;
+  UserModel? owner;
   final bool isFeatured;
 
-  Etablissement(
-      {this.id,
-      required this.name,
-      required this.address,
-      this.imageUrl,
-      this.statut = StatutEtablissement.en_attente,
-      this.latitude,
-      this.longitude,
-      required this.idOwner,
-      this.createdAt,
-      this.horaires,
-      this.owner,
-      this.nbProduits = 0,
-      this.isFeatured = false});
+  Etablissement({
+    this.id,
+    required this.name,
+    required this.address,
+    this.imageUrl,
+    this.statut = StatutEtablissement.en_attente,
+    this.latitude,
+    this.longitude,
+    required this.idOwner,
+    DateTime? createdAt,
+    this.horaires,
+    this.owner,
+    this.nbProduits = 0,
+    this.isFeatured = false,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   factory Etablissement.fromJson(Map<String, dynamic> json) {
     List<Horaire>? horaires;
@@ -45,23 +45,24 @@ class Etablissement {
         : null;
 
     return Etablissement(
-        id: json['id'],
-        name: json['name'],
-        address: json['address'],
-        imageUrl: json['image_url'],
-        statut: StatutEtablissementExt.fromString(json['statut']),
-        latitude: (json['latitude'] as num?)?.toDouble(),
-        longitude: (json['longitude'] as num?)?.toDouble(),
-        idOwner: json['id_owner'] is String
-            ? json['id_owner']
-            : (json['id_owner']['id'] ?? ''),
-        createdAt: json['created_at'] != null
-            ? DateTime.parse(json['created_at'])
-            : null,
-        horaires: horaires,
-        owner: ownerData,
-        isFeatured: json['is_featured'],
-        nbProduits: json['nb_produits']);
+      id: json['id'],
+      name: json['name'] ?? '',
+      address: json['address'] ?? '',
+      imageUrl: json['image_url'],
+      statut: StatutEtablissementExt.fromString(json['statut']),
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
+      idOwner: json['id_owner'] is String
+          ? json['id_owner']
+          : (json['id_owner']?['id'] ?? ''),
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at']) ?? DateTime.now()
+          : DateTime.now(),
+      horaires: horaires,
+      owner: ownerData,
+      isFeatured: json['is_featured'] ?? false,
+      nbProduits: (json['nb_produits'] as num?)?.toDouble() ?? 0,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -73,13 +74,12 @@ class Etablissement {
       'latitude': latitude,
       'longitude': longitude,
       'id_owner': idOwner,
-      'created_at': createdAt?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(), 
       'is_featured': isFeatured,
-      'nb_produits': nbProduits
+      'nb_produits': nbProduits,
     };
   }
 
-  /// Ajout du copyWith
   Etablissement copyWith({
     String? id,
     String? name,
@@ -92,6 +92,8 @@ class Etablissement {
     String? idOwner,
     DateTime? createdAt,
     List<Horaire>? horaires,
+    UserModel? owner,
+    bool? isFeatured,
   }) {
     return Etablissement(
       id: id ?? this.id,
@@ -104,6 +106,9 @@ class Etablissement {
       idOwner: idOwner ?? this.idOwner,
       createdAt: createdAt ?? this.createdAt,
       horaires: horaires ?? this.horaires,
+      owner: owner ?? this.owner,
+      nbProduits: nbProduits ?? this.nbProduits,
+      isFeatured: isFeatured ?? this.isFeatured,
     );
   }
 }

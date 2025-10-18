@@ -10,14 +10,13 @@ class EtablissementRepository {
   // Création avec gestion d'erreur
   Future<String?> createEtablissement(Etablissement etablissement) async {
     try {
-      final data = etablissement.toJson();
+      final data = etablissement.toJson()..['statut'] = 'en_attente';
 
-      // S'assurer que le statut est bien en_attente
-      data['statut'] = 'en_attente';
-
-      final response =
-          await _db.from(_table).insert(data).select('id').single();
-
+      final response = await _db
+          .from(_table)
+          .insert(data)
+          .select('*, id_owner(*)') // ✅ jointure complète dès la création
+          .single();
       return response['id']?.toString();
     } catch (e, stack) {
       print('Erreur création établissement: $e');
@@ -41,8 +40,13 @@ class EtablissementRepository {
         // Déjà converti par le contrôleur
       }
 
-      final response = await _db.from(_table).update(data).eq('id', id);
-
+      final response = await _db
+          .from(_table)
+          .update(data)
+          .eq('id', id)
+          .select('*, id_owner(*)') // ✅ inclure aussi le owner
+          .single();
+          
       print('Établissement $id mis à jour avec succès');
       return true;
     } catch (e, stack) {

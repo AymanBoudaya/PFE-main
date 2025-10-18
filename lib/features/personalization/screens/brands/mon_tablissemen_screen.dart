@@ -121,13 +121,16 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
 
       if (data.isEmpty) return _buildEmptyState();
 
+      final sortedData = [...data];
+      sortedData.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
       return RefreshIndicator(
         onRefresh: _chargerEtablissements,
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: data.length,
+          itemCount: sortedData.length,
           itemBuilder: (context, index) {
-            final e = data[index];
+            final e = sortedData[index];
             return _buildEtablissementCard(e, index);
           },
         ),
@@ -254,7 +257,8 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
 
   Widget _buildEtablissementCard(Etablissement etablissement, int index) {
     final dark = THelperFunctions.isDarkMode(context);
-
+    final isRecent = etablissement.statut == StatutEtablissement.en_attente &&
+        _controller.isRecentEtablissement(etablissement);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -267,16 +271,38 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
               offset: const Offset(0, 2))
         ],
       ),
-      child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        leading: _buildEtablissementImage(etablissement),
-        title: Text(etablissement.name,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-        subtitle: _buildEtablissementSubtitle(etablissement),
-        trailing: _buildStatutBadge(etablissement.statut),
-        onTap: () => _showEtablissementOptions(etablissement),
-      ),
+      child: Stack(children: [
+        ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          leading: _buildEtablissementImage(etablissement),
+          title: Text(etablissement.name,
+              style:
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+          subtitle: _buildEtablissementSubtitle(etablissement),
+          trailing: _buildStatutBadge(etablissement.statut),
+          onTap: () => _showEtablissementOptions(etablissement),
+        ),
+        if (isRecent)
+          Positioned(
+            top: 8,
+            right: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade600,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                "Nouveau",
+                style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+      ]),
     );
   }
 
