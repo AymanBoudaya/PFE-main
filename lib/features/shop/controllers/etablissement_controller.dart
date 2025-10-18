@@ -102,13 +102,43 @@ class EtablissementController extends GetxController {
       }
 
       isLoading.value = true;
+
+      // Create in repo
       final id = await repo.createEtablissement(e);
       Get.back(result: true);
 
       if (id != null && id.isNotEmpty) {
-        // Rafraîchir selon le rôle
         await _refreshEtablissementsAfterAction();
         TLoaders.successSnackBar(message: 'Établissement créé avec succès');
+
+        try {
+          final currentUser = _supabase.auth.currentUser;
+          final gerantName =
+              currentUser?.userMetadata?['full_name'] ?? 'Un gérant';
+          final etabName = e.name;
+
+          // Fetch all admins
+          final adminUsers =
+              await _supabase.from('users').select('id').eq('role', 'Admin');
+
+          if (adminUsers.isEmpty) {
+            print('⚠️ Aucun admin trouvé pour notifier');
+          } else {
+            for (final admin in adminUsers) {
+              final response = await _supabase.from('notifications').insert({
+                'user_id': admin['id'],
+                'title': 'Nouvel établissement à valider',
+                'message':
+                    '$gerantName a ajouté un nouvel établissement "$etabName".',
+                'etablissement_id': id,
+              }).select();
+              print(
+                  '✅ Notification créée pour admin ${admin['id']}: $response');
+            }
+          }
+        } catch (notifyErr) {
+          print('⚠️ Erreur envoi notification: $notifyErr');
+        }
       } else {
         TLoaders.errorSnackBar(message: 'Erreur lors de la création');
       }
@@ -157,6 +187,25 @@ class EtablissementController extends GetxController {
         _refreshEtablissementsAfterAction();
         TLoaders.successSnackBar(
             message: 'Établissement mis à jour avec succès');
+
+        final gerantId = data['id_owner'] ??
+            etablissements.firstWhereOrNull((e) => e.id == id)?.idOwner;
+        final newStatut = data['statut'];
+        final etabName = data['name'] ??
+            etablissements.firstWhereOrNull((e) => e.id == id)?.name ??
+            'Établissement';
+
+        if (gerantId != null && gerantId.toString().isNotEmpty) {
+          await _supabase.from('notifications').insert({
+            'user_id': gerantId,
+            'title': 'Statut mis à jour',
+            'message':
+                'Votre établissement "$etabName" est maintenant $newStatut.',
+            'etablissement_id': id,
+          });
+        } else {
+          print('⚠️ Impossible d’envoyer notification: id_owner introuvable');
+        }
       } else {
         TLoaders.errorSnackBar(message: 'Échec de la mise à jour');
       }
