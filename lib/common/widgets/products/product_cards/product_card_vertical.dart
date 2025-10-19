@@ -181,8 +181,7 @@ class ProductCardVertical extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (product.productType ==
-                                ProductType.single.toString() &&
+                        if (product.productType == 'single' &&
                             product.salePrice > 0)
                           Text(
                             '${product.price} DT',

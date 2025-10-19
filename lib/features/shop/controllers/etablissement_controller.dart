@@ -81,27 +81,31 @@ class EtablissementController extends GetxController {
     }
   }
 
-RxList<Etablissement> get filteredEtablissements {
-  final List<Etablissement> all = etablissements;
-  late List<Etablissement> filtered;
+  RxList<Etablissement> get filteredEtablissements {
+    final List<Etablissement> all = etablissements;
+    late List<Etablissement> filtered;
 
-  switch (selectedFilter.value) {
-    case 'Approuvés':
-      filtered = all.where((e) => e.statut == StatutEtablissement.approuve).toList();
-      break;
-    case 'Rejetés':
-      filtered = all.where((e) => e.statut == StatutEtablissement.rejete).toList();
-      break;
-    case 'En attente':
-      filtered = all.where((e) => e.statut == StatutEtablissement.en_attente).toList();
-      break;
-    default:
-      filtered = List.from(all)
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    switch (selectedFilter.value) {
+      case 'Approuvés':
+        filtered =
+            all.where((e) => e.statut == StatutEtablissement.approuve).toList();
+        break;
+      case 'Rejetés':
+        filtered =
+            all.where((e) => e.statut == StatutEtablissement.rejete).toList();
+        break;
+      case 'En attente':
+        filtered = all
+            .where((e) => e.statut == StatutEtablissement.en_attente)
+            .toList();
+        break;
+      default:
+        filtered = List.from(all)
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+
+    return filtered.obs;
   }
-
-  return filtered.obs;
-}
 
   Future<String?> uploadEtablissementImage(XFile file) async {
     try {
@@ -128,7 +132,7 @@ RxList<Etablissement> get filteredEtablissements {
 
       final currentUser = userController.user.value;
       final etabWithOwner = e.copyWith(
-        owner: currentUser, // 🔥 Inclure l'owner immédiatement
+        owner: currentUser, // Inclure l'owner immédiatement
       );
 
       // Create in repo

@@ -21,13 +21,16 @@ class _SearchOverlayState extends State<SearchOverlay> {
   final ResearchController controller = Get.put(ResearchController());
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  bool _showFilters = true;
+  double _lastOffset = 0;
 
   @override
   void initState() {
     super.initState();
     controller.fetchAllProducts(reset: true);
-    
+
     _scrollController.addListener(() {
+      // Pagination logic
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 200 &&
           !controller.isPaginating.value &&
@@ -35,9 +38,22 @@ class _SearchOverlayState extends State<SearchOverlay> {
           controller.hasMore.value) {
         controller.fetchAllProducts();
       }
+
+      // Detect scroll direction
+      double currentOffset = _scrollController.offset;
+
+      if (currentOffset > _lastOffset + 10) {
+        // Scrolling down → hide filters
+        if (_showFilters) setState(() => _showFilters = false);
+      } else if (currentOffset < _lastOffset - 10) {
+        // Scrolling up → show filters
+        if (!_showFilters) setState(() => _showFilters = true);
+      }
+
+      _lastOffset = currentOffset;
     });
-    
-    // 🔥 Lier le controller de texte
+
+    // Lier le controller de texte
     _searchController.addListener(() {
       controller.onSearchChanged(_searchController.text);
     });
@@ -78,10 +94,12 @@ class _SearchOverlayState extends State<SearchOverlay> {
                     decoration: InputDecoration(
                       hintText: 'Rechercher un produit, établissement...',
                       hintStyle: const TextStyle(color: Colors.white70),
-                      prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                      prefixIcon:
+                          const Icon(Icons.search, color: Colors.white70),
                       suffixIcon: Obx(() => controller.query.value.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(Icons.close, color: Colors.white70),
+                              icon: const Icon(Icons.close,
+                                  color: Colors.white70),
                               onPressed: () {
                                 _searchController.clear();
                                 controller.clearSearch();
@@ -101,29 +119,51 @@ class _SearchOverlayState extends State<SearchOverlay> {
 
                   const SizedBox(height: 20),
 
-                  /// 🔥 AMÉLIORATION : Filtres actifs ---
-                  _buildActiveFilters(),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    transitionBuilder: (child, animation) {
+                      final slideAnimation = Tween<Offset>(
+                        begin: const Offset(0, -0.2),
+                        end: Offset.zero,
+                      ).animate(animation);
 
-                  const SizedBox(height: 16),
+                      final fadeAnimation = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeInOut,
+                      );
 
-                  /// --- Filtres --- ///
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: _buildCategoryFilter(),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _buildEtablissementFilter(),
-                      ),
-                    ],
+                      return FadeTransition(
+                        opacity: fadeAnimation,
+                        child: SlideTransition(
+                          position: slideAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _showFilters
+                        ? Column(
+                            key: const ValueKey('filtersVisible'),
+                            children: [
+                              _buildActiveFilters(),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(child: _buildCategoryFilter()),
+                                  const SizedBox(width: 10),
+                                  Expanded(child: _buildEtablissementFilter()),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              _buildSortFilter(),
+                              const SizedBox(height: 20),
+                            ],
+                          )
+                        : const SizedBox(key: ValueKey('filtersHidden')),
                   ),
-                  const SizedBox(height: 10),
-
-                  /// --- Tri --- ///
-                  _buildSortFilter(),
-                  const SizedBox(height: 20),
 
                   /// --- Product Grid (Scrollable Page) ---
                   Expanded(
@@ -148,7 +188,7 @@ class _SearchOverlayState extends State<SearchOverlay> {
     );
   }
 
-  // 🔥 NOUVEAU : Filtres actifs avec badges
+  // Filtres actifs avec badges
   Widget _buildActiveFilters() {
     return Obx(() {
       if (!controller.hasActiveFilters) return const SizedBox();
@@ -183,7 +223,8 @@ class _SearchOverlayState extends State<SearchOverlay> {
                   ),
                 if (controller.selectedEtablissement.value != null)
                   _buildFilterChip(
-                    label: 'Établissement: ${controller.selectedEtablissementName}',
+                    label:
+                        'Établissement: ${controller.selectedEtablissementName}',
                     onRemove: controller.clearEtablissementFilter,
                   ),
                 if (controller.selectedSort.value.isNotEmpty)
@@ -200,7 +241,8 @@ class _SearchOverlayState extends State<SearchOverlay> {
     });
   }
 
-  Widget _buildFilterChip({required String label, required VoidCallback onRemove}) {
+  Widget _buildFilterChip(
+      {required String label, required VoidCallback onRemove}) {
     return Chip(
       label: Text(
         label,
@@ -238,7 +280,7 @@ class _SearchOverlayState extends State<SearchOverlay> {
     );
   }
 
-  // 🔥 AMÉLIORATION : Filtre catégorie avec objets
+  // Filtre catégorie avec objets
   Widget _buildCategoryFilter() {
     return Obx(() => DropdownButtonFormField<CategoryModel>(
           value: controller.selectedCategory.value,
@@ -255,7 +297,7 @@ class _SearchOverlayState extends State<SearchOverlay> {
           items: [
             const DropdownMenuItem<CategoryModel>(
               value: null,
-              child: Text('Toutes les catégories', style: TextStyle(color: Colors.white70)),
+              child: Text('Toutes', style: TextStyle(color: Colors.white70)),
             ),
             ...controller.categories.map((category) {
               return DropdownMenuItem<CategoryModel>(
@@ -272,7 +314,7 @@ class _SearchOverlayState extends State<SearchOverlay> {
         ));
   }
 
-  // 🔥 AMÉLIORATION : Filtre établissement avec objets
+  // Filtre établissement avec objets
   Widget _buildEtablissementFilter() {
     return Obx(() => DropdownButtonFormField<Etablissement>(
           value: controller.selectedEtablissement.value,
@@ -289,7 +331,7 @@ class _SearchOverlayState extends State<SearchOverlay> {
           items: [
             const DropdownMenuItem<Etablissement>(
               value: null,
-              child: Text('Tous les établissements', style: TextStyle(color: Colors.white70)),
+              child: Text('Tous', style: TextStyle(color: Colors.white70)),
             ),
             ...controller.etablissements.map((etablissement) {
               return DropdownMenuItem<Etablissement>(
@@ -306,10 +348,12 @@ class _SearchOverlayState extends State<SearchOverlay> {
         ));
   }
 
-  // 🔥 AMÉLIORATION : Filtre tri
+  // Filtre tri
   Widget _buildSortFilter() {
     return Obx(() => DropdownButtonFormField<String>(
-          value: controller.selectedSort.value.isEmpty ? null : controller.selectedSort.value,
+          value: controller.selectedSort.value.isEmpty
+              ? null
+              : controller.selectedSort.value,
           decoration: const InputDecoration(
             labelText: 'Trier par',
             labelStyle: TextStyle(color: Colors.white70),
@@ -336,11 +380,12 @@ class _SearchOverlayState extends State<SearchOverlay> {
         ));
   }
 
-  // 🔥 AMÉLIORATION : Grille de produits
+  // Grille de produits
   Widget _buildProductGrid(double screenWidth) {
     return Obx(() {
       if (controller.isLoading.value && controller.searchResults.isEmpty) {
-        return const Center(child: CircularProgressIndicator(color: Colors.white));
+        return const Center(
+            child: CircularProgressIndicator(color: Colors.white));
       }
 
       if (controller.searchResults.isEmpty) {
@@ -351,7 +396,7 @@ class _SearchOverlayState extends State<SearchOverlay> {
         controller: _scrollController,
         child: Column(
           children: [
-            // 🔥 INFO : Nombre de résultats
+            // INFO : Nombre de résultats
             Container(
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 16),
@@ -368,8 +413,8 @@ class _SearchOverlayState extends State<SearchOverlay> {
                   ),
                   if (controller.hasActiveFilters)
                     InkWell(
-                      onTap: controller.debugFilters,
-                      child: const Icon(Icons.info_outline, size: 16, color: Colors.white70),
+                      child: const Icon(Icons.info_outline,
+                          size: 16, color: Colors.white70),
                     ),
                 ],
               ),
@@ -401,7 +446,7 @@ class _SearchOverlayState extends State<SearchOverlay> {
     });
   }
 
-  // 🔥 NOUVEAU : État vide amélioré
+  // État vide amélioré
   Widget _buildEmptyState() {
     return Center(
       child: Column(

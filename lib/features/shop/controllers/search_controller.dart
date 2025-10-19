@@ -16,12 +16,12 @@ class ResearchController extends GetxController {
   RxBool hasMore = true.obs;
   RxString query = ''.obs;
 
-  /// 🔥 AMÉLIORATION : Filtres avec objets complets
+  /// Filtres avec objets complets
   Rx<CategoryModel?> selectedCategory = Rx<CategoryModel?>(null);
   Rx<Etablissement?> selectedEtablissement = Rx<Etablissement?>(null);
   RxString selectedSort = ''.obs;
 
-  // 🔥 NOUVEAU : Listes complètes pour les filtres
+  // Listes complètes pour les filtres
   RxList<CategoryModel> categories = <CategoryModel>[].obs;
   RxList<Etablissement> etablissements = <Etablissement>[].obs;
 
@@ -36,10 +36,10 @@ class ResearchController extends GetxController {
     loadFilterData();
   }
 
-  // 🔥 AMÉLIORATION : Chargement des données de filtres
+  // Chargement des données de filtres
   Future<void> loadFilterData() async {
     try {
-      // 🔥 CORRECTION : Récupérer les objets complets avec IDs
+      // Récupérer les objets complets avec IDs
       final cats = await _repo.getAllCategoriesWithIds();
       final ets = await _repo.getAllEtablissementsWithIds();
 
@@ -92,11 +92,11 @@ class ResearchController extends GetxController {
     }
   }
 
-  /// 🔥 AMÉLIORATION : Filtrage combiné avec gestion des IDs
+  /// Filtrage combiné avec gestion des IDs
   void applyFilters() {
     List<ProduitModel> results = List.from(allProducts);
 
-    // 🔍 Recherche textuelle
+    // Recherche textuelle
     if (query.value.isNotEmpty) {
       results = results.where((p) {
         final name = p.name.toLowerCase();
@@ -109,41 +109,80 @@ class ResearchController extends GetxController {
       }).toList();
     }
 
-    // 🏷️ Filtre par catégorie (ID)
+    // Filtre par catégorie (ID)
     if (selectedCategory.value != null) {
       results = results
           .where((p) => p.categoryId == selectedCategory.value!.id)
           .toList();
     }
 
-    // 🏠 Filtre par établissement (ID)
+    // Filtre par établissement (ID)
     if (selectedEtablissement.value != null) {
       results = results
           .where((p) => p.etablissementId == selectedEtablissement.value!.id)
           .toList();
     }
 
-    // 🧮 Tri
+    // Tri
     switch (selectedSort.value) {
       case 'Prix ↑':
-        results.sort((a, b) => a.price.compareTo(b.price));
+        print('results $results');
+        results.sort(
+            (a, b) => _getEffectivePrice(a).compareTo(_getEffectivePrice(b)));
         break;
       case 'Prix ↓':
-        results.sort((a, b) => b.price.compareTo(a.price));
+        results.sort(
+            (a, b) => _getEffectivePrice(b).compareTo(_getEffectivePrice(a)));
         break;
       case 'Nom A-Z':
         results.sort((a, b) => a.name.compareTo(b.name));
         break;
       case 'Popularité':
-        results.sort((a, b) => (b.isFeatured == true ? 1 : 0)
-            .compareTo(a.isFeatured == true ? 1 : 0));
+        results.sort((a, b) {
+          final aScore = a.isFeatured == true ? 1 : 0;
+          final bScore = b.isFeatured == true ? 1 : 0;
+          return bScore.compareTo(aScore);
+        });
         break;
     }
 
     searchResults.assignAll(results);
   }
 
-  /// 🔥 NOUVEAU : Gestion des changements avec objets
+  double _getEffectivePrice(ProduitModel product) {
+    try {
+      // PRODUIT SIMPLE
+      if (product.productType == 'single') {
+        // Si promo active
+        if (product.salePrice > 0 && product.salePrice < product.price) {
+          return product.salePrice;
+        }
+        return product.price;
+      }
+
+      // PRODUIT AVEC VARIANTES / TAILLES
+      if (product.productType == 'variable' && product.sizesPrices.isNotEmpty) {
+        final prices = product.sizesPrices.map((e) => e.price).toList();
+        prices.sort();
+        final minPrice = prices.first;
+        final maxPrice = prices.last;
+
+        // Si toutes les tailles ont le même prix → un seul affichage
+        if (minPrice == maxPrice) {
+          return minPrice;
+        }
+
+        // Sinon prix miniumum
+        return minPrice;
+      }
+
+      return product.price;
+    } catch (e) {
+      return 0.00;
+    }
+  }
+
+  /// Gestion des changements avec objets
   void onSearchChanged(String text) {
     query.value = text;
     applyFilters();
@@ -164,7 +203,7 @@ class ResearchController extends GetxController {
     applyFilters();
   }
 
-  // 🔥 NOUVEAU : Méthodes pour retirer les filtres
+  // Méthodes pour retirer les filtres
   void clearSearch() {
     query.value = '';
     applyFilters();
@@ -193,7 +232,7 @@ class ResearchController extends GetxController {
     applyFilters();
   }
 
-  // 🔥 NOUVEAU : Vérifier si des filtres sont actifs
+  // Vérifier si des filtres sont actifs
   bool get hasActiveFilters {
     return query.value.isNotEmpty ||
         selectedCategory.value != null ||
@@ -201,21 +240,8 @@ class ResearchController extends GetxController {
         selectedSort.value.isNotEmpty;
   }
 
-  // 🔥 NOUVEAU : Getters pour l'affichage
+  // Getters pour l'affichage
   String get selectedCategoryName => selectedCategory.value?.name ?? '';
   String get selectedEtablissementName =>
       selectedEtablissement.value?.name ?? '';
-
-  // 🔥 NOUVEAU : Debug des filtres
-  void debugFilters() {
-    print('🔍 DEBUG FILTRES:');
-    print('  - Recherche: "${query.value}"');
-    print(
-        '  - Catégorie: ${selectedCategory.value?.name} (ID: ${selectedCategory.value?.id})');
-    print(
-        '  - Établissement: ${selectedEtablissement.value?.name} (ID: ${selectedEtablissement.value?.id})');
-    print('  - Tri: $selectedSort');
-    print('  - Produits totaux: ${allProducts.length}');
-    print('  - Résultats filtrés: ${searchResults.length}');
-  }
 }

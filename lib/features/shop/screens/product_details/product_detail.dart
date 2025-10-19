@@ -54,7 +54,7 @@ class ProductDetailScreen extends StatelessWidget {
                     ),
 
                     /// Attributes
-                    if (product.productType == ProductType.variable.toString())
+                    if (product.productType == 'variable')
                       TProductAttributes(product: product),
                     const SizedBox(
                       height: AppSizes.spaceBtwSections,

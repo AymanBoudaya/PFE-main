@@ -103,7 +103,7 @@ class CategoryModel {
     return CategoryModel(
       id: id,
       name: name,
-      image: 'assets/images/default_category.png', // 🔥 Valeur par défaut
+      image: 'assets/images/default_category.png', // Valeur par défaut
     );
   }
 }

@@ -395,7 +395,7 @@ class ProduitController extends GetxController {
   String getProductPrice(ProduitModel product) {
     try {
       // PRODUIT SIMPLE
-      if (product.productType == ProductType.single.toString()) {
+      if (product.productType == 'single') {
         // Si promo active
         if (product.salePrice > 0 && product.salePrice < product.price) {
           return "${product.salePrice.toStringAsFixed(2)}";
@@ -416,7 +416,7 @@ class ProduitController extends GetxController {
         }
 
         // Sinon afficher une plage
-        return "${minPrice.toStringAsFixed(2)} - ${maxPrice.toStringAsFixed(2)}";
+        return "à partir de ${minPrice.toStringAsFixed(2)}";
       }
 
       return "${product.price.toStringAsFixed(2)}";
