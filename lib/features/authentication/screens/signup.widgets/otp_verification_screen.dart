@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:caferesto/utils/device/device_utility.dart';
 
@@ -62,60 +63,115 @@ class OTPVerificationScreen extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          'Entrez le code reçu à l’adresse $email',
+          'Entrez le code reçu à l\'adresse $email',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 40),
 
-        /// OTP Fields
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: List.generate(6, (index) {
-            return SizedBox(
-              width: 50,
-              height: 60,
-              child: TextField(
-                maxLength: 1,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  counterText: "",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onChanged: (val) {
-                  if (val.isNotEmpty) {
-                    final text = controller.otpController.text;
-                    final newText = text.padRight(6, ' ');
-                    controller.otpController.text =
-                        newText.replaceRange(index, index + 1, val);
-                    if (index < 5) FocusScope.of(context).nextFocus();
-                  }
-                },
+        /// 🔥 CHAMP OTP UNIQUE
+        SizedBox(
+          width: 200,
+          child: TextField(
+            controller: controller.singleOtpController,
+            maxLength: 6,
+            keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 2,
+            ),
+            decoration: InputDecoration(
+              counterText: "",
+              hintText: '000000',
+              hintStyle: TextStyle(
+                color: Colors.grey.shade400,
+                letterSpacing: 2,
               ),
-            );
-          }),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                ),
+              ),
+              filled: true,
+              fillColor: isDark ? Colors.grey.shade800 : Colors.grey.shade50,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+            // 🔥 EMPÊCHER LA SAISIE DE CARACTÈRES NON NUMÉRIQUES
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(6),
+            ],
+            // 🔥 VALIDER EN TEMPS RÉEL
+            onChanged: (value) {
+              controller.validateOTPInput(value);
+            },
+          ),
         ),
+        const SizedBox(height: 8),
+
+        // 🔥 INDICATEUR DE VALIDATION
+        Obx(() {
+          final length = controller.otpInput.value.length;
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(6, (index) {
+              final isFilled = index < length;
+              final isValid = controller.isOtpValid.value;
+
+              return Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isFilled
+                      ? (isValid ? Colors.green : Colors.orange)
+                      : Colors.grey.shade400,
+                ),
+              );
+            }),
+          );
+        }),
+
         const SizedBox(height: 30),
 
-        /// Bouton vérification
+        /// 🔥 BOUTON VÉRIFICATION AVEC VALIDATION
         Obx(
           () => SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: controller.isLoading.value
-                  ? null
-                  : () => controller.verifyOTP(),
+              onPressed:
+                  controller.isOtpValid.value && !controller.isLoading.value
+                      ? () => controller.verifyOTP()
+                      : null,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               child: controller.isLoading.value
                   ? const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(isSignupFlow ? 'Créer le compte' : 'Se connecter'),
+                  : Text(
+                      isSignupFlow ? 'Créer le compte' : 'Se connecter',
+                      style: const TextStyle(fontSize: 16),
+                    ),
             ),
           ),
         ),

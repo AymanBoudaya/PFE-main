@@ -12,7 +12,10 @@ class OTPVerificationController extends GetxController {
 
   /// Champs liés à l’OTP
   final emailController = TextEditingController();
-  final otpController = TextEditingController();
+  final TextEditingController singleOtpController = TextEditingController();
+
+  final RxString otpInput = ''.obs;
+  final RxBool isOtpValid = false.obs;
 
   /// Timer & état
   final secondsRemaining = 60.obs;
@@ -22,12 +25,32 @@ class OTPVerificationController extends GetxController {
   final isLoading = false.obs;
   final RxBool isSignupFlow = true.obs;
   Map<String, dynamic> userData = {};
+
+  void onInit() {
+    super.onInit();
+
+    // 🔥 ÉCOUTEUR POUR LE CHAMP OTP UNIQUE
+    singleOtpController.addListener(() {
+      final text = singleOtpController.text;
+      otpInput.value = text;
+      validateOTPInput(text);
+    });
+  }
+
   @override
   void onClose() {
     _timer?.cancel();
     emailController.dispose();
-    otpController.dispose();
+    singleOtpController.dispose();
     super.onClose();
+  }
+
+  void validateOTPInput(String input) {
+    // Vérifier que c'est exactement 6 chiffres
+    final isSixDigits = input.length == 6;
+    final isAllNumeric = RegExp(r'^[0-9]+$').hasMatch(input);
+
+    isOtpValid.value = isSixDigits && isAllNumeric;
   }
 
   /// Lancer un compte à rebours de 60 secondes
@@ -57,7 +80,7 @@ class OTPVerificationController extends GetxController {
       isLoading.value = true;
 
       final email = emailController.text.trim();
-      final otp = otpController.text.trim();
+      final otp = singleOtpController.text.trim();
 
       if (email.isEmpty || otp.isEmpty) {
         TLoaders.warningSnackBar(
