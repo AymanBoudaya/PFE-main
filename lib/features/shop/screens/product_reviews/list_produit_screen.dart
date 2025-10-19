@@ -379,7 +379,7 @@ class _ListProduitScreenState extends State<ListProduitScreen> {
             ),
           ),
 
-        // 🔹 AFFICHAGE DES PRIX AVEC PROMOTION SI APPLICABLE
+        // AFFICHAGE DES PRIX AVEC PROMOTION SI APPLICABLE
         _buildPriceDisplay(produit),
         const SizedBox(height: 4),
 
@@ -416,7 +416,7 @@ class _ListProduitScreenState extends State<ListProduitScreen> {
   // AFFICHAGE DES PRIX
   Widget _buildPriceDisplay(ProduitModel produit) {
     // Si le produit est de type single ET a un prix soldé
-    if (produit.productType == ProductType.single.toString() &&
+    if (produit.productType == 'single' &&
         produit.salePrice > 0 &&
         produit.salePrice < produit.price) {
       return Column(

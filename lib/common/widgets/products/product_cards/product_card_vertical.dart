@@ -156,7 +156,7 @@ class ProductCardVertical extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   BrandTitleWithVerifiedIcon(
-                    title: product.etablissement?.name ?? '',
+                    title: product.etablissement?.name ?? 'null',
                     textColor: dark ? Colors.white70 : Colors.grey[700],
                   ),
                   const SizedBox(height: AppSizes.spaceBtwItems / 2),

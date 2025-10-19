@@ -65,7 +65,6 @@ class OrderModel {
   /// Converts Dart model → JSON (for Supabase insert/update)
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'user_id': userId,
       'status': status.name,
       'total_amount': totalAmount,

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../utils/constants/enums.dart';
 import '../../../../utils/popups/loaders.dart';
 import '../etablissement_controller.dart';
 

@@ -15,15 +15,13 @@ class AddressRepository extends GetxController {
         throw ('Unable to find user information. Try again in few minutes');
       }
 
-      final response = await supabase
-          .from('addresses')
-          .select()
-          .eq('user_id', userId);
+      final response =
+          await supabase.from('addresses').select().eq('user_id', userId);
 
       // response is List<dynamic>
       final data = response as List<dynamic>;
       return data
-          .map((row) => AddressModel.fromMap(row as Map<String, dynamic>))
+          .map((row) => AddressModel.fromJson(row as Map<String, dynamic>))
           .toList();
     } catch (e) {
       throw 'Something went wrong while fetching address information, try again later';

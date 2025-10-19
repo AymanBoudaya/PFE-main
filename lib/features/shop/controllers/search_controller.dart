@@ -127,12 +127,12 @@ class ResearchController extends GetxController {
     switch (selectedSort.value) {
       case 'Prix ↑':
         print('results $results');
-        results.sort(
-            (a, b) => _getEffectivePrice(a).compareTo(_getEffectivePrice(b)));
+        results.sort((a, b) =>
+            _getEffectivePrice(a).compareTo(_getEffectivePrice(b)));
         break;
       case 'Prix ↓':
-        results.sort(
-            (a, b) => _getEffectivePrice(b).compareTo(_getEffectivePrice(a)));
+        results.sort((a, b) =>
+            _getEffectivePrice(b).compareTo(_getEffectivePrice(a)));
         break;
       case 'Nom A-Z':
         results.sort((a, b) => a.name.compareTo(b.name));

@@ -27,25 +27,25 @@ class TProductMetaData extends StatelessWidget {
         Row(
           children: [
             /// Sale tag
-            TRoundedContainer(
-              radius: AppSizes.sm,
-              backgroundColor:
-                  AppColors.secondary.withAlpha((255 * 0.8).toInt()),
-              padding: const EdgeInsets.symmetric(
-                  vertical: AppSizes.xs, horizontal: AppSizes.sm),
-              child: Text(
-                'Remise : $salePercentage% !',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge!
-                    .apply(color: AppColors.black),
-              ),
-            ),
+            salePercentage != null
+                ? TRoundedContainer(
+                    radius: AppSizes.sm,
+                    backgroundColor:
+                        AppColors.secondary.withAlpha((255 * 0.8).toInt()),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: AppSizes.xs, horizontal: AppSizes.sm),
+                    child: Text(
+                      'Remise : $salePercentage% !',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge!
+                          .apply(color: AppColors.black),
+                    ))
+                : SizedBox(),
             const SizedBox(width: AppSizes.spaceBtwItems),
 
             /// Price
-            if (product.productType == ProductType.single.toString() &&
-                product.salePrice > 0)
+            if (product.productType == 'single' && product.salePrice > 0)
               Text(
                 '${product.price} DT',
                 style: Theme.of(context)
@@ -53,8 +53,7 @@ class TProductMetaData extends StatelessWidget {
                     .titleSmall!
                     .apply(decoration: TextDecoration.lineThrough),
               ),
-            if (product.productType == ProductType.single.toString() &&
-                product.salePrice > 0)
+            if (product.productType == 'single' && product.salePrice > 0)
               const SizedBox(width: AppSizes.spaceBtwItems),
             ProductPriceText(
               price: controller.getProductPrice(product),
@@ -86,12 +85,13 @@ class TProductMetaData extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             /// Safe Circular Image with fallback and layout-safe wrapping
-            if (product.etablissementId != null /*&& product.etablissementId!.image.isNotEmpty*/)
+            if (product.etablissementId !=
+                null /*&& product.etablissementId!.image.isNotEmpty*/)
               LayoutBuilder(
                 builder: (context, constraints) {
                   return ClipOval(
                     child: Image.network(
-                      product.etablissementId,//.image,
+                      product.etablissement?.imageUrl ?? '', //.image,
                       width: 32,
                       height: 32,
                       fit: BoxFit.cover,
@@ -142,7 +142,7 @@ class TProductMetaData extends StatelessWidget {
             /// Brand title with optional verified icon
             Expanded(
               child: BrandTitleWithVerifiedIcon(
-                title: product.etablissementId,//?.name ?? 'Sans marque',
+                title: product.etablissement?.name ?? 'Inconnu',
                 brandTextSize: TexAppSizes.medium,
               ),
             ),

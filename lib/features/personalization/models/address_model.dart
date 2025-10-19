@@ -1,5 +1,4 @@
-import 'package:caferesto/utils/formatters/formatter.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../utils/formatters/formatter.dart';
 
 class AddressModel {
   String id;
@@ -12,6 +11,8 @@ class AddressModel {
   final String country;
   final DateTime? dateTime;
   bool selectedAddress;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   AddressModel({
     required this.id,
@@ -24,6 +25,8 @@ class AddressModel {
     required this.country,
     this.dateTime,
     this.selectedAddress = true,
+    this.createdAt,
+    this.updatedAt,
   });
 
   String get formattedPhoneNo => TFormatter.formatPhoneNumber(phoneNumber);
@@ -43,16 +46,18 @@ class AddressModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'Id': id,
-      'Name': name,
-      'PhoneNumber': phoneNumber,
-      'Street': street,
-      'City': city,
-      'State': state,
-      'PostalCode': postalCode,
-      'Country': country,
-      'DateTime': DateTime.now(),
-      'SelectedAddress': selectedAddress,
+      'id': id,
+      'name': name,
+      'phone_number': phoneNumber, // ✅ snake_case
+      'street': street,
+      'city': city,
+      'state': state,
+      'postal_code': postalCode, // ✅ snake_case
+      'country': country,
+      'date_time': dateTime?.toIso8601String(), // ✅ snake_case
+      'selected_address': selectedAddress, // ✅ snake_case
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
 
@@ -60,36 +65,46 @@ class AddressModel {
     if (data.isEmpty) return AddressModel.empty();
 
     return AddressModel(
-      id: data['Id'] ?? '',
-      name: data['Name'] ?? '',
-      phoneNumber: data['PhoneNumber'] ?? '',
-      street: data['Street'] ?? '',
-      city: data['City'] ?? '',
-      state: data['State'] ?? '',
-      postalCode: data['PostalCode'] ?? '',
-      country: data['Country'] ?? '',
-      dateTime: (data['DateTime'] as Timestamp).toDate(),
-      selectedAddress: data['SelectedAddress'] ?? false,
+      id: data['id'] ?? '',
+      name: data['name'] ?? '',
+      phoneNumber: data['phone_number'] ?? '', // ✅ snake_case
+      street: data['street'] ?? '',
+      city: data['city'] ?? '',
+      state: data['state'] ?? '',
+      postalCode: data['postal_code'] ?? '', // ✅ snake_case
+      country: data['country'] ?? '',
+      dateTime: data['date_time'] != null
+          ? DateTime.parse(data['date_time'] as String) // ✅ snake_case
+          : null,
+      selectedAddress: data['selected_address'] ?? false, // ✅ snake_case
+      createdAt: data['created_at'] != null
+          ? DateTime.parse(data['created_at'] as String)
+          : null,
+      updatedAt: data['updated_at'] != null
+          ? DateTime.parse(data['updated_at'] as String)
+          : null,
     );
   }
 
   factory AddressModel.fromMap(Map<String, dynamic> data) {
     return AddressModel(
-      id: data['Id']?.toString() ?? '',
-      name: data['Name'] ?? '',
-      phoneNumber: data['PhoneNumber'] ?? '',
-      street: data['Street'] ?? '',
-      city: data['City'] ?? '',
-      state: data['State'] ?? '',
-      postalCode: data['PostalCode'] ?? '',
-      country: data['Country'] ?? '',
-      dateTime: (data['DateTime'] as Timestamp).toDate(),
-      selectedAddress: data['SelectedAddress'] ?? false,
+      id: data['id']?.toString() ?? '',
+      name: data['name'] ?? '',
+      phoneNumber: data['phone_number'] ?? '', // ✅ snake_case
+      street: data['street'] ?? '',
+      city: data['city'] ?? '',
+      state: data['state'] ?? '',
+      postalCode: data['postal_code'] ?? '', // ✅ snake_case
+      country: data['country'] ?? '',
+      dateTime: data['date_time'] != null
+          ? DateTime.parse(data['date_time'] as String) // ✅ snake_case
+          : null,
+      selectedAddress: data['selected_address'] ?? false, // ✅ snake_case
     );
   }
 
   @override
   String toString() {
-    return '$street, $city, $state, $postalCode, $country)';
+    return '$street, $city, $state, $postalCode, $country';
   }
 }

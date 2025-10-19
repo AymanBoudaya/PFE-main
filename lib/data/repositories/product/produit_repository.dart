@@ -70,7 +70,7 @@ class ProduitRepository extends GetxController {
 
     final response = await _db
         .from(_table)
-        .select('*')
+        .select('*, etablissement:etablissement_id(*)')
         .order('created_at', ascending: false)
         .range(from, to);
 
