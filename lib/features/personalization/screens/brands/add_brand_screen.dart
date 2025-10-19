@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:caferesto/utils/constants/colors.dart';
@@ -6,6 +5,8 @@ import 'package:caferesto/utils/constants/sizes.dart';
 import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,6 +18,7 @@ import '../../../shop/controllers/etablissement_controller.dart';
 import '../../../shop/models/etablissement_model.dart';
 import '../../controllers/user_controller.dart';
 import '../categories/widgets/category_form_widgets.dart';
+import 'map_picker_screen.dart';
 
 class AddEtablissementScreen extends StatefulWidget {
   const AddEtablissementScreen({super.key});
@@ -36,6 +38,101 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
   final EtablissementController _controller =
       EtablissementController(EtablissementRepository());
   final UserController userController = Get.find<UserController>();
+// Add these variables
+  String _selectedAddressFromMap = '';
+
+// Add these methods
+  Future<void> _selectLocationFromMap() async {
+    try {
+      final double? currentLat = _latitudeController.text.isNotEmpty
+          ? double.tryParse(_latitudeController.text)
+          : null;
+      final double? currentLng = _longitudeController.text.isNotEmpty
+          ? double.tryParse(_longitudeController.text)
+          : null;
+
+      final result = await Get.to(() => MapPickerScreen(
+            initialLatitude: currentLat,
+            initialLongitude: currentLng,
+          ));
+
+      if (result != null) {
+        setState(() {
+          _latitudeController.text = result['latitude'].toStringAsFixed(6);
+          _longitudeController.text = result['longitude'].toStringAsFixed(6);
+          _selectedAddressFromMap = result['address'] ?? '';
+
+          // Also update the address field if it's empty
+          if (_addressController.text.isEmpty &&
+              _selectedAddressFromMap.isNotEmpty) {
+            _addressController.text = _selectedAddressFromMap;
+          }
+        });
+      }
+    } catch (e) {
+      print('Error selecting location from map: $e');
+      TLoaders.errorSnackBar(
+          message: 'Erreur lors de la sélection sur la carte: $e');
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      TLoaders.infoSnackBar(message: 'Obtention de votre position...');
+
+      // Check permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          TLoaders.errorSnackBar(
+              message: 'Permissions de localisation refusées');
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        TLoaders.errorSnackBar(
+          message:
+              'Permissions de localisation définitivement refusées. Activez-les dans les paramètres.',
+        );
+        return;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Get address from coordinates
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      setState(() {
+        _latitudeController.text = position.latitude.toStringAsFixed(6);
+        _longitudeController.text = position.longitude.toStringAsFixed(6);
+
+        if (placemarks.isNotEmpty) {
+          Placemark place = placemarks.first;
+          _selectedAddressFromMap =
+              '${place.street ?? ''}, ${place.postalCode ?? ''} ${place.locality ?? ''}, ${place.country ?? ''}';
+
+          // Update address field
+          if (_addressController.text.isEmpty) {
+            _addressController.text = _selectedAddressFromMap;
+          }
+        }
+      });
+
+      TLoaders.successSnackBar(message: 'Localisation actuelle récupérée');
+    } catch (e) {
+      print('Error getting current location: $e');
+      TLoaders.errorSnackBar(
+          message: 'Erreur lors de l\'obtention de la localisation: $e');
+    }
+  }
 
   bool _isLoading = false;
   XFile? _selectedImage;
@@ -282,6 +379,48 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
   }
 
   // Section coordonnées GPS
+  // Widget _buildCoordinatesSection(double width) {
+  //   final isWide = width >= 900;
+
+  //   return CategoryFormCard(children: [
+  //     const Text('Coordonnées GPS',
+  //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+  //     const SizedBox(height: 12),
+  //     Row(
+  //       children: [
+  //         Expanded(
+  //           child: TextFormField(
+  //             controller: _latitudeController,
+  //             decoration: const InputDecoration(
+  //               labelText: 'Latitude',
+  //               border: OutlineInputBorder(),
+  //               prefixIcon: Icon(Icons.explore_outlined),
+  //             ),
+  //             keyboardType: TextInputType.numberWithOptions(decimal: true),
+  //           ),
+  //         ),
+  //         const SizedBox(width: 16),
+  //         Expanded(
+  //           child: TextFormField(
+  //             controller: _longitudeController,
+  //             decoration: const InputDecoration(
+  //               labelText: 'Longitude',
+  //               border: OutlineInputBorder(),
+  //               prefixIcon: Icon(Icons.explore_outlined),
+  //             ),
+  //             keyboardType: TextInputType.numberWithOptions(decimal: true),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //     const SizedBox(height: 8),
+  //     Text(
+  //       'Les coordonnées GPS sont optionnelles - utilisées pour la géolocalisation',
+  //       style: Theme.of(context).textTheme.bodySmall,
+  //     ),
+  //   ]);
+  // }
+
   Widget _buildCoordinatesSection(double width) {
     final isWide = width >= 900;
 
@@ -289,6 +428,37 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
       const Text('Coordonnées GPS',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       const SizedBox(height: 12),
+
+      // Location selection buttons
+      Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: _selectLocationFromMap,
+              icon: const Icon(Icons.map),
+              label: const Text('Sélectionner sur la carte'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: _getCurrentLocation,
+              icon: const Icon(Icons.my_location),
+              label: const Text('Ma position'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                backgroundColor: Colors.blueGrey,
+              ),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 16),
+
+      // Coordinates display (read-only)
       Row(
         children: [
           Expanded(
@@ -298,7 +468,9 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
                 labelText: 'Latitude',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.explore_outlined),
+                suffixIcon: Icon(Icons.lock), // Show it's read-only
               ),
+              readOnly: true, // Make it read-only
               keyboardType: TextInputType.numberWithOptions(decimal: true),
             ),
           ),
@@ -310,15 +482,41 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
                 labelText: 'Longitude',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.explore_outlined),
+                suffixIcon: Icon(Icons.lock), // Show it's read-only
               ),
+              readOnly: true, // Make it read-only
               keyboardType: TextInputType.numberWithOptions(decimal: true),
             ),
           ),
         ],
       ),
       const SizedBox(height: 8),
+
+      // Selected address display
+      if (_selectedAddressFromMap.isNotEmpty) ...[
+        Card(
+          color: Colors.blue[50],
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                const Icon(Icons.location_on, color: Colors.blue, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _selectedAddressFromMap,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+
       Text(
-        'Les coordonnées GPS sont optionnelles - utilisées pour la géolocalisation',
+        'Utilisez les boutons ci-dessus pour sélectionner la localisation',
         style: Theme.of(context).textTheme.bodySmall,
       ),
     ]);

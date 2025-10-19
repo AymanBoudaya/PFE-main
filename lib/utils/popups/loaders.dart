@@ -47,6 +47,21 @@ class TLoaders {
     );
   }
 
+    static infoSnackBar({title = 'Info', message = '', duration = 2}) {
+    Get.snackbar(
+      title,
+      message,
+      isDismissible: true,
+      shouldIconPulse: true,
+      colorText: Colors.white,
+      backgroundColor: Colors.lightGreenAccent,
+      snackPosition: SnackPosition.TOP,
+      duration: Duration(seconds: duration),
+      margin: const EdgeInsets.all(10),
+      icon: const Icon(Iconsax.check, color: AppColors.white),
+    );
+  }
+
   static warningSnackBar({title = 'Avertissement', message = ''}) {
     Get.snackbar(
       title,

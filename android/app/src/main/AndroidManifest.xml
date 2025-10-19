@@ -1,10 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:label="cmandi_supabase"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="com.google.android.geo.AIzaSyAFLwZx76YapcRGASTIuKv5kSkhRDfbOs4"
+            android:value="AIzaSyAFLwZx76YapcRGASTIuKv5kSkhRDfbOs4"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -65,7 +65,9 @@ dependencies:
   image_picker: ^1.2.0
   file_picker: ^8.0.0
   mime: ^1.0.4
-
+  google_maps_flutter: ^2.2.3
+  geolocator: ^9.0.2
+  geocoding: ^2.0.5
   # Firebase
   #firebase_core:
   #firebase_auth:

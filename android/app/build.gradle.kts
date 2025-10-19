@@ -23,7 +23,7 @@ android {
         applicationId = "com.example.cmandi_supabase"
 
         // Override ici
-        minSdk = 23 // minimum requis par plusieurs plugins
+        minSdk = flutter.minSdkVersion // minimum requis par plusieurs plugins
         targetSdk = flutter.targetSdkVersion
 
         versionCode = flutter.versionCode
