@@ -178,7 +178,7 @@ class EtablissementRepository {
       // Convert the result into a list of ProductModel
       final produits =
           (response as List).map((p) => ProduitModel.fromJson(p)).toList();
-
+      print('produits $produits');
       return produits;
     } catch (e) {
       print('Erreur getProduitsEtablissement: $e');

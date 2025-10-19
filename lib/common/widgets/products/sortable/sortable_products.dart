@@ -20,7 +20,6 @@ class TSortableProducts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = AllProductsController.instance;
-    controller.assignProducts(products);
     final screenWidth = MediaQuery.of(context).size.width;
     return Column(
       children: [
@@ -46,9 +45,9 @@ class TSortableProducts extends StatelessWidget {
         /// Products
         Obx(
           () => GridLayout(
-            itemCount: controller.products.length,
+            itemCount: controller.brandProducts.length,
             itemBuilder: (_, index) =>
-                ProductCardVertical(product: controller.products[index]),
+                ProductCardVertical(product: controller.brandProducts[index]),
             crossAxisCount: TDeviceUtils.getCrossAxisCount(screenWidth),
             mainAxisExtent: TDeviceUtils.getMainAxisExtent(screenWidth),
           ),

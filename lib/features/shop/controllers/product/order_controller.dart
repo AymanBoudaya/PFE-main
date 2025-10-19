@@ -5,7 +5,6 @@ import '../../../../common/widgets/success_screen/success_screen.dart';
 import '../../../../data/repositories/authentication/authentication_repository.dart';
 import '../../../../data/repositories/order/order_repository.dart';
 import '../../../../navigation_menu.dart';
-import '../../../../utils/constants/enums.dart' hide OrderStatus;
 import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../../utils/popups/loaders.dart';

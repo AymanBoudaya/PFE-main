@@ -125,7 +125,7 @@ class ProduitController extends GetxController {
         // Gérant ne voit que ses propres produits
         final etablissementId = await getEtablissementIdUtilisateur();
         if (etablissementId != null) {
-          final products = await getProductsByEtablissement(etablissementId);
+          final products = await fetchProductsByEtablissement(etablissementId);
           allProducts.assignAll(products);
           filteredProducts.assignAll(products);
         } else {
@@ -166,7 +166,7 @@ class ProduitController extends GetxController {
     }
   }
 
-  Future<List<ProduitModel>> getProductsByEtablissement(
+  Future<List<ProduitModel>> fetchProductsByEtablissement(
       String etablissementId) async {
     try {
       return await produitRepository
