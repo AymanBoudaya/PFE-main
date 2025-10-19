@@ -192,6 +192,7 @@ class ProductCardVertical extends StatelessWidget {
                                     ),
                           ),
                         ProductPriceText(
+                          variable: product.productType == 'variable',
                           price: controller.getProductPrice(product),
                           isLarge: false,
                         ),

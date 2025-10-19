@@ -145,7 +145,7 @@ class TDeviceUtils {
   /// Détermine la hauteur des éléments selon la largeur de l'écran
   static double getMainAxisExtent(double screenWidth) {
     if (screenWidth < 480) {
-      return 280; // Mobile petit
+      return 300; // Mobile petit
     } else if (screenWidth < 768) {
       return 300; // Mobile large / tablette petite
     } else if (screenWidth < 1024) {

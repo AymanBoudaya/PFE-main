@@ -292,12 +292,17 @@ class _SearchOverlayState extends State<SearchOverlay> {
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
+          isExpanded: true,
           dropdownColor: Colors.black87,
           style: const TextStyle(color: Colors.white, fontSize: 14),
           items: [
             const DropdownMenuItem<CategoryModel>(
               value: null,
-              child: Text('Toutes', style: TextStyle(color: Colors.white70)),
+              child: Text(
+                'Toutes les catégories',
+                style: TextStyle(color: Colors.white70),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             ...controller.categories.map((category) {
               return DropdownMenuItem<CategoryModel>(
@@ -327,11 +332,16 @@ class _SearchOverlayState extends State<SearchOverlay> {
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
           dropdownColor: Colors.black87,
+          isExpanded: true,
           style: const TextStyle(color: Colors.white, fontSize: 14),
           items: [
             const DropdownMenuItem<Etablissement>(
               value: null,
-              child: Text('Tous', style: TextStyle(color: Colors.white70)),
+              child: Text(
+                'Tous les établissements',
+                style: TextStyle(color: Colors.white70),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             ...controller.etablissements.map((etablissement) {
               return DropdownMenuItem<Etablissement>(

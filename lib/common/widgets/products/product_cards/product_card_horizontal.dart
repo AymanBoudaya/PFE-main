@@ -229,7 +229,6 @@ class TProductCardHorizontal extends StatelessWidget {
     );
   }
 
-  /// Méthode pour construire l'image du produit (identique à ProductCardVertical)
   Widget _buildProductImage() {
     // Si l'URL de l'image commence par http, c'est une image réseau
     if (product.imageUrl != null &&

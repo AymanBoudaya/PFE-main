@@ -416,7 +416,7 @@ class ProduitController extends GetxController {
         }
 
         // Sinon afficher une plage
-        return "à partir de ${minPrice.toStringAsFixed(2)}";
+        return "${minPrice.toStringAsFixed(2)}";
       }
 
       return "${product.price.toStringAsFixed(2)}";

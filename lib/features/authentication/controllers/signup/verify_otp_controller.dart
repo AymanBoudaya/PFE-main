@@ -29,7 +29,7 @@ class OTPVerificationController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // 🔥 ÉCOUTEUR POUR LE CHAMP OTP UNIQUE
+    // ÉCOUTEUR POUR LE CHAMP OTP UNIQUE
     singleOtpController.addListener(() {
       final text = singleOtpController.text;
       otpInput.value = text;

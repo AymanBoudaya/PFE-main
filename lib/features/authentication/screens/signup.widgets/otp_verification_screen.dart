@@ -68,7 +68,7 @@ class OTPVerificationScreen extends StatelessWidget {
         ),
         const SizedBox(height: 40),
 
-        /// 🔥 CHAMP OTP UNIQUE
+        /// CHAMP OTP UNIQUE
         SizedBox(
           width: 200,
           child: TextField(
@@ -108,12 +108,12 @@ class OTPVerificationScreen extends StatelessWidget {
                 vertical: 14,
               ),
             ),
-            // 🔥 EMPÊCHER LA SAISIE DE CARACTÈRES NON NUMÉRIQUES
+            // EMPÊCHER LA SAISIE DE CARACTÈRES NON NUMÉRIQUES
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(6),
             ],
-            // 🔥 VALIDER EN TEMPS RÉEL
+            // VALIDER EN TEMPS RÉEL
             onChanged: (value) {
               controller.validateOTPInput(value);
             },
@@ -121,7 +121,7 @@ class OTPVerificationScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
 
-        // 🔥 INDICATEUR DE VALIDATION
+        // INDICATEUR DE VALIDATION
         Obx(() {
           final length = controller.otpInput.value.length;
           return Row(
@@ -147,7 +147,7 @@ class OTPVerificationScreen extends StatelessWidget {
 
         const SizedBox(height: 30),
 
-        /// 🔥 BOUTON VÉRIFICATION AVEC VALIDATION
+        /// BOUTON VÉRIFICATION AVEC VALIDATION
         Obx(
           () => SizedBox(
             width: double.infinity,
