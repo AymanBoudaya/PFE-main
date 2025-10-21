@@ -127,6 +127,16 @@ class EtablissementController extends GetxController {
       if (!_hasPermissionForAction('création')) {
         return null;
       }
+      if (_isUserGerant()) {
+        final canCreate =
+            await repo.canUserCreateEtablissement(userController.user.value.id);
+        if (!canCreate) {
+          TLoaders.errorSnackBar(
+              title: 'Limitation',
+              message: 'Vous ne pouvez créer qu\'un seul établissement');
+          return null;
+        }
+      }
 
       isLoading.value = true;
 

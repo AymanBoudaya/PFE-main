@@ -185,4 +185,19 @@ class EtablissementRepository {
       rethrow;
     }
   }
+
+  Future<bool> canUserCreateEtablissement(String userId) async {
+    try {
+      final response = await _db
+          .from('etablissements')
+          .select('id')
+          .eq('id_owner', userId)
+          .limit(1);
+
+      return response.isEmpty; // true si l'utilisateur n'a pas d'établissement
+    } catch (e) {
+      print('Erreur vérification établissement: $e');
+      return false;
+    }
+  }
 }

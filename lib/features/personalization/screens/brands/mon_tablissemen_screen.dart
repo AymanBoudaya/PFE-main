@@ -128,19 +128,22 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
             const SizedBox(height: 12),
 
             // 🔹 Filtres stylés avec ChoiceChip
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: [
-                  _buildFilterChip('Récents'),
-                  _buildFilterChip('Approuvés'),
-                  _buildFilterChip('Rejetés'),
-                  _buildFilterChip('En attente'),
-                ],
+            if (_userRole == 'Admin') ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    _buildFilterChip('Récents'),
+                    _buildFilterChip('Approuvés'),
+                    _buildFilterChip('Rejetés'),
+                    _buildFilterChip('En attente'),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(height: 12),
+            ],
 
             const SizedBox(height: 12),
 
@@ -155,7 +158,9 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
                         return _buildEtablissementCard(e, index);
                       },
                     )
-                  : _buildNoResultsState(_controller.selectedFilter.value),
+                  : _userRole == 'Gérant'
+                      ? _buildEmptyState() // <- Message "Vous n'avez pas d'établissement"
+                      : _buildNoResultsState(_controller.selectedFilter.value),
             ),
           ],
         ),
@@ -208,28 +213,35 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   }
 
   Widget _buildFloatingActionButton() {
-    // Gérant ne peut créer qu'un seul établissement
-    if (_userRole == 'Gérant' && _controller.etablissements.isNotEmpty) {
-      return const SizedBox();
-    }
+    return Obx(() {
+      // Si chargement => ne rien afficher pour éviter glitch visuel
+      if (_controller.isLoading.value) return const SizedBox();
 
-    if (_userRole == 'Gérant') {
-      return FloatingActionButton(
-        onPressed: () async {
-          final result = await Get.to(() => AddEtablissementScreen());
-          if (result == true) {
-            await _chargerEtablissements();
-          }
-        },
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add, size: 28),
-      );
-    } else {
+      // Gérant ne peut créer qu'un seul établissement
+      if (_userRole == 'Gérant' && _controller.etablissements.isNotEmpty) {
+        return const SizedBox();
+      }
+
+      // Afficher le bouton si le gérant n’a pas encore créé d’établissement
+      if (_userRole == 'Gérant') {
+        return FloatingActionButton(
+          onPressed: () async {
+            final result = await Get.to(() => AddEtablissementScreen());
+            if (result == true) {
+              await _chargerEtablissements();
+            }
+          },
+          backgroundColor: Colors.blue.shade600,
+          foregroundColor: Colors.white,
+          elevation: 4,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: const Icon(Icons.add, size: 28),
+        );
+      }
+
       return const SizedBox();
-    }
+    });
   }
 
   Widget _buildLoadingState() {
@@ -299,7 +311,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
           Text(
             _userRole == 'Admin'
                 ? "Les établissements apparaîtront ici une fois créés"
-                : "Commencez par créer votre premier établissement",
+                : "Commencez par créer votre établissement",
             style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
           if (_userRole == 'Gérant') ...[
