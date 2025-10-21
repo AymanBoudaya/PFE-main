@@ -15,18 +15,19 @@ import '../utils/helpers/network_manager.dart';
 class GeneralBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put(ProduitRepository());
-    Get.put(UserRepository());
-    Get.put(EtablissementRepository());
+    Get.lazyPut(() => ProduitRepository());
+    Get.lazyPut(() => UserRepository());
+    Get.lazyPut(() => EtablissementRepository());
 
     Get.lazyPut(() => SignupController());
     Get.lazyPut(() => OTPVerificationController());
+    Get.lazyPut(() => UserController());
+    Get.lazyPut(() => VariationController());
+    Get.lazyPut(() => AddressController());
+    Get.lazyPut(() => CheckoutController());
+    Get.lazyPut(
+        () => EtablissementController(Get.find<EtablissementRepository>()));
 
-    Get.put(NetworkManager());
-    Get.put(UserController());
-    Get.put(VariationController());
-    Get.put(AddressController());
-    Get.put(CheckoutController());
-    Get.put(EtablissementController(Get.find<EtablissementRepository>()));
+    Get.put(NetworkManager(), permanent: true);
   }
 }

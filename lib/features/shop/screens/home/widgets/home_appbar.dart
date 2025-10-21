@@ -1,4 +1,3 @@
-import 'package:badges/badges.dart' as badges;
 import 'package:caferesto/features/personalization/controllers/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,8 +17,7 @@ class THomeAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userController = Get.put(UserController());
-    final notifController = Get.put(NotificationController());
+    final UserController userController = Get.find();
 
     return TAppBar(
       centerTitle: false,

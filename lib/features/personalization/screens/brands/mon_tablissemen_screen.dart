@@ -21,7 +21,7 @@ class MonEtablissementScreen extends StatefulWidget {
 
 class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   late final EtablissementController _controller;
-  late final UserController _userController;
+  late final UserController userController;
   String _userRole = '';
 
   @override
@@ -32,11 +32,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
 
   // Initialisation
   void _initializeControllers() {
-    // Initialiser UserController
-    if (!Get.isRegistered<UserController>()) {
-      Get.put(UserController());
-    }
-    _userController = Get.find<UserController>();
+    final UserController userController = Get.find<UserController>();
 
     // Initialiser EtablissementController
     if (!Get.isRegistered<EtablissementController>()) {
@@ -44,7 +40,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
     }
     _controller = Get.find<EtablissementController>();
 
-    _userRole = _userController.userRole;
+    _userRole = userController.userRole;
 
     // Charger les données après un court délai
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -56,7 +52,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
   Future<void> _chargerEtablissements() async {
     try {
       _controller.isLoading.value = true;
-      final user = _userController.user.value;
+      final user = userController.user.value;
 
       if (_userRole == 'Gérant' && user.id.isNotEmpty) {
         await _controller.fetchEtablissementsByOwner(user.id);

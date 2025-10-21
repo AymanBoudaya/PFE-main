@@ -23,7 +23,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userController = Get.put(UserController());
+    final UserController userController = Get.find();
 
     bool canAddCategory() {
       final role = userController.user.value.role;
