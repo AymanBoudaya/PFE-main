@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
-import '../../personalization/screens/brands/mon_tablissemen_screen.dart';
+import '../../personalization/screens/brands/mon_etablissement_screen.dart';
 import '../models/notification_model.dart';
 
 class NotificationController extends GetxController {

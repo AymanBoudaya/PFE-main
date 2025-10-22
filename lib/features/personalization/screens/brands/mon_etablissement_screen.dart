@@ -1,3 +1,5 @@
+import 'package:caferesto/features/personalization/screens/brands/widgets/etablissement_subtitle.dart';
+import 'package:caferesto/features/personalization/screens/brands/widgets/no_results_state.dart';
 import 'package:caferesto/utils/popups/loaders.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,6 +13,7 @@ import '../../../shop/models/etablissement_model.dart';
 import '../../../shop/models/statut_etablissement_model.dart';
 import 'add_brand_screen.dart';
 import 'edit_brand_screen.dart';
+import 'widgets/etablissement_image.dart';
 
 class MonEtablissementScreen extends StatefulWidget {
   const MonEtablissementScreen({super.key});
@@ -156,7 +159,8 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
                     )
                   : _userRole == 'Gérant'
                       ? _buildEmptyState() // <- Message "Vous n'avez pas d'établissement"
-                      : _buildNoResultsState(_controller.selectedFilter.value),
+                      : NoResultsState(
+                          currentFilter: _controller.selectedFilter.value),
             ),
           ],
         ),
@@ -183,29 +187,6 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
         pressElevation: 3,
       );
     });
-  }
-
-  Widget _buildNoResultsState(String currentFilter) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off, size: 50, color: Colors.grey.shade400),
-            const SizedBox(height: 12),
-            Text(
-              'Aucun établissement trouvé pour "$currentFilter".',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildFloatingActionButton() {
@@ -352,11 +333,11 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
         ListTile(
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          leading: _buildEtablissementImage(etablissement),
+          leading: EtablissementImage(etablissement: etablissement),
           title: Text(etablissement.name,
               style:
                   const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-          subtitle: _buildEtablissementSubtitle(etablissement),
+          subtitle: EtablissementSubtitle(etablissement: etablissement),
           trailing: _buildStatutBadge(etablissement.statut),
           onTap: () => _showEtablissementOptions(etablissement),
         ),
@@ -380,53 +361,6 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
             ),
           ),
       ]),
-    );
-  }
-
-  Widget _buildEtablissementImage(Etablissement etablissement) {
-    if (etablissement.imageUrl != null && etablissement.imageUrl!.isNotEmpty) {
-      return Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          image: DecorationImage(
-            image: NetworkImage(etablissement.imageUrl!),
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
-    } else {
-      // Image par défaut
-      return Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.blue.shade50,
-        ),
-        child: Icon(Icons.business, color: Colors.blue.shade600, size: 24),
-      );
-    }
-  }
-
-  Widget _buildEtablissementSubtitle(Etablissement etablissement) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(etablissement.address,
-            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis),
-        if (_userRole == 'Admin') ...[
-          const SizedBox(height: 4),
-          Text(
-            'Gérant : ${etablissement.ownerDisplayName}',
-            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ],
     );
   }
 

@@ -15,7 +15,7 @@ import '../../../../utils/constants/sizes.dart';
 import '../../../shop/screens/product_reviews/list_produit_screen.dart';
 import '../../controllers/user_controller.dart';
 import '../address/address.dart';
-import '../brands/mon_tablissemen_screen.dart';
+import '../brands/mon_etablissement_screen.dart';
 import '../categories/category_manager_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
