@@ -1,3 +1,4 @@
+import 'package:caferesto/features/shop/screens/order/delivery_map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/widgets/appbar/appbar.dart';
@@ -181,7 +182,7 @@ class OrderTrackingScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Get.to(() => DeliveryMapScreen(order: order));
+                  Get.to(() => DeliveryMapView(order: order));
                 },
                 icon: const Icon(Icons.map_outlined),
                 label: const Text("Afficher l’itinéraire"),
