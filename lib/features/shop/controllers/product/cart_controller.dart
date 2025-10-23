@@ -110,7 +110,7 @@ class CartController extends GetxController {
       image: isVariation ? variation.image : product.imageUrl,
       quantity: quantity,
       variationId: variation.id,
-      brandName: product.etablissementId,
+      brandName: product.etablissement?.name ?? 'Inconnu',
       selectedVariation: isVariation ? variation.attributeValues : null,
     );
   }

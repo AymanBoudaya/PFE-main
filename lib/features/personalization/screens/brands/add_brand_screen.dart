@@ -355,50 +355,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
       ),
     ]);
   }
-
-  // Section coordonnées GPS
-  // Widget _buildCoordinatesSection(double width) {
-  //   final isWide = width >= 900;
-
-  //   return CategoryFormCard(children: [
-  //     const Text('Coordonnées GPS',
-  //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-  //     const SizedBox(height: 12),
-  //     Row(
-  //       children: [
-  //         Expanded(
-  //           child: TextFormField(
-  //             controller: _latitudeController,
-  //             decoration: const InputDecoration(
-  //               labelText: 'Latitude',
-  //               border: OutlineInputBorder(),
-  //               prefixIcon: Icon(Icons.explore_outlined),
-  //             ),
-  //             keyboardType: TextInputType.numberWithOptions(decimal: true),
-  //           ),
-  //         ),
-  //         const SizedBox(width: 16),
-  //         Expanded(
-  //           child: TextFormField(
-  //             controller: _longitudeController,
-  //             decoration: const InputDecoration(
-  //               labelText: 'Longitude',
-  //               border: OutlineInputBorder(),
-  //               prefixIcon: Icon(Icons.explore_outlined),
-  //             ),
-  //             keyboardType: TextInputType.numberWithOptions(decimal: true),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //     const SizedBox(height: 8),
-  //     Text(
-  //       'Les coordonnées GPS sont optionnelles - utilisées pour la géolocalisation',
-  //       style: Theme.of(context).textTheme.bodySmall,
-  //     ),
-  //   ]);
-  // }
-
+  
   Widget _buildCoordinatesSection(double width) {
     final isWide = width >= 900;
     final dark = THelperFunctions.isDarkMode(context);

@@ -1,3 +1,4 @@
+import 'package:caferesto/features/shop/controllers/etablissement_controller.dart';
 import 'package:caferesto/utils/constants/colors.dart';
 import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ class ListProduitScreen extends StatefulWidget {
 
 class _ListProduitScreenState extends State<ListProduitScreen> {
   late ProduitController controller;
+  final etsController = EtablissementController.instance;
 
   @override
   void initState() {

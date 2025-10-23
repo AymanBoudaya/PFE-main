@@ -12,7 +12,6 @@ import 'package:get/get.dart';
 import '../../../../features/shop/controllers/product/produit_controller.dart';
 import '../../../../features/shop/models/produit_model.dart';
 import '../../../../features/shop/screens/product_details/product_detail.dart';
-import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../styles/shadows.dart';
 import '../../texts/brand_title_text_with_verified_icon.dart';
@@ -212,11 +211,10 @@ class ProductCardVertical extends StatelessWidget {
   /// Méthode pour construire l'image du produit (supporte réseau et assets)
   Widget _buildProductImage() {
     // Si l'URL de l'image commence par http, c'est une image réseau
-    if (product.imageUrl != null &&
-        product.imageUrl!.isNotEmpty &&
-        product.imageUrl!.startsWith('http')) {
+    if (product.imageUrl.isNotEmpty &&
+        product.imageUrl.startsWith('http')) {
       return Image.network(
-        product.imageUrl!,
+        product.imageUrl,
         height: 150,
         width: double.infinity,
         fit: BoxFit.cover,
@@ -231,9 +229,9 @@ class ProductCardVertical extends StatelessWidget {
     }
 
     // Si c'est un asset local
-    if (product.imageUrl != null && product.imageUrl!.isNotEmpty) {
+    if (product.imageUrl.isNotEmpty) {
       return Image.asset(
-        product.imageUrl!,
+        product.imageUrl,
         height: 150,
         width: double.infinity,
         fit: BoxFit.cover,

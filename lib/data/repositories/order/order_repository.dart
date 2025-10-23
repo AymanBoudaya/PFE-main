@@ -38,7 +38,7 @@ class OrderRepository extends GetxController {
     try {
       final data = order.toJson()..['user_id'] = userId;
 
-      final response = await _db.from('orders').insert(data).select();
+      await _db.from('orders').insert(data).select();
     } on PostgrestException catch (e) {
       print('❌ Postgres error: ${e.message}');
       rethrow;

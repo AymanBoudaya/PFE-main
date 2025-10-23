@@ -94,7 +94,8 @@ class THelperFunctions {
     return MediaQuery.of(Get.context!).size.width;
   }
 
-  static String getFormattedDate(DateTime date, {String format = 'dd MMM yyyy'}) {
+  static String getFormattedDate(DateTime date,
+      {String format = 'dd MMM yyyy'}) {
     return DateFormat(format).format(date);
   }
 
@@ -105,9 +106,34 @@ class THelperFunctions {
   static List<Widget> wrapWidgets(List<Widget> widgets, int rowSize) {
     final wrappedList = <Widget>[];
     for (var i = 0; i < widgets.length; i += rowSize) {
-      final rowChildren = widgets.sublist(i, i + rowSize > widgets.length ? widgets.length : i + rowSize);
+      final rowChildren = widgets.sublist(
+          i, i + rowSize > widgets.length ? widgets.length : i + rowSize);
       wrappedList.add(Row(children: rowChildren));
     }
     return wrappedList;
+  }
+
+  static 
+  
+  List<String> generateTimeSlots(String start, String end,
+      {int intervalMinutes = 30}) {
+    final List<String> slots = [];
+    final startParts = start.split(':').map(int.parse).toList();
+    final endParts = end.split(':').map(int.parse).toList();
+
+    DateTime startTime = DateTime(0, 0, 0, startParts[0], startParts[1]);
+    DateTime endTime = DateTime(0, 0, 0, endParts[0], endParts[1]);
+
+    while (startTime.isBefore(endTime)) {
+      final slotEnd = startTime.add(Duration(minutes: intervalMinutes));
+      if (slotEnd.isAfter(endTime)) break;
+
+      final slotStr =
+          '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')} - ${slotEnd.hour.toString().padLeft(2, '0')}:${slotEnd.minute.toString().padLeft(2, '0')}';
+      slots.add(slotStr);
+      startTime = slotEnd;
+    }
+
+    return slots;
   }
 }

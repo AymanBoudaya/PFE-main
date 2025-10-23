@@ -40,7 +40,7 @@ class EtablissementRepository {
         // Déjà converti par le contrôleur
       }
 
-      final response = await _db
+      await _db
           .from(_table)
           .update(data)
           .eq('id', id)
@@ -60,7 +60,7 @@ class EtablissementRepository {
     try {
       print('Changement statut établissement $id: ${newStatut.value}');
 
-      final response = await _db
+      await _db
           .from(_table)
           .update({'statut': newStatut.value}).eq('id', id);
 
@@ -156,7 +156,7 @@ class EtablissementRepository {
       }
 
       // 3. Supprimer l'établissement
-      final response = await _db.from(_table).delete().eq('id', id);
+      await _db.from(_table).delete().eq('id', id);
 
       print('Établissement $id supprimé avec succès');
       return true;

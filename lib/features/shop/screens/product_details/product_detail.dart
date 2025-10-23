@@ -3,10 +3,12 @@ import 'package:caferesto/features/shop/controllers/product/horaire_controller.d
 import 'package:caferesto/features/shop/screens/product_details/widgets/product_meta_data.dart';
 import 'package:caferesto/features/shop/screens/product_reviews/product_reviews.dart';
 import 'package:caferesto/utils/constants/sizes.dart';
+import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:readmore/readmore.dart';
+import '../../../../utils/constants/colors.dart';
 import 'widgets/rating_share_widget.dart';
 
 import '../../../../data/repositories/horaire/horaire_repository.dart';
@@ -25,6 +27,7 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = THelperFunctions.isDarkMode(context);
     return Scaffold(
         bottomNavigationBar: TBottomAddToCart(product: product),
         body: SingleChildScrollView(
@@ -86,11 +89,12 @@ class ProductDetailScreen extends StatelessWidget {
                             return;
                           }
 
-                          // ✅ Ouvre la modale de sélection de créneau
+                          // Ouvre la modale de sélection de créneau
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
-                            backgroundColor: Colors.white,
+                            backgroundColor:
+                                dark ? AppColors.eerieBlack : Colors.white,
                             shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.vertical(
                                   top: Radius.circular(16)),
@@ -127,76 +131,88 @@ class ProductDetailScreen extends StatelessWidget {
                                             fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 12),
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        itemCount: horaires.length,
-                                        itemBuilder: (ctx, index) {
-                                          final h = horaires[index];
-                                          final dayLabel = h.jour.valeur;
-                                          if (!h.isValid) {
-                                            return ListTile(
+                                      Flexible(
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: horaires.length,
+                                          itemBuilder: (ctx, index) {
+                                            final h = horaires[index];
+                                            final dayLabel = h.jour.valeur;
+
+                                            if (!h.isValid) {
+                                              return ListTile(
+                                                title: Text(dayLabel),
+                                                subtitle: const Text("Fermé"),
+                                                enabled: false,
+                                              );
+                                            }
+
+                                            final slots = THelperFunctions.generateTimeSlots(
+                                                h.ouverture!, h.fermeture!);
+
+                                            return ExpansionTile(
                                               title: Text(dayLabel),
-                                              subtitle: const Text("Fermé"),
-                                              enabled: false,
+                                              children: slots.map((slot) {
+                                                return ListTile(
+                                                  title: Text(slot),
+                                                  trailing: const Icon(
+                                                      Icons.arrow_forward_ios,
+                                                      size: 14),
+                                                  onTap: () async {
+                                                    final now = DateTime.now();
+                                                    final targetWeekday =
+                                                        _weekdayFromJour(
+                                                            h.jour);
+                                                    final daysToAdd =
+                                                        (targetWeekday -
+                                                                now.weekday +
+                                                                7) %
+                                                            7;
+                                                    final chosenDate = now.add(
+                                                        Duration(
+                                                            days: daysToAdd));
+
+                                                    final startTimeParts = slot
+                                                        .split(' - ')[0]
+                                                        .split(':')
+                                                        .map(int.parse)
+                                                        .toList();
+                                                    final pickupDateTime =
+                                                        DateTime(
+                                                      chosenDate.year,
+                                                      chosenDate.month,
+                                                      chosenDate.day,
+                                                      startTimeParts[0],
+                                                      startTimeParts[1],
+                                                    );
+
+                                                    Navigator.of(ctx).pop();
+
+                                                    await orderController
+                                                        .processOrder(
+                                                      totalAmount:
+                                                          cartController
+                                                              .totalCartPrice
+                                                              .value,
+                                                      pickupDateTime:
+                                                          pickupDateTime,
+                                                      pickupDay: dayLabel,
+                                                      pickupTimeRange: slot,
+                                                    );
+
+                                                    Get.snackbar(
+                                                      "Commande enregistrée ✅",
+                                                      "Créneau : $dayLabel ($slot)",
+                                                      backgroundColor:
+                                                          Colors.green,
+                                                      colorText: Colors.white,
+                                                    );
+                                                  },
+                                                );
+                                              }).toList(),
                                             );
-                                          }
-
-                                          final timeRange =
-                                              "${h.ouverture} - ${h.fermeture}";
-                                          return ListTile(
-                                            title: Text(dayLabel),
-                                            subtitle: Text(timeRange),
-                                            trailing: const Icon(
-                                                Icons.arrow_forward_ios,
-                                                size: 14),
-                                            onTap: () async {
-                                              // 🔢 Calcule la date exacte du jour sélectionné
-                                              final now = DateTime.now();
-                                              final targetWeekday =
-                                                  _weekdayFromJour(h
-                                                      .jour); // fonction helper
-                                              final daysToAdd = (targetWeekday -
-                                                      now.weekday +
-                                                      7) %
-                                                  7;
-                                              final chosenDate = now.add(
-                                                  Duration(days: daysToAdd));
-
-                                              final parts =
-                                                  h.ouverture!.split(':');
-                                              final pickupDateTime = DateTime(
-                                                chosenDate.year,
-                                                chosenDate.month,
-                                                chosenDate.day,
-                                                int.parse(parts[0]),
-                                                int.parse(parts[1]),
-                                              );
-
-                                              Navigator.of(ctx)
-                                                  .pop(); // ferme la modale
-
-                                              // ✅ Enregistre la commande
-                                              await orderController
-                                                  .processOrder(
-                                                totalAmount: cartController
-                                                    .totalCartPrice.value,
-                                                pickupDateTime:
-                                                    pickupDateTime, // ✅ conversion
-                                                pickupDay: dayLabel,
-                                                pickupTimeRange: timeRange,
-                                              );
-
-                                              Get.snackbar(
-                                                "Commande enregistrée ✅",
-                                                "Créneau : $dayLabel ($timeRange)",
-                                                backgroundColor: Colors.green,
-                                                colorText: Colors.white,
-                                              );
-                                            },
-                                          );
-                                        },
+                                          },
+                                        ),
                                       ),
                                       const SizedBox(height: 20),
                                     ],
