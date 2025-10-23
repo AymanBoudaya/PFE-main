@@ -11,6 +11,7 @@ import '../../../../../navigation_menu.dart';
 import '../../../../../utils/constants/image_strings.dart';
 import '../../../../../utils/helpers/cloud_helper_functions.dart';
 import '../../../../../utils/loaders/animation_loader.dart';
+import '../../../models/order_model.dart';
 
 class TOrderListItems extends StatelessWidget {
   const TOrderListItems({super.key});
@@ -112,7 +113,7 @@ class TOrderListItems extends StatelessWidget {
                                             .textTheme
                                             .labelMedium),
                                     Text(
-                                      order.totalAmount.toString(),
+                                      '${order.totalAmount.toString()} DT',
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleMedium,
@@ -152,9 +153,61 @@ class TOrderListItems extends StatelessWidget {
                             ]),
                           ),
                         ],
-                      )
+                      ),
+
+                      /// 🔥 NOUVEAU : Row 3 - Information créneau horaire
+                      const SizedBox(height: AppSizes.spaceBtwItems),
+                      _buildTimeSlotInfo(order, context),
                     ]));
               });
         });
+  }
+
+  // 🔥 NOUVELLE MÉTHODE : Affichage du créneau horaire
+  Widget _buildTimeSlotInfo(OrderModel order, BuildContext context) {
+    // Vérifier si l'ordre a des informations de créneau
+    final hasPickupInfo =
+        order.pickupDay != null && order.pickupTimeRange != null;
+
+    if (!hasPickupInfo) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.access_time, color: Colors.blue.shade600, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Créneau de retrait",
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Colors.blue.shade800,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "${order.pickupDay!} • ${order.pickupTimeRange!}",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.blue.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
