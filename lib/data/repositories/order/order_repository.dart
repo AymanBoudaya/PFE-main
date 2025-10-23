@@ -20,7 +20,7 @@ class OrderRepository extends GetxController {
 
       final response = await _db
           .from('orders')
-          .select('*')
+          .select('*, etablissement:etablissement_id(*)')
           .eq('user_id', user.id)
           .order('order_date', ascending: false);
 
@@ -36,8 +36,16 @@ class OrderRepository extends GetxController {
   /// Save a new order for a specific user
   Future<void> saveOrder(OrderModel order, String userId) async {
     try {
-      final data = order.toJson()..['user_id'] = userId;
+      if (order.etablissementId.isEmpty) {
+        throw 'Etablissement ID is missing for this order.';
+      }
 
+      // Convert to JSON and add user/etablissement IDs
+      final data = {
+        ...order.toJson(),
+        'user_id': userId,
+        'etablissement_id': order.etablissementId,
+      };
       await _db.from('orders').insert(data).select();
     } on PostgrestException catch (e) {
       print('❌ Postgres error: ${e.message}');

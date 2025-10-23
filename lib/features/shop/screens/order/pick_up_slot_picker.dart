@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../data/repositories/horaire/horaire_repository.dart';
+import '../../../../utils/helpers/helper_functions.dart';
 import '../../controllers/product/horaire_controller.dart';
 import '../../models/jour_semaine.dart';
 
@@ -76,7 +77,8 @@ class PickUpSlotPicker extends StatelessWidget {
                           child: Text(timeRange),
                           onPressed: () {
                             final now = DateTime.now();
-                            final targetWeekday = _weekdayFromJour(h.jour);
+                            final targetWeekday =
+                                THelperFunctions.weekdayFromJour(h.jour);
                             final daysToAdd =
                                 (targetWeekday - now.weekday + 7) % 7;
                             final chosenDate =
@@ -138,24 +140,5 @@ class PickUpSlotPicker extends StatelessWidget {
     }
 
     return slots;
-  }
-
-  int _weekdayFromJour(JourSemaine jour) {
-    switch (jour) {
-      case JourSemaine.lundi:
-        return 1;
-      case JourSemaine.mardi:
-        return 2;
-      case JourSemaine.mercredi:
-        return 3;
-      case JourSemaine.jeudi:
-        return 4;
-      case JourSemaine.vendredi:
-        return 5;
-      case JourSemaine.samedi:
-        return 6;
-      case JourSemaine.dimanche:
-        return 7;
-    }
   }
 }

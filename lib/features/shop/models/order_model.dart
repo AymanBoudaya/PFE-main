@@ -2,6 +2,7 @@ import 'package:caferesto/features/shop/models/cart_item_model.dart';
 import 'package:caferesto/utils/helpers/helper_functions.dart';
 
 import '../../personalization/models/address_model.dart';
+import 'etablissement_model.dart';
 
 enum OrderStatus { pending, shipped, delivered }
 
@@ -20,23 +21,25 @@ class OrderModel {
   final String? pickupTimeRange;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-
-  OrderModel({
-    required this.id,
-    required this.userId,
-    required this.status,
-    required this.totalAmount,
-    required this.orderDate,
-    required this.paymentMethod,
-    required this.items,
-    this.address,
-    this.deliveryDate,
-    this.pickupDateTime,
-    this.pickupDay,
-    this.pickupTimeRange,
-    this.createdAt,
-    this.updatedAt,
-  });
+  final Etablissement? etablissement;
+  final String etablissementId;
+  OrderModel(
+      {required this.id,
+      required this.userId,
+      required this.status,
+      required this.totalAmount,
+      required this.orderDate,
+      required this.paymentMethod,
+      required this.items,
+      this.address,
+      this.deliveryDate,
+      this.pickupDateTime,
+      this.pickupDay,
+      this.pickupTimeRange,
+      this.createdAt,
+      this.updatedAt,
+      this.etablissement,
+      required this.etablissementId});
 
   // -------------------------
   // Computed / helper getters
@@ -110,6 +113,10 @@ class OrderModel {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
+      etablissement: json['etablissement'] != null
+          ? Etablissement.fromJson(json['etablissement'])
+          : null,
+      etablissementId: json['etablissement_id'] ?? '',
     );
   }
 

@@ -112,6 +112,7 @@ class CartController extends GetxController {
       variationId: variation.id,
       brandName: product.etablissement?.name ?? 'Inconnu',
       selectedVariation: isVariation ? variation.attributeValues : null,
+      etablissementId: product.etablissementId
     );
   }
 

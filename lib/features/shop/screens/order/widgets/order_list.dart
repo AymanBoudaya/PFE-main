@@ -12,6 +12,7 @@ import '../../../../../utils/constants/image_strings.dart';
 import '../../../../../utils/helpers/cloud_helper_functions.dart';
 import '../../../../../utils/loaders/animation_loader.dart';
 import '../../../models/order_model.dart';
+import '../order_tracking_screen.dart';
 
 class TOrderListItems extends StatelessWidget {
   const TOrderListItems({super.key});
@@ -83,9 +84,18 @@ class TOrderListItems extends StatelessWidget {
 
                         /// Icon
                         IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Iconsax.arrow_right_34,
-                                size: AppSizes.iconSm)),
+                          onPressed: () {},
+                          icon: const Icon(Iconsax.arrow_right_34,
+                              size: AppSizes.iconSm),
+                        ),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            icon: const Icon(Iconsax.map, size: 18),
+                            label: const Text("Suivre la commande"),
+                            onPressed: () =>
+                                Get.to(() => OrderTrackingScreen(order: order)),
+                          ),
+                        ),
                       ]),
                       const SizedBox(
                         height: AppSizes.spaceBtwItems,

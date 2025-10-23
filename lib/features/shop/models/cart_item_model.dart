@@ -7,17 +7,18 @@ class CartItemModel {
   String variationId;
   String? brandName;
   Map<String, String>? selectedVariation;
+  String etablissementId; // ✅ ADD THIS FIELD
 
-  CartItemModel({
-    required this.productId,
-    required this.quantity,
-    this.variationId = '',
-    this.title = '',
-    this.price = 0.0,
-    this.image,
-    this.brandName,
-    this.selectedVariation,
-  });
+  CartItemModel(
+      {required this.productId,
+      required this.quantity,
+      this.variationId = '',
+      this.title = '',
+      this.price = 0.0,
+      this.image,
+      this.brandName,
+      this.selectedVariation,
+      this.etablissementId = ''});
 
   static CartItemModel empty() {
     return CartItemModel(
@@ -36,6 +37,7 @@ class CartItemModel {
       'variationId': variationId,
       'brandName': brandName,
       'selectedVariation': selectedVariation,
+      'etablissementId': etablissementId,
     };
   }
 
@@ -51,6 +53,7 @@ class CartItemModel {
       selectedVariation: data['selectedVariation'] != null
           ? Map<String, String>.from(data['selectedVariation'])
           : null,
+      etablissementId: data['etablissement_id'] ?? '',
     );
   }
 }

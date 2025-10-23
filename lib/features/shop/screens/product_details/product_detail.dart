@@ -57,7 +57,7 @@ class ProductDetailScreen extends StatelessWidget {
                   const SizedBox(height: AppSizes.sm),
 
                   /// Attributes
-                  if (product.productType == 'variable') 
+                  if (product.productType == 'variable')
                     TProductAttributes(product: product),
 
                   const SizedBox(height: AppSizes.spaceBtwSections),
@@ -103,7 +103,8 @@ class ProductDetailScreen extends StatelessWidget {
                       ),
                       IconButton(
                         icon: const Icon(Iconsax.arrow_right, size: 18),
-                        onPressed: () => Get.to(() => const ProductReviewsScreen()),
+                        onPressed: () =>
+                            Get.to(() => const ProductReviewsScreen()),
                       ),
                     ],
                   ),
@@ -166,7 +167,8 @@ class ProductDetailScreen extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => _buildTimeSlotModalContent(context, dark, horaireController, orderController, cartController),
+      builder: (_) => _buildTimeSlotModalContent(
+          context, dark, horaireController, orderController, cartController),
     );
   }
 
@@ -193,12 +195,14 @@ class ProductDetailScreen extends StatelessWidget {
 
           /// Liste des créneaux
           Expanded(
-            child: _buildTimeSlotsList(horaireController, orderController, dark),
+            child:
+                _buildTimeSlotsList(horaireController, orderController, dark),
           ),
           const SizedBox(height: 20),
 
           /// Bouton de confirmation
-          _buildConfirmButton(orderController, horaireController, cartController, context),
+          _buildConfirmButton(
+              orderController, horaireController, cartController, context),
         ],
       ),
     );
@@ -252,10 +256,11 @@ class ProductDetailScreen extends StatelessWidget {
     OrderController orderController,
     bool dark,
   ) {
-    final slots = THelperFunctions.generateTimeSlots(h.ouverture!, h.fermeture!);
+    final slots =
+        THelperFunctions.generateTimeSlots(h.ouverture!, h.fermeture!);
     final now = DateTime.now();
     final todayWeekday = now.weekday;
-    final targetWeekday = _weekdayFromJour(h.jour);
+    final targetWeekday = THelperFunctions.weekdayFromJour(h.jour);
     final daysToAdd = (targetWeekday - todayWeekday + 7) % 7;
     final isToday = daysToAdd == 0;
 
@@ -268,14 +273,16 @@ class ProductDetailScreen extends StatelessWidget {
         ),
       ),
       initiallyExpanded: orderController.selectedDay.value == dayLabel,
-      children: slots.map((slot) => _buildTimeSlotItem(
-        slot: slot,
-        dayLabel: dayLabel,
-        isToday: isToday,
-        now: now,
-        orderController: orderController,
-        dark: dark,
-      )).toList(),
+      children: slots
+          .map((slot) => _buildTimeSlotItem(
+                slot: slot,
+                dayLabel: dayLabel,
+                isToday: isToday,
+                now: now,
+                orderController: orderController,
+                dark: dark,
+              ))
+          .toList(),
     );
   }
 
@@ -288,40 +295,46 @@ class ProductDetailScreen extends StatelessWidget {
     required bool dark,
   }) {
     final startParts = slot.split(' - ')[0].split(':').map(int.parse).toList();
-    final slotStart = DateTime(now.year, now.month, now.day, startParts[0], startParts[1]);
+    final slotStart =
+        DateTime(now.year, now.month, now.day, startParts[0], startParts[1]);
     final isPast = isToday && slotStart.isBefore(now);
 
     return Obx(() {
-      final isSelected = orderController.selectedSlot.value == slot && 
-                        orderController.selectedDay.value == dayLabel;
+      final isSelected = orderController.selectedSlot.value == slot &&
+          orderController.selectedDay.value == dayLabel;
 
       return GestureDetector(
-        onTap: isPast ? null : () {
-          orderController.setSelectedSlot(dayLabel, slot);
-        },
+        onTap: isPast
+            ? null
+            : () {
+                orderController.setSelectedSlot(dayLabel, slot);
+              },
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: isPast 
-              ? Colors.grey.shade200 
-              : isSelected 
-                ? Colors.green.withOpacity(0.3)  // 🔥 CORRECTION : Opacité augmentée pour meilleure visibilité
-                : Colors.transparent,
+            color: isPast
+                ? Colors.grey.shade200
+                : isSelected
+                    ? Colors.green.withOpacity(
+                        0.3) // 🔥 CORRECTION : Opacité augmentée pour meilleure visibilité
+                    : Colors.transparent,
             border: Border.all(
-              color: isSelected 
-                ? Colors.green 
-                : (dark ? Colors.grey.shade700 : Colors.grey.shade300),
+              color: isSelected
+                  ? Colors.green
+                  : (dark ? Colors.grey.shade700 : Colors.grey.shade300),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected ? [
-              BoxShadow(
-                color: Colors.green.withOpacity(0.2),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              )
-            ] : null, // 🔥 AJOUT : Ombre pour mieux mettre en évidence
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null, // 🔥 AJOUT : Ombre pour mieux mettre en évidence
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -329,17 +342,21 @@ class ProductDetailScreen extends StatelessWidget {
               Text(
                 slot,
                 style: TextStyle(
-                  color: isPast 
-                    ? Colors.grey 
-                    : (isSelected 
-                      ? Colors.green.shade800 
-                      : (dark ? Colors.white : Colors.black)),
+                  color: isPast
+                      ? Colors.grey
+                      : (isSelected
+                          ? Colors.green.shade800
+                          : (dark ? Colors.white : Colors.black)),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  fontSize: isSelected ? 15 : 14, // 🔥 AJOUT : Taille de police légèrement augmentée
+                  fontSize: isSelected
+                      ? 15
+                      : 14, // 🔥 AJOUT : Taille de police légèrement augmentée
                 ),
               ),
-              if (isSelected) 
-                Icon(Icons.check_circle, color: Colors.green, size: 20), // 🔥 CORRECTION : Taille d'icône
+              if (isSelected)
+                Icon(Icons.check_circle,
+                    color: Colors.green,
+                    size: 20), // 🔥 CORRECTION : Taille d'icône
             ],
           ),
         ),
@@ -354,16 +371,14 @@ class ProductDetailScreen extends StatelessWidget {
     BuildContext context,
   ) {
     return Obx(() {
-      final hasSelection = orderController.selectedSlot.value != null && 
-                          orderController.selectedDay.value != null;
+      final hasSelection = orderController.selectedSlot.value != null &&
+          orderController.selectedDay.value != null;
 
       return ElevatedButton.icon(
-        onPressed: hasSelection ? () => _confirmOrder(
-          orderController, 
-          horaireController, 
-          cartController, 
-          context
-        ) : null,
+        onPressed: hasSelection
+            ? () => _confirmOrder(
+                orderController, horaireController, cartController, context)
+            : null,
         icon: const Icon(Icons.check),
         label: const Text("Confirmer le créneau"),
         style: ElevatedButton.styleFrom(
@@ -385,12 +400,52 @@ class ProductDetailScreen extends StatelessWidget {
     BuildContext context,
   ) async {
     try {
-      final selectedHoraire = horaireController.horaires.firstWhere(
-        (h) => h.jour.valeur == orderController.selectedDay.value
-      );
+      // Vérifier si le panier est vide
+      if (cartController.cartItems.isEmpty) {
+        Get.snackbar(
+          "Panier vide",
+          "Veuillez ajouter des produits au panier avant de confirmer la commande",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Vérifier qu'un créneau est sélectionné
+      if (orderController.selectedDay.value == null ||
+          orderController.selectedSlot.value == null) {
+        Get.snackbar(
+          "Créneau manquant",
+          "Veuillez sélectionner un jour et un créneau avant de confirmer",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Récupérer le créneau horaire correspondant
+      Horaire? selectedHoraire;
+      try {
+        selectedHoraire = horaireController.horaires.firstWhere(
+          (h) => h.jour.valeur == orderController.selectedDay.value,
+        );
+      } catch (e) {
+        selectedHoraire = null;
+      }
+
+      if (selectedHoraire == null) {
+        Get.snackbar(
+          "Erreur",
+          "Impossible de trouver le créneau horaire sélectionné",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
 
       final now = DateTime.now();
-      final targetWeekday = _weekdayFromJour(selectedHoraire.jour);
+      final targetWeekday =
+          THelperFunctions.weekdayFromJour(selectedHoraire.jour);
       final daysToAdd = (targetWeekday - now.weekday + 7) % 7;
       final chosenDate = now.add(Duration(days: daysToAdd));
 
@@ -408,6 +463,18 @@ class ProductDetailScreen extends StatelessWidget {
         startParts[1],
       );
 
+      // Récupérer l'etablissementId depuis le panier en toute sécurité
+      final etablissementId = cartController.cartItems.first.etablissementId;
+      if (etablissementId == null || etablissementId.isEmpty) {
+        Get.snackbar(
+          "Erreur",
+          "Impossible de déterminer l'établissement pour cette commande",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
       Navigator.of(context).pop();
 
       await orderController.processOrder(
@@ -415,6 +482,7 @@ class ProductDetailScreen extends StatelessWidget {
         pickupDateTime: pickupDateTime,
         pickupDay: orderController.selectedDay.value!,
         pickupTimeRange: orderController.selectedSlot.value!,
+        etablissementId: etablissementId,
       );
 
       Get.snackbar(
@@ -430,18 +498,6 @@ class ProductDetailScreen extends StatelessWidget {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-    }
-  }
-
-  int _weekdayFromJour(JourSemaine jour) {
-    switch (jour) {
-      case JourSemaine.lundi: return 1;
-      case JourSemaine.mardi: return 2;
-      case JourSemaine.mercredi: return 3;
-      case JourSemaine.jeudi: return 4;
-      case JourSemaine.vendredi: return 5;
-      case JourSemaine.samedi: return 6;
-      case JourSemaine.dimanche: return 7;
     }
   }
 }

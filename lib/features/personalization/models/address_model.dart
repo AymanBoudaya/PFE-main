@@ -82,12 +82,8 @@ class AddressModel {
       updatedAt: data['updated_at'] != null
           ? DateTime.parse(data['updated_at'] as String)
           : null,
-      latitude: data['latitude'] != null
-          ? (data['latitude'] as num).toDouble()
-          : null,
-      longitude: data['longitude'] != null
-          ? (data['longitude'] as num).toDouble()
-          : null,
+      latitude: parseDouble(data['latitude']),
+      longitude: parseDouble(data['longitude']),
     );
   }
 
@@ -115,4 +111,12 @@ class AddressModel {
   String toString() {
     return '$street, $city, $state, $postalCode, $country';
   }
+}
+
+double parseDouble(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  return 0.0;
 }

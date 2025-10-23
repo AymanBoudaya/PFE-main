@@ -46,6 +46,7 @@ class OrderController extends GetxController {
 
   Future<void> processOrder({
     required double totalAmount,
+    required String etablissementId,
     DateTime? pickupDateTime,
     String? pickupDay,
     String? pickupTimeRange,
@@ -54,30 +55,46 @@ class OrderController extends GetxController {
       TFullScreenLoader.openLoadingDialog(
           'En cours d\'enrgistrer votre commande...', TImages.pencilAnimation);
 
-      final userId = AuthenticationRepository.instance.authUser!.id;
-      if (userId.isEmpty) {
-        TFullScreenLoader.stopLoading(); // Close loader before returning
+      final user = AuthenticationRepository.instance.authUser;
+      if (user == null || user.id.isEmpty) {
+        TFullScreenLoader.stopLoading();
+        TLoaders.errorSnackBar(
+          title: 'Erreur utilisateur',
+          message: 'Impossible de récupérer vos informations utilisateur.',
+        );
+        return;
+      }
+
+      // Ensure we have a selected address
+      final selectedAddress = addressController.selectedAddress.value;
+      if (selectedAddress.id.isEmpty) {
+        TFullScreenLoader.stopLoading();
+        TLoaders.warningSnackBar(
+          title: 'Adresse manquante',
+          message: 'Veuillez sélectionner une adresse de livraison.',
+        );
         return;
       }
 
       final order = OrderModel(
         id: '', // Let database generate UUID
-        userId: userId,
+        userId: user.id,
+        etablissementId: etablissementId,
         status: OrderStatus.pending,
         totalAmount: totalAmount,
         orderDate: DateTime.now(),
         paymentMethod: checkoutController.selectedPaymentMethod.value.name,
-        address: addressController.selectedAddress.value,
+        address: selectedAddress,
         deliveryDate: null, // Should be null initially
         items: cartController.cartItems.toList(),
         pickupDateTime: pickupDateTime,
         pickupDay: pickupDay,
         pickupTimeRange: pickupTimeRange,
-        createdAt: DateTime.now(), // ✅ Set createdAt
-        updatedAt: DateTime.now(), // ✅ Set updatedAt
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
-      await orderRepository.saveOrder(order, userId);
+      await orderRepository.saveOrder(order, user.id);
 
       cartController.clearCart();
       TFullScreenLoader.stopLoading();
@@ -89,6 +106,7 @@ class OrderController extends GetxController {
           onPressed: () => Get.offAll(() => const NavigationMenu())));
     } catch (e, st) {
       TFullScreenLoader.stopLoading();
+      print(st);
 
       TLoaders.warningSnackBar(title: 'Erreur', message: e.toString());
     }
