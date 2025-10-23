@@ -35,7 +35,10 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
 
   // Initialisation
   void _initializeControllers() {
-    final UserController userController = Get.find<UserController>();
+    if (!Get.isRegistered<UserController>()) {
+      Get.put(UserController());
+    }
+    userController = Get.find<UserController>();
 
     // Initialiser EtablissementController
     if (!Get.isRegistered<EtablissementController>()) {

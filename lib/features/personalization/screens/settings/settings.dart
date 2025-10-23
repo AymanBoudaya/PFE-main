@@ -23,14 +23,14 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final UserController userController = Get.find();
+    final userController = Get.put(UserController());
 
-    bool canAddCategory() {
+    bool isAdminOnly() {
       final role = userController.user.value.role;
       return role == 'Admin';
     }
 
-    bool canAddEtablissement() {
+    bool isAdminGerant() {
       final role = userController.user.value.role;
       return role == 'Gérant' || role == 'Admin';
     }
@@ -123,12 +123,13 @@ class SettingsScreen extends StatelessWidget {
                     trailing: Switch(value: true, onChanged: (value) {})),
 
                 /// Développeur , upload
-                SizedBox(height: AppSizes.spaceBtwSections),
-                TSectionHeading(
-                    title: "Développement", showActionButton: false),
-                SizedBox(height: AppSizes.spaceBtwItems),
-                SizedBox(height: AppSizes.spaceBtwItems),
-                if (canAddCategory())
+                if (isAdminGerant()) ...[
+                  SizedBox(height: AppSizes.spaceBtwSections),
+                  TSectionHeading(
+                      title: "Développement", showActionButton: false),
+                  SizedBox(height: AppSizes.spaceBtwItems),
+                ],
+                if (isAdminOnly())
                   TSettingsMenuTile(
                     icon: Iconsax.category,
                     title: "Gérer catégorie",
@@ -144,7 +145,7 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                 SizedBox(height: AppSizes.spaceBtwItems),
-                if (canAddEtablissement())
+                if (isAdminGerant())
                   TSettingsMenuTile(
                     icon: Iconsax.home,
                     title: "Gérer  établissement",
@@ -156,7 +157,7 @@ class SettingsScreen extends StatelessWidget {
                   height: AppSizes.spaceBtwItems,
                 ),
 
-                if (canAddEtablissement())
+                if (isAdminGerant())
                   TSettingsMenuTile(
                     icon: Iconsax.bag_tick_2,
                     title: "Gérer produit",

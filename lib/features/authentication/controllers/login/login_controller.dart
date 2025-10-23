@@ -14,7 +14,7 @@ import '../../../personalization/controllers/user_controller.dart';
 
 class LoginController extends GetxController {
   static LoginController get instance => Get.find();
-  final UserController userController = Get.find();
+  final userController = Get.put(UserController());
 
   /// Variables
   final rememberMe = false.obs;

@@ -112,7 +112,7 @@ class TOrderListItems extends StatelessWidget {
                                             .textTheme
                                             .labelMedium),
                                     Text(
-                                      order.id,
+                                      order.totalAmount.toString(),
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleMedium,

@@ -46,8 +46,9 @@ class CategoryController extends GetxController
   final Rx<CategoryFilter> selectedFilter = CategoryFilter.all.obs;
 
   @override
-  void onInit() {
-    super.onInit();
+  void onReady() {
+    super.onReady();
+    // Delay tabController creation until after the first frame
     tabController = TabController(length: 2, vsync: this);
     _initializeData();
   }
@@ -69,7 +70,7 @@ class CategoryController extends GetxController
     super.onClose();
   }
 
-  /// 📸 Sélection d'image compatible Web et Mobile
+  /// Sélection d'image compatible Web et Mobile
   Future<void> pickImage() async {
     final pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,

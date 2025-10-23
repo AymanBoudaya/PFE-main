@@ -9,6 +9,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app.dart';
 import 'data/repositories/authentication/authentication_repository.dart';
+import 'data/repositories/user/user_repository.dart';
 
 Future<void> main() async {
   // Assurer l'initialisation du binding des widgets Flutter
@@ -29,7 +30,6 @@ Future<void> main() async {
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
-
   // Injecter votre repository d'authentification (à remplacer par votre implémentation)
   Get.put(AuthenticationRepository());
 

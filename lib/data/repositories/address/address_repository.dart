@@ -56,8 +56,9 @@ class AddressRepository extends GetxController {
           .single();
 
       return response['id'] as String;
-    } catch (e) {
-      throw 'Something went wrong while adding address information, try again later';
+    } catch (e, s) {
+      print('❌ Supabase insert error: $e\n$s');
+      rethrow;
     }
   }
 }

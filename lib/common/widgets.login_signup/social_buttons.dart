@@ -12,7 +12,8 @@ class TSocialButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LoginController controller = Get.find();
+    final controller = Get.put(LoginController());
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
