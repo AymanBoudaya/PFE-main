@@ -7,9 +7,6 @@
         android:label="cmandi_supabase"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <meta-data
-            android:name="com.google.android.geo.AIzaSyAFLwZx76YapcRGASTIuKv5kSkhRDfbOs4"
-            android:value="AIzaSyAFLwZx76YapcRGASTIuKv5kSkhRDfbOs4"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -1,33 +1,30 @@
 import 'package:caferesto/utils/popups/loaders.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+import 'dart:convert';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart' as http;
+
 
 class MapPickerScreen extends StatefulWidget {
   final double? initialLatitude;
   final double? initialLongitude;
 
-  const MapPickerScreen({
-    super.key,
-    this.initialLatitude,
-    this.initialLongitude,
-  });
+  const MapPickerScreen({super.key, this.initialLatitude, this.initialLongitude});
 
   @override
   State<MapPickerScreen> createState() => _MapPickerScreenState();
 }
 
 class _MapPickerScreenState extends State<MapPickerScreen> {
-  late GoogleMapController _mapController;
+  final MapController _mapController = MapController();
   LatLng? _selectedLocation;
   String _selectedAddress = '';
-  bool _isLoading = true;
   bool _isGettingAddress = false;
+  bool _isLoading = true;
 
-  // Default position (Paris)
-  static const LatLng _defaultPosition = LatLng(48.8566, 2.3522);
+  static const LatLng _defaultPosition = LatLng(48.8566, 2.3522); // Paris
 
   @override
   void initState() {
@@ -37,25 +34,19 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
   Future<void> _initializeLocation() async {
     try {
-      LatLng initialPosition;
-
-      if (widget.initialLatitude != null && widget.initialLongitude != null) {
-        initialPosition =
-            LatLng(widget.initialLatitude!, widget.initialLongitude!);
-      } else {
-        // Get current device location
-        initialPosition = await _getCurrentLocation();
-      }
+      LatLng initialPos = widget.initialLatitude != null && widget.initialLongitude != null
+          ? LatLng(widget.initialLatitude!, widget.initialLongitude!)
+          : await _getCurrentLocation();
 
       setState(() {
-        _selectedLocation = initialPosition;
+        _selectedLocation = initialPos;
         _isLoading = false;
       });
 
-      // Get address for initial position
-      await _getAddressFromLatLng(initialPosition);
+      await _getAddressFromLatLng(initialPos);
+      _mapController.move(initialPos, 15);
     } catch (e) {
-      print('Error initializing location: $e');
+      print('Erreur initialisation localisation: $e');
       setState(() {
         _selectedLocation = _defaultPosition;
         _isLoading = false;
@@ -65,28 +56,24 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
   Future<LatLng> _getCurrentLocation() async {
     try {
-      // Check permission
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          throw 'Location permissions denied';
+          throw 'Permission refusée';
         }
       }
-
       if (permission == LocationPermission.deniedForever) {
-        throw 'Location permissions permanently denied';
+        throw 'Permission définitivement refusée';
       }
 
-      // Get current position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+          desiredAccuracy: LocationAccuracy.high);
 
       return LatLng(position.latitude, position.longitude);
     } catch (e) {
-      print('Error getting current location: $e');
-      throw 'Could not get current location: $e';
+      print('Erreur récupération localisation: $e');
+      throw 'Impossible d\'obtenir la localisation';
     }
   }
 
@@ -94,60 +81,46 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     try {
       setState(() => _isGettingAddress = true);
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        latLng.latitude,
-        latLng.longitude,
-      );
+      final url = Uri.parse(
+          'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latLng.latitude}&lon=${latLng.longitude}');
+      final response = await http.get(url, headers: {
+        'User-Agent': 'com.caferesto.app', // Required by Nominatim
+      });
 
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks.first;
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
         setState(() {
-          _selectedAddress =
-              '${place.street ?? ''}, ${place.postalCode ?? ''} ${place.locality ?? ''}, ${place.country ?? ''}';
+          _selectedAddress = data['display_name'] ?? 'Adresse non disponible';
         });
+      } else {
+        setState(() => _selectedAddress = 'Adresse non disponible');
       }
     } catch (e) {
-      print('Error getting address: $e');
-      setState(() {
-        _selectedAddress = 'Adresse non disponible';
-      });
+      print('Erreur récupération adresse: $e');
+      setState(() => _selectedAddress = 'Adresse non disponible');
     } finally {
       setState(() => _isGettingAddress = false);
     }
   }
 
-  Future<void> _moveToCurrentLocation() async {
+  Future<void> _goToCurrentLocation() async {
     try {
-      setState(() => _isLoading = true);
-      final LatLng currentLocation = await _getCurrentLocation();
+      TLoaders.infoSnackBar(message: 'Obtention de votre position...');
+      LatLng currentPos = await _getCurrentLocation();
 
-      _mapController.animateCamera(
-        CameraUpdate.newLatLngZoom(currentLocation, 15),
-      );
+      setState(() => _selectedLocation = currentPos);
+      _mapController.move(currentPos, 15);
+      await _getAddressFromLatLng(currentPos);
 
-      setState(() {
-        _selectedLocation = currentLocation;
-      });
-
-      await _getAddressFromLatLng(currentLocation);
+      TLoaders.successSnackBar(message: 'Position actuelle récupérée');
     } catch (e) {
-      print('Error moving to current location: $e');
-      TLoaders.errorSnackBar(
-        message: 'Impossible d\'obtenir la localisation actuelle',
-      );
-    } finally {
-      setState(() => _isLoading = false);
+      print('Erreur localisation: $e');
+      TLoaders.errorSnackBar(message: 'Impossible d\'obtenir la position');
     }
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-  }
-
   void _onMapTap(LatLng latLng) {
-    setState(() {
-      _selectedLocation = latLng;
-    });
+    setState(() => _selectedLocation = latLng);
     _getAddressFromLatLng(latLng);
   }
 
@@ -169,7 +142,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.my_location),
-            onPressed: _moveToCurrentLocation,
+            onPressed: _goToCurrentLocation,
             tooltip: 'Ma position actuelle',
           ),
         ],
@@ -178,99 +151,82 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
-                GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: _selectedLocation ?? _defaultPosition,
-                    zoom: 15,
+                FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter: _selectedLocation ?? _defaultPosition,
+                    initialZoom: 15,
+                    onTap: (tapPos, point) => _onMapTap(point),
                   ),
-                  onTap: _onMapTap,
-                  markers: _selectedLocation != null
-                      ? {
-                          Marker(
-                            markerId: const MarkerId('selected_location'),
-                            position: _selectedLocation!,
-                            draggable: true,
-                            onDragEnd: (LatLng newPosition) {
-                              setState(() => _selectedLocation = newPosition);
-                              _getAddressFromLatLng(newPosition);
-                            },
-                          ),
-                        }
-                      : {},
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                ),
-
-                // Center marker
-                const IgnorePointer(
-                  child: Center(
-                    child: Icon(
-                      Icons.location_pin,
-                      color: Colors.red,
-                      size: 40,
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.caferesto.app',
+                      tileProvider: NetworkTileProvider(),
                     ),
-                  ),
-                ),
-
-                // Address display
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  right: 16,
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Localisation sélectionnée:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                    MarkerLayer(
+                      markers: [
+                        if (_selectedLocation != null)
+                          Marker(
+                            point: _selectedLocation!,
+                            child : const Icon(
+                              Icons.location_pin,
+                              size: 40,
+                              color: Colors.red,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          _isGettingAddress
-                              ? const Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text('Recherche de l\'adresse...'),
-                                  ],
-                                )
-                              : Text(
-                                  _selectedAddress.isEmpty
-                                      ? 'Appuyez sur la carte pour sélectionner'
-                                      : _selectedAddress,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                          if (_selectedLocation != null) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              'Lat: ${_selectedLocation!.latitude.toStringAsFixed(6)}, '
-                              'Lng: ${_selectedLocation!.longitude.toStringAsFixed(6)}',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ),
-                            ),
+                      ],
+                    ),
+                  ],
+                ),
+                if (_isGettingAddress)
+                  const Positioned(
+                    top: 16,
+                    left: 16,
+                    right: 16,
+                    child: Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2)),
+                            SizedBox(width: 8),
+                            Text('Recherche de l\'adresse...'),
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
+                if (!_isGettingAddress && _selectedAddress.isNotEmpty)
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    right: 16,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.location_on, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _selectedAddress,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _selectedLocation != null ? _confirmSelection : null,
+        onPressed: _confirmSelection,
         child: const Icon(Icons.check),
       ),
     );

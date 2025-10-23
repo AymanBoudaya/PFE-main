@@ -2,14 +2,18 @@ import 'package:caferesto/common/widgets/appbar/appbar.dart';
 import 'package:caferesto/features/personalization/controllers/address_controller.dart';
 import 'package:caferesto/features/personalization/controllers/user_controller.dart';
 import 'package:caferesto/utils/constants/sizes.dart';
+import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../utils/validators/validation.dart';
 
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 
 class AddNewAddressScreen extends StatelessWidget {
   const AddNewAddressScreen({super.key});
@@ -18,7 +22,7 @@ class AddNewAddressScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = AddressController.instance;
     final userController = UserController.instance;
-
+    final dark = THelperFunctions.isDarkMode(context);
     // Prefill user info once
     controller.name.text = userController.user.value.fullName ?? '';
     controller.phoneNumber.text = userController.user.value.phone ?? '';
@@ -54,28 +58,100 @@ class AddNewAddressScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.grey.shade300),
                       ),
-                      child: GoogleMap(
-                        initialCameraPosition: const CameraPosition(
-                          target: LatLng(36.8065, 10.1815), // Tunis default
-                          zoom: 12,
-                        ),
-                        onTap: controller.setMapAddress,
-                        markers: controller.selectedLocation.value != null
-                            ? {
-                                Marker(
-                                  markerId: const MarkerId('selected'),
-                                  position: controller.selectedLocation.value!,
-                                )
-                              }
-                            : {},
+                      child: Stack(
+                        children: [
+                          FlutterMap(
+                            mapController: controller.mapController,
+                            options: MapOptions(
+                              initialCenter: controller.selectedLocation.value ??
+                                  LatLng(36.8065, 10.1815),
+                              initialZoom : 12,
+                              onTap: (tapPosition, latLng) =>
+                                  controller.setMapAddress(latLng),
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                userAgentPackageName: 'caferesto.app',
+                                tileProvider: CancellableNetworkTileProvider(),
+                              ),
+                              if (controller.selectedLocation.value != null)
+                                MarkerLayer(
+                                  markers: [
+                                    Marker(
+                                      point: controller.selectedLocation.value!,
+                                      width: 40,
+                                      height: 40,
+                                      child : const Icon(
+                                        Icons.location_pin,
+                                        color: Colors.red,
+                                        size: 40,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.my_location),
+                              label: const Text("Ma position"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueGrey,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                              ),
+                              onPressed: () async {
+                                try {
+                                  // Get device location
+                                  LocationPermission permission =
+                                      await Geolocator.checkPermission();
+                                  if (permission == LocationPermission.denied) {
+                                    permission =
+                                        await Geolocator.requestPermission();
+                                  }
+                                  if (permission ==
+                                          LocationPermission.deniedForever ||
+                                      permission == LocationPermission.denied) {
+                                    throw 'Permissions de localisation refusées';
+                                  }
+
+                                  Position position =
+                                      await Geolocator.getCurrentPosition(
+                                          desiredAccuracy:
+                                              LocationAccuracy.high);
+
+                                  final currentLatLng = LatLng(
+                                      position.latitude, position.longitude);
+
+                                  // Update controller
+                                  controller.setMapAddress(currentLatLng);
+
+                                  // Move map to location
+                                  controller.mapController
+                                      ?.move(currentLatLng, 15);
+                                } catch (e) {
+                                  print('Erreur localisation: $e');
+                                  Get.snackbar('Erreur',
+                                      'Impossible d\'obtenir la localisation',
+                                      snackPosition: SnackPosition.BOTTOM);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
                     if (controller.selectedLocation.value != null)
                       Text(
                         "Position sélectionnée: ${controller.selectedLocation.value!.latitude.toStringAsFixed(5)}, ${controller.selectedLocation.value!.longitude.toStringAsFixed(5)}",
-                        style:
-                            const TextStyle(fontSize: 13, color: Colors.black87),
+                        style: TextStyle(
+                            fontSize: 13,
+                            color: dark ? Colors.white : Colors.black87),
                       ),
                     if (controller.isLoadingAddress.value)
                       const Padding(
@@ -150,8 +226,7 @@ class AddNewAddressScreen extends StatelessWidget {
                   const SizedBox(height: AppSizes.spaceBtwInputFields),
                   TextFormField(
                     controller: controller.phoneNumber,
-                    validator: (value) =>
-                        TValidator.validatePhoneNumber(value),
+                    validator: (value) => TValidator.validatePhoneNumber(value),
                     decoration: const InputDecoration(
                         prefixIcon: Icon(Iconsax.mobile),
                         labelText: 'Numéro de téléphone'),

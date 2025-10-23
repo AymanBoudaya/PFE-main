@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:caferesto/utils/constants/colors.dart';
@@ -5,9 +6,9 @@ import 'package:caferesto/utils/constants/sizes.dart';
 import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -32,8 +33,8 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
-  final _latitudeController = TextEditingController();
-  final _longitudeController = TextEditingController();
+  double? latitude;
+  double? longitude;
 
   final EtablissementController _controller =
       EtablissementController(EtablissementRepository());
@@ -43,36 +44,13 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
 
 // Add these methods
   Future<void> _selectLocationFromMap() async {
-    try {
-      final double? currentLat = _latitudeController.text.isNotEmpty
-          ? double.tryParse(_latitudeController.text)
-          : null;
-      final double? currentLng = _longitudeController.text.isNotEmpty
-          ? double.tryParse(_longitudeController.text)
-          : null;
-
-      final result = await Get.to(() => MapPickerScreen(
-            initialLatitude: currentLat,
-            initialLongitude: currentLng,
-          ));
-
-      if (result != null) {
-        setState(() {
-          _latitudeController.text = result['latitude'].toStringAsFixed(6);
-          _longitudeController.text = result['longitude'].toStringAsFixed(6);
-          _selectedAddressFromMap = result['address'] ?? '';
-
-          // Also update the address field if it's empty
-          if (_addressController.text.isEmpty &&
-              _selectedAddressFromMap.isNotEmpty) {
-            _addressController.text = _selectedAddressFromMap;
-          }
-        });
-      }
-    } catch (e) {
-      print('Error selecting location from map: $e');
-      TLoaders.errorSnackBar(
-          message: 'Erreur lors de la sélection sur la carte: $e');
+    final result = await Get.to(() => const MapPickerScreen());
+    if (result != null && result is Map) {
+      setState(() {
+        latitude = result['latitude'];
+        longitude = result['longitude'];
+        _addressController.text = result['address'] ?? '';
+      });
     }
   }
 
@@ -80,7 +58,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     try {
       TLoaders.infoSnackBar(message: 'Obtention de votre position...');
 
-      // Check permission
+      // Check and request permission
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -99,38 +77,41 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
         return;
       }
 
-      // Get current position
+      // Get the current GPS position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Get address from coordinates
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+      latitude = position.latitude;
+      longitude = position.longitude;
+
+      // Reverse geocoding using OpenStreetMap Nominatim API
+      final url =
+          'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=$latitude&lon=$longitude&addressdetails=1';
+      final response = await http.get(Uri.parse(url), headers: {
+        'User-Agent':
+            'FlutterApp/1.0 (contact: your@email.com)' // Required by OSM
+      });
+
+      String formattedAddress = '';
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        formattedAddress = data['display_name'] ?? '';
+      }
 
       setState(() {
-        _latitudeController.text = position.latitude.toStringAsFixed(6);
-        _longitudeController.text = position.longitude.toStringAsFixed(6);
-
-        if (placemarks.isNotEmpty) {
-          Placemark place = placemarks.first;
-          _selectedAddressFromMap =
-              '${place.street ?? ''}, ${place.postalCode ?? ''} ${place.locality ?? ''}, ${place.country ?? ''}';
-
-          // Update address field
-          if (_addressController.text.isEmpty) {
-            _addressController.text = _selectedAddressFromMap;
-          }
+        _selectedAddressFromMap = formattedAddress;
+        if (_addressController.text.isEmpty) {
+          _addressController.text = formattedAddress;
         }
       });
 
       TLoaders.successSnackBar(message: 'Localisation actuelle récupérée');
     } catch (e) {
-      print('Error getting current location: $e');
+      debugPrint('Erreur lors de la localisation: $e');
       TLoaders.errorSnackBar(
-          message: 'Erreur lors de l\'obtention de la localisation: $e');
+        message: 'Erreur lors de l\'obtention de la localisation: $e',
+      );
     }
   }
 
@@ -151,8 +132,6 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
     _animationController?.dispose();
     _nameController.dispose();
     _addressController.dispose();
-    _latitudeController.dispose();
-    _longitudeController.dispose();
     super.dispose();
   }
 
@@ -191,7 +170,10 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
   // Création avec upload d'image
   void _addEtablissement() async {
     if (!_formKey.currentState!.validate()) return;
-
+    if (latitude == null || longitude == null) {
+      TLoaders.errorSnackBar(message: 'Veuillez sélectionner un emplacement.');
+      return;
+    }
     setState(() => _isLoading = true);
 
     final user = userController.user.value;
@@ -211,12 +193,8 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
       name: _nameController.text.trim(),
       address: _addressController.text.trim(),
       imageUrl: imageUrl,
-      latitude: _latitudeController.text.isNotEmpty
-          ? double.tryParse(_latitudeController.text)
-          : null,
-      longitude: _longitudeController.text.isNotEmpty
-          ? double.tryParse(_longitudeController.text)
-          : null,
+      latitude: latitude,
+      longitude: longitude,
       idOwner: user.id,
     );
 
@@ -423,7 +401,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
 
   Widget _buildCoordinatesSection(double width) {
     final isWide = width >= 900;
-
+    final dark = THelperFunctions.isDarkMode(context);
     return CategoryFormCard(children: [
       const Text('Coordonnées GPS',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -461,33 +439,11 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
       // Coordinates display (read-only)
       Row(
         children: [
-          Expanded(
-            child: TextFormField(
-              controller: _latitudeController,
-              decoration: const InputDecoration(
-                labelText: 'Latitude',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.explore_outlined),
-                suffixIcon: Icon(Icons.lock), // Show it's read-only
-              ),
-              readOnly: true, // Make it read-only
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: TextFormField(
-              controller: _longitudeController,
-              decoration: const InputDecoration(
-                labelText: 'Longitude',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.explore_outlined),
-                suffixIcon: Icon(Icons.lock), // Show it's read-only
-              ),
-              readOnly: true, // Make it read-only
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-            ),
-          ),
+          if (latitude != null && longitude != null)
+            Text(
+              'Coordonnées: ${latitude!.toStringAsFixed(6)}, ${longitude!.toStringAsFixed(6)}',
+              style: const TextStyle(color: Colors.grey),
+            )
         ],
       ),
       const SizedBox(height: 8),
@@ -495,7 +451,7 @@ class _AddEtablissementScreenState extends State<AddEtablissementScreen>
       // Selected address display
       if (_selectedAddressFromMap.isNotEmpty) ...[
         Card(
-          color: Colors.blue[50],
+          color: dark ? AppColors.eerieBlack : Colors.blue[50],
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(

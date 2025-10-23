@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:caferesto/common/widgets/texts/section_heading.dart';
 import 'package:caferesto/features/personalization/screens/address/widgets/single_address.dart';
 import 'package:caferesto/utils/helpers/cloud_helper_functions.dart';
 import 'package:caferesto/utils/loaders/circular_loader.dart';
 import 'package:caferesto/utils/popups/loaders.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 
 import '../../../data/repositories/address/address_repository.dart';
 import '../../../utils/constants/image_strings.dart';
@@ -13,9 +18,6 @@ import '../../../utils/helpers/network_manager.dart';
 import '../../../utils/popups/full_screen_loader.dart';
 import '../models/address_model.dart';
 import '../screens/address/add_new_address.dart';
-
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geocoding/geocoding.dart' as geo;
 
 import 'user_controller.dart';
 
@@ -39,6 +41,8 @@ class AddressController extends GetxController {
   final useMap = true.obs;
   final selectedLocation = Rxn<LatLng>();
   final isLoadingAddress = false.obs;
+
+  final MapController mapController = MapController();
 
   final addressRepository = Get.put(AddressRepository());
 
@@ -108,19 +112,26 @@ class AddressController extends GetxController {
     isLoadingAddress.value = true;
 
     try {
-      final placemarks = await geo.placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-        localeIdentifier: "fr_FR",
+      final url = Uri.parse(
+        'https://nominatim.openstreetmap.org/reverse?format=jsonv2'
+        '&lat=${position.latitude}&lon=${position.longitude}&addressdetails=1'
+        '&accept-language=fr',
       );
+      final response = await http.get(url,
+          headers: {'User-Agent': 'YourAppName/1.0 (your@email.com)'});
 
-      if (placemarks.isNotEmpty) {
-        final p = placemarks.first;
-        street.text = p.street ?? '';
-        city.text = p.locality ?? '';
-        state.text = p.administrativeArea ?? '';
-        postalCode.text = p.postalCode ?? '';
-        country.text = p.country ?? '';
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final address = data['address'] ?? {};
+
+        street.text = address['road'] ?? '';
+        city.text =
+            address['city'] ?? address['town'] ?? address['village'] ?? '';
+        state.text = address['state'] ?? '';
+        postalCode.text = address['postcode'] ?? '';
+        country.text = address['country'] ?? '';
+      } else {
+        throw Exception('Échec du géocodage inverse');
       }
     } catch (e) {
       TLoaders.errorSnackBar(
