@@ -5,7 +5,6 @@ import '../../../../common/widgets/success_screen/success_screen.dart';
 import '../../../../data/repositories/authentication/authentication_repository.dart';
 import '../../../../data/repositories/order/order_repository.dart';
 import '../../../../navigation_menu.dart';
-import '../../../../utils/constants/enums.dart' hide OrderStatus;
 import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../../utils/popups/loaders.dart';
@@ -21,6 +20,19 @@ class OrderController extends GetxController {
   final addressController = AddressController.instance;
   final checkoutController = CheckoutController.instance;
   final orderRepository = Get.put(OrderRepository());
+
+  final RxnString selectedDay = RxnString();
+  final RxnString selectedSlot = RxnString();
+
+  void setSelectedSlot(String day, String slot) {
+    selectedDay.value = day;
+    selectedSlot.value = slot;
+  }
+
+  void clearSelectedSlot() {
+    selectedDay.value = null;
+    selectedSlot.value = null;
+  }
 
   Future<List<OrderModel>> fetchUserOrders() async {
     try {

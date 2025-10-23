@@ -68,6 +68,22 @@ class CheckoutScreen extends StatelessWidget {
 
                     /// Address
                     TBillingAddressSection(),
+
+                    Obx(() {
+                      if (orderController.selectedSlot.value != null &&
+                          orderController.selectedDay.value != null) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Text(
+                            "Créneau choisi : ${orderController.selectedDay.value!} (${orderController.selectedSlot.value!})",
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.green),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
                   ],
                 ),
               )
@@ -81,7 +97,7 @@ class CheckoutScreen extends StatelessWidget {
         padding: const EdgeInsets.all(AppSizes.defaultSpace),
         child: ElevatedButton(
             onPressed: subTotal > 0
-                ? () => orderController.processOrder(totalAmount : totalAmount)
+                ? () => orderController.processOrder(totalAmount: totalAmount)
                 : () => TLoaders.warningSnackBar(
                     title: 'Panier vide',
                     message:
