@@ -1,7 +1,10 @@
 import 'package:caferesto/common/widgets/appbar/appbar.dart';
 import 'package:caferesto/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
+import '../../controllers/product/order_controller.dart';
 import 'widgets/order_list.dart';
 
 class OrderScreen extends StatelessWidget {
@@ -9,29 +12,32 @@ class OrderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final orderController = Get.put(OrderController());
+
     return Scaffold(
-      /// Appbar
       appBar: TAppBar(
         title: Row(
           children: [
             Text(
-              'Mes',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            Text(
-              ' commandes',
+              ' Mes commandes',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ],
-        ),      ),
-      body: const Padding(
-        padding: EdgeInsets.all(AppSizes.defaultSpace),
-
-        /// Orders
-        child: TOrderListItems(),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Iconsax.refresh),
+            onPressed: () => orderController.fetchUserOrders(),
+            tooltip: 'Actualiser',
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => orderController.fetchUserOrders(),
+        child: const Padding(
+          padding: EdgeInsets.all(AppSizes.defaultSpace),
+          child: TOrderListItems(),
+        ),
       ),
     );
   }

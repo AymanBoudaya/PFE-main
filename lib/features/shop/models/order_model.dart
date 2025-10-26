@@ -23,6 +23,7 @@ class OrderModel {
   final DateTime? updatedAt;
   final Etablissement? etablissement;
   final String etablissementId;
+  final String? refusalReason;
   OrderModel(
       {required this.id,
       required this.userId,
@@ -39,7 +40,8 @@ class OrderModel {
       this.createdAt,
       this.updatedAt,
       this.etablissement,
-      required this.etablissementId});
+      required this.etablissementId,
+      this.refusalReason});
 
   // -------------------------
   // Computed / helper getters
@@ -50,21 +52,84 @@ class OrderModel {
       ? THelperFunctions.getFormattedDate(deliveryDate!)
       : '';
 
-String get orderStatusText {
-  switch (status) {
-    case OrderStatus.delivered:
-      return 'Livrée';
-    case OrderStatus.preparing:
-      return 'En préparation';
-    case OrderStatus.ready:
-      return 'Prête';
-    case OrderStatus.pending:
-      return 'En attente';
-    case OrderStatus.cancelled:
-      return 'Annulée';
-    case OrderStatus.refused:
-      return 'Refusée';
-  }}
+  String get orderStatusText {
+    switch (status) {
+      case OrderStatus.delivered:
+        return 'Livrée';
+      case OrderStatus.preparing:
+        return 'En préparation';
+      case OrderStatus.ready:
+        return 'Prête';
+      case OrderStatus.pending:
+        return 'En attente';
+      case OrderStatus.cancelled:
+        return 'Annulée';
+      case OrderStatus.refused:
+        return 'Refusée';
+    }
+  }
+
+  // 🔥 NEW: Check if order can be modified by client
+  bool get canBeModified => status == OrderStatus.pending;
+
+  // 🔥 NEW: Check if order can be cancelled by client
+  bool get canBeCancelled => status == OrderStatus.pending;
+
+  // 🔥 NEW: Check if order is active (not completed)
+  bool get isActive =>
+      status == OrderStatus.pending ||
+      status == OrderStatus.preparing ||
+      status == OrderStatus.ready;
+
+  // 🔥 NEW: Check if order is completed
+  bool get isCompleted =>
+      status == OrderStatus.delivered ||
+      status == OrderStatus.cancelled ||
+      status == OrderStatus.refused;
+
+  // -------------------------
+  // 🚀 COPYWITH METHOD
+  // -------------------------
+
+  OrderModel copyWith({
+    String? id,
+    String? userId,
+    OrderStatus? status,
+    double? totalAmount,
+    DateTime? orderDate,
+    String? paymentMethod,
+    AddressModel? address,
+    DateTime? deliveryDate,
+    List<CartItemModel>? items,
+    DateTime? pickupDateTime,
+    String? pickupDay,
+    String? pickupTimeRange,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Etablissement? etablissement,
+    String? etablissementId,
+    String? refusalReason,
+  }) {
+    return OrderModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      status: status ?? this.status,
+      totalAmount: totalAmount ?? this.totalAmount,
+      orderDate: orderDate ?? this.orderDate,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      address: address ?? this.address,
+      deliveryDate: deliveryDate ?? this.deliveryDate,
+      items: items ?? this.items,
+      pickupDateTime: pickupDateTime ?? this.pickupDateTime,
+      pickupDay: pickupDay ?? this.pickupDay,
+      pickupTimeRange: pickupTimeRange ?? this.pickupTimeRange,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      etablissement: etablissement ?? this.etablissement,
+      etablissementId: etablissementId ?? this.etablissementId,
+      refusalReason: refusalReason ?? this.refusalReason,
+    );
+  }
 
   // -------------------------
   // Serialization
@@ -73,6 +138,7 @@ String get orderStatusText {
   /// Converts Dart model → JSON (for Supabase insert/update)
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'user_id': userId,
       'status': status.name,
       'total_amount': totalAmount,
@@ -86,6 +152,8 @@ String get orderStatusText {
       'pickup_time_range': pickupTimeRange,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
+      'etablissement_id': etablissementId,
+      'refusal_reason': refusalReason,
     };
   }
 
@@ -122,6 +190,8 @@ String get orderStatusText {
           ? Etablissement.fromJson(json['etablissement'])
           : null,
       etablissementId: json['etablissement_id'] ?? '',
+      refusalReason:
+          json['refusal_reason'] as String?, 
     );
   }
 
@@ -131,14 +201,57 @@ String get orderStatusText {
         return OrderStatus.delivered;
       case 'ready':
         return OrderStatus.ready;
-              case 'preparing':
+      case 'preparing':
         return OrderStatus.preparing;
-              case 'refused':
+      case 'refused':
         return OrderStatus.refused;
-              case 'cancelled':
+      case 'cancelled':
         return OrderStatus.cancelled;
       default:
         return OrderStatus.pending;
     }
+  }
+
+  factory OrderModel.empty() {
+    return OrderModel(
+      id: '',
+      userId: '',
+      status: OrderStatus.pending,
+      totalAmount: 0.0,
+      orderDate: DateTime.now(),
+      paymentMethod: '',
+      items: [],
+      etablissementId: '',
+    );
+  }
+
+  // 🔥 NEW: Helper method to check if order belongs to user
+  bool belongsToUser(String userId) {
+    return this.userId == userId;
+  }
+
+  // 🔥 NEW: Helper method to check if order belongs to establishment
+  bool belongsToEstablishment(String etablissementId) {
+    return this.etablissementId == etablissementId;
+  }
+
+  // 🔥 NEW: Get item count
+  int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
+
+  // 🔥 NEW: Get formatted total amount
+  String get formattedTotalAmount => '${totalAmount.toStringAsFixed(2)} DT';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is OrderModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  String toString() {
+    return 'OrderModel(id: $id, status: $status, totalAmount: $totalAmount, items: ${items.length})';
   }
 }
