@@ -1,12 +1,14 @@
 import 'package:caferesto/features/authentication/controllers/signup/signup_controller.dart';
+import 'package:caferesto/features/personalization/controllers/address_controller.dart';
 import 'package:caferesto/features/shop/controllers/product/order_controller.dart';
 import 'package:get/get.dart';
 
+import '../data/repositories/address/address_repository.dart';
 import '../data/repositories/etablissement/etablissement_repository.dart';
+import '../data/repositories/order/order_repository.dart';
 import '../data/repositories/product/produit_repository.dart';
 import '../data/repositories/user/user_repository.dart';
 import '../features/authentication/controllers/signup/verify_otp_controller.dart';
-import '../features/personalization/controllers/address_controller.dart';
 import '../features/personalization/controllers/user_controller.dart';
 import '../features/shop/controllers/etablissement_controller.dart';
 import '../features/shop/controllers/product/checkout_controller.dart';
@@ -24,10 +26,13 @@ class GeneralBinding extends Bindings {
     Get.lazyPut(() => OTPVerificationController());
     Get.lazyPut(() => OrderController());
 
+    Get.lazyPut<AddressController>(() => AddressController(), fenix: true);
+    Get.lazyPut<OrderRepository>(() => OrderRepository(), fenix: true);
+    Get.lazyPut<AddressRepository>(() => AddressRepository(), fenix: true);
+
     Get.put(NetworkManager());
     Get.put(UserController());
     Get.put(VariationController());
-    Get.put(AddressController());
     Get.put(CheckoutController());
     Get.put(EtablissementController(Get.find<EtablissementRepository>()));
   }

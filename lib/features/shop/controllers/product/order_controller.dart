@@ -35,12 +35,31 @@ class OrderController extends GetxController {
   void onInit() {
     super.onInit();
     _subscribeToOrdersRealtime();
+    listenToUserOrders(); // 👈 Start real-time listener
   }
 
   @override
   void onClose() {
     if (_ordersChannel != null) _db.removeChannel(_ordersChannel!);
     super.onClose();
+  }
+
+  void listenToUserOrders() {
+    final userId = userController.user.value.id;
+    if (userId == null) return;
+
+    isLoading.value = true;
+
+    /// Listen to changes in the `orders` table
+    _db
+        .from('orders')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', userId)
+        .order('created_at', ascending: false)
+        .listen((data) {
+          orders.value = data.map((row) => OrderModel.fromJson(row)).toList();
+          isLoading.value = false;
+        });
   }
 
   Future<List<OrderModel>> fetchGerantOrders(String etablissementId) async {
@@ -237,6 +256,8 @@ class OrderController extends GetxController {
 
   Future<List<OrderModel>> fetchUserOrders() async {
     try {
+      isLoading.value = true;
+
       final userOrders = await orderRepository.fetchUserOrders();
       return userOrders;
     } catch (e) {

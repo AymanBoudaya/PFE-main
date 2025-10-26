@@ -90,7 +90,7 @@ class CheckoutScreen extends StatelessWidget {
         padding: const EdgeInsets.all(AppSizes.defaultSpace),
         child: ElevatedButton(
             onPressed: subTotal > 0
-                ? () => _processOrder2(orderController, totalAmount, context)
+                ? () => _processOrder(orderController, totalAmount, context)
                 : () => TLoaders.warningSnackBar(
                     title: 'Panier vide',
                     message:
@@ -324,69 +324,7 @@ class CheckoutScreen extends StatelessWidget {
     });
   }
 
-  // 🔥 MÉTHODE : Traitement de la commande
   void _processOrder(
-    OrderController orderController,
-    double totalAmount,
-    BuildContext context,
-  ) {
-    final cartController = CartController.instance;
-
-    // 1. Validate slot
-    if (orderController.selectedSlot.value == null ||
-        orderController.selectedDay.value == null) {
-      TLoaders.warningSnackBar(
-        title: 'Créneau manquant',
-        message: 'Veuillez choisir un créneau de retrait pour votre commande',
-      );
-      return;
-    }
-
-    // 2. Validate cart
-    if (cartController.cartItems.isEmpty) {
-      TLoaders.warningSnackBar(
-        title: 'Panier vide',
-        message: 'Veuillez ajouter des produits au panier',
-      );
-      return;
-    }
-
-    // 3. Extract etablissementId from the first item (all items must belong to same etablissement)
-    final etablissementId = cartController.cartItems.first.etablissementId;
-
-    // 4. Calculate pickupDateTime
-    final now = DateTime.now();
-    final targetWeekday = THelperFunctions.weekdayFromJour(
-        THelperFunctions.stringToJourSemaine(
-            orderController.selectedDay.value!)); // your helper
-    final daysToAdd = (targetWeekday - now.weekday + 7) % 7;
-    final chosenDate = now.add(Duration(days: daysToAdd));
-
-    final startParts = orderController.selectedSlot.value!
-        .split(' - ')[0]
-        .split(':')
-        .map(int.parse)
-        .toList();
-
-    final pickupDateTime = DateTime(
-      chosenDate.year,
-      chosenDate.month,
-      chosenDate.day,
-      startParts[0],
-      startParts[1],
-    );
-
-    // 5. Process the order
-    orderController.processOrder(
-      totalAmount: totalAmount,
-      pickupDay: orderController.selectedDay.value!,
-      pickupTimeRange: orderController.selectedSlot.value!,
-      pickupDateTime: pickupDateTime,
-      etablissementId: etablissementId, // ✅ pass correctly
-    );
-  }
-
-  void _processOrder2(
     OrderController orderController,
     double totalAmount,
     BuildContext context,
