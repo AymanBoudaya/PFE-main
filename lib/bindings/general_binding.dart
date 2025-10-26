@@ -1,4 +1,5 @@
 import 'package:caferesto/features/authentication/controllers/signup/signup_controller.dart';
+import 'package:caferesto/features/shop/controllers/product/order_controller.dart';
 import 'package:get/get.dart';
 
 import '../data/repositories/etablissement/etablissement_repository.dart';
@@ -21,6 +22,7 @@ class GeneralBinding extends Bindings {
 
     Get.lazyPut(() => SignupController());
     Get.lazyPut(() => OTPVerificationController());
+    Get.lazyPut(() => OrderController());
 
     Get.put(NetworkManager());
     Get.put(UserController());

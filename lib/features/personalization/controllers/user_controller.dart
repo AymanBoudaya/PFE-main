@@ -10,6 +10,8 @@ import 'package:image_picker/image_picker.dart';
 class UserController extends GetxController {
   static UserController get instance => Get.find();
   String get userRole => user.value.role;
+  String? get currentEtablissementId => user.value.establishmentId;
+  bool get hasEtablissement => user.value.establishmentId != null && user.value.establishmentId!.isNotEmpty;
 
   final profileLoading = false.obs;
   Rx<UserModel> user = UserModel.empty().obs;

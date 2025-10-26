@@ -54,4 +54,28 @@ class OrderRepository extends GetxController {
       TLoaders.errorSnackBar(title: 'Erreur', message: e.toString());
     }
   }
+
+  Future<void> updateOrder(String orderId, Map<String, dynamic> updates) async {
+    try {
+      await _db.from('orders').update(updates).eq('id', orderId);
+    } catch (e) {
+      throw 'Erreur lors de la mise à jour: $e';
+    }
+  }
+
+  Future<List<OrderModel>> fetchOrdersByEtablissement(
+      String etablissementId) async {
+    try {
+      final response = await _db
+          .from('orders')
+          .select('*, etablissement:etablissements(*)')
+          .eq('etablissement_id', etablissementId)
+          .order('created_at', ascending: false);
+      return (response as List)
+          .map((json) => OrderModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw 'Erreur lors du chargement des commandes: $e';
+    }
+  }
 }

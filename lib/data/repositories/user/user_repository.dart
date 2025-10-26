@@ -38,8 +38,11 @@ class UserRepository extends GetxController {
 
       if (targetId == null) throw 'No authenticated user.';
 
-      final response =
-          await _client.from(_table).select().eq('id', targetId).maybeSingle();
+      final response = await _client
+          .from(_table)
+          .select('*, etablissement:establishment_id(*)')
+          .eq('id', targetId)
+          .maybeSingle();
       if (response == null) return null;
 
       return UserModel.fromJson({

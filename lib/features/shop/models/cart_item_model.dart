@@ -1,3 +1,5 @@
+import 'package:caferesto/features/shop/models/produit_model.dart';
+
 class CartItemModel {
   String productId;
   String title;
@@ -7,7 +9,8 @@ class CartItemModel {
   String variationId;
   String? brandName;
   Map<String, String>? selectedVariation;
-  String etablissementId; // ✅ ADD THIS FIELD
+  String etablissementId;
+  ProduitModel? product;
 
   CartItemModel(
       {required this.productId,
@@ -18,7 +21,8 @@ class CartItemModel {
       this.image,
       this.brandName,
       this.selectedVariation,
-      this.etablissementId = ''});
+      this.etablissementId = '',
+      this.product});
 
   static CartItemModel empty() {
     return CartItemModel(

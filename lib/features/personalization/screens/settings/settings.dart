@@ -2,6 +2,7 @@ import 'package:caferesto/common/widgets/appbar/appbar.dart';
 import 'package:caferesto/common/widgets/custom_shapes/containers/primary_header_container.dart';
 import 'package:caferesto/common/widgets/texts/section_heading.dart';
 import 'package:caferesto/features/personalization/screens/profile/profile.dart';
+import 'package:caferesto/features/shop/screens/order/gerant_order_management_screen.dart';
 import 'package:caferesto/features/shop/screens/order/order.dart';
 import 'package:caferesto/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
@@ -125,10 +126,25 @@ class SettingsScreen extends StatelessWidget {
                 /// Développeur , upload
                 if (isAdminGerant()) ...[
                   SizedBox(height: AppSizes.spaceBtwSections),
-                  TSectionHeading(
-                      title: "Développement", showActionButton: false),
+                  TSectionHeading(title: "Gestion", showActionButton: false),
                   SizedBox(height: AppSizes.spaceBtwItems),
                 ],
+
+                if (isAdminGerant())
+                  TSettingsMenuTile(
+                    icon: Iconsax.category,
+                    title: "Gérer commandes",
+                    subTitle:
+                        "Consulter, ajouter, modifier ou supprimer une catégorie",
+                    onTap: () async {
+                      final result =
+                          await Get.to(() => GerantOrderManagementScreen());
+                      if (result == true) {
+                        // Le formulaire a été réinitialisé
+                        print("Écran fermé et formulaire réinitialisé");
+                      }
+                    },
+                  ),
                 if (isAdminOnly())
                   TSettingsMenuTile(
                     icon: Iconsax.category,

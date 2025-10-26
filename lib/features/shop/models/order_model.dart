@@ -4,7 +4,7 @@ import 'package:caferesto/utils/helpers/helper_functions.dart';
 import '../../personalization/models/address_model.dart';
 import 'etablissement_model.dart';
 
-enum OrderStatus { pending, shipped, delivered }
+enum OrderStatus { pending, cancelled, delivered, preparing, ready, refused }
 
 class OrderModel {
   final String id;
@@ -50,16 +50,21 @@ class OrderModel {
       ? THelperFunctions.getFormattedDate(deliveryDate!)
       : '';
 
-  String get orderStatusText {
-    switch (status) {
-      case OrderStatus.delivered:
-        return 'Livrée';
-      case OrderStatus.shipped:
-        return 'Livraison en cours';
-      default:
-        return 'En cours de traitement';
-    }
-  }
+String get orderStatusText {
+  switch (status) {
+    case OrderStatus.delivered:
+      return 'Livrée';
+    case OrderStatus.preparing:
+      return 'En préparation';
+    case OrderStatus.ready:
+      return 'Prête';
+    case OrderStatus.pending:
+      return 'En attente';
+    case OrderStatus.cancelled:
+      return 'Annulée';
+    case OrderStatus.refused:
+      return 'Refusée';
+  }}
 
   // -------------------------
   // Serialization
@@ -124,8 +129,14 @@ class OrderModel {
     switch (statusStr) {
       case 'delivered':
         return OrderStatus.delivered;
-      case 'shipped':
-        return OrderStatus.shipped;
+      case 'ready':
+        return OrderStatus.ready;
+              case 'preparing':
+        return OrderStatus.preparing;
+              case 'refused':
+        return OrderStatus.refused;
+              case 'cancelled':
+        return OrderStatus.cancelled;
       default:
         return OrderStatus.pending;
     }
