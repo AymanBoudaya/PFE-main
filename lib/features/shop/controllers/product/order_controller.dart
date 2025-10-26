@@ -251,6 +251,7 @@ class OrderController extends GetxController {
     DateTime? pickupDateTime,
     String? pickupDay,
     String? pickupTimeRange,
+    String? addressId,
   }) async {
     try {
       TFullScreenLoader.openLoadingDialog(
@@ -294,7 +295,7 @@ class OrderController extends GetxController {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-
+      print(order);
       await orderRepository.saveOrder(order, user.id);
 
       cartController.clearCart();

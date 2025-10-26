@@ -41,12 +41,20 @@ class OrderRepository extends GetxController {
       }
 
       // Convert to JSON and add user/etablissement IDs
-      final data = {
-        ...order.toJson(),
-        'user_id': userId,
+      await _db.from('orders').insert({
+        'user_id': order.userId,
         'etablissement_id': order.etablissementId,
-      };
-      await _db.from('orders').insert(data).select();
+        'status': order.status.name,
+        'total_amount': order.totalAmount,
+        'payment_method': order.paymentMethod,
+        'address': order.address,
+        'items': order.items.map((e) => e.toJson()).toList(),
+        'pickup_date_time': order.pickupDateTime?.toIso8601String(),
+        'pickup_day': order.pickupDay,
+        'pickup_time_range': order.pickupTimeRange,
+        'created_at': order.createdAt?.toIso8601String(),
+        'updated_at': order.updatedAt?.toIso8601String(),
+      }).select();
     } on PostgrestException catch (e) {
       print('❌ Postgres error: ${e.message}');
       rethrow;

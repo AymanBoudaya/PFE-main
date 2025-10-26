@@ -11,6 +11,7 @@ import '../../../../common/widgets/appbar/appbar.dart';
 import '../../../../common/widgets/products/cart/coupon_widget.dart';
 import '../../../../common/widgets/products/product_cards/widgets/rounded_container.dart';
 import '../../../../utils/helpers/pricing_calculator.dart';
+import '../../../personalization/controllers/address_controller.dart';
 import '../../../personalization/controllers/user_controller.dart';
 import '../../controllers/product/cart_controller.dart';
 import '../../controllers/product/order_controller.dart';
@@ -89,7 +90,7 @@ class CheckoutScreen extends StatelessWidget {
         padding: const EdgeInsets.all(AppSizes.defaultSpace),
         child: ElevatedButton(
             onPressed: subTotal > 0
-                ? () => _processOrder(orderController, totalAmount, context)
+                ? () => _processOrder2(orderController, totalAmount, context)
                 : () => TLoaders.warningSnackBar(
                     title: 'Panier vide',
                     message:
@@ -382,6 +383,71 @@ class CheckoutScreen extends StatelessWidget {
       pickupTimeRange: orderController.selectedSlot.value!,
       pickupDateTime: pickupDateTime,
       etablissementId: etablissementId, // ✅ pass correctly
+    );
+  }
+
+  void _processOrder2(
+    OrderController orderController,
+    double totalAmount,
+    BuildContext context,
+  ) {
+    final cartController = CartController.instance;
+    final addressController = AddressController.instance;
+
+    // ✅ Vérifier adresse
+    if (addressController.selectedAddress.value.id.isEmpty) {
+      TLoaders.warningSnackBar(
+        title: 'Adresse manquante',
+        message: 'Veuillez sélectionner une adresse de livraison.',
+      );
+      return;
+    }
+
+    // ✅ Vérifier créneau
+    if (orderController.selectedSlot.value == null ||
+        orderController.selectedDay.value == null) {
+      TLoaders.warningSnackBar(
+        title: 'Créneau manquant',
+        message: 'Veuillez choisir un créneau de retrait pour votre commande',
+      );
+      return;
+    }
+
+    // ✅ Vérifier panier
+    if (cartController.cartItems.isEmpty) {
+      TLoaders.warningSnackBar(
+        title: 'Panier vide',
+        message: 'Veuillez ajouter des produits au panier',
+      );
+      return;
+    }
+
+    // ✅ Calcul etablissementId + date/heure
+    final etablissementId = cartController.cartItems.first.etablissementId;
+    final selectedAddressId = addressController.selectedAddress.value.id;
+
+    final now = DateTime.now();
+    final startParts = orderController.selectedSlot.value!
+        .split(' - ')[0]
+        .split(':')
+        .map(int.parse)
+        .toList();
+    final pickupDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      startParts[0],
+      startParts[1],
+    );
+
+    // ✅ Envoi
+    orderController.processOrder(
+      totalAmount: totalAmount,
+      pickupDay: orderController.selectedDay.value!,
+      pickupTimeRange: orderController.selectedSlot.value!,
+      pickupDateTime: pickupDateTime,
+      etablissementId: etablissementId,
+      addressId: selectedAddressId, // ✅ plus de ""
     );
   }
 }
