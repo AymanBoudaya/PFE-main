@@ -53,6 +53,7 @@ class AddressController extends GetxController {
     final user = UserController.instance.user.value;
     name.text = user.fullName ?? '';
     phoneNumber.text = user.phone ?? '';
+    getAllUserAddresses(); // ⚡️ charge la sélection existante
   }
 
   /// ───────────────────────────────────────────────
@@ -203,48 +204,50 @@ class AddressController extends GetxController {
   Future<dynamic> selectNewAddressPopup(BuildContext context) {
     return showModalBottomSheet(
       context: context,
-      builder: (_) => Container(
-        padding: const EdgeInsets.all(AppSizes.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const TSectionHeading(
-              title: 'Sélectionner une adresse',
-              showActionButton: false,
-            ),
-            FutureBuilder(
-              future: getAllUserAddresses(),
-              builder: (_, snapshot) {
-                final response = TCloudHelperFunctions.checkMultiRecordState(
-                    snapshot: snapshot);
-                if (response != null) return response;
-
-                final addresses = snapshot.data!;
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: addresses.length,
-                  itemBuilder: (_, index) {
-                    final address = addresses[index];
-                    return TSingleAddress(
-                      address: address,
-                      onTap: () async {
-                        await selectAddress(address);
-                        Get.back();
-                      },
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: AppSizes.defaultSpace * 2),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Get.to(() => const AddNewAddressScreen()),
-                child: const Text('Ajouter une nouvelle adresse'),
+      builder: (_) => SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(AppSizes.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const TSectionHeading(
+                title: 'Sélectionner une adresse',
+                showActionButton: false,
               ),
-            ),
-          ],
+              FutureBuilder(
+                future: getAllUserAddresses(),
+                builder: (_, snapshot) {
+                  final response = TCloudHelperFunctions.checkMultiRecordState(
+                      snapshot: snapshot);
+                  if (response != null) return response;
+
+                  final addresses = snapshot.data!;
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: addresses.length,
+                    itemBuilder: (_, index) {
+                      final address = addresses[index];
+                      return TSingleAddress(
+                        address: address,
+                        onTap: () async {
+                          await selectAddress(address);
+                          Get.back();
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: AppSizes.defaultSpace * 2),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.to(() => const AddNewAddressScreen()),
+                  child: const Text('Ajouter une nouvelle adresse'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

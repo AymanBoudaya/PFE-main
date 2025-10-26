@@ -11,6 +11,7 @@ import '../../../../common/widgets/appbar/appbar.dart';
 import '../../../../common/widgets/products/cart/coupon_widget.dart';
 import '../../../../common/widgets/products/product_cards/widgets/rounded_container.dart';
 import '../../../../utils/helpers/pricing_calculator.dart';
+import '../../../personalization/controllers/user_controller.dart';
 import '../../controllers/product/cart_controller.dart';
 import '../../controllers/product/order_controller.dart';
 import 'widgets/billing_address_section.dart';
@@ -45,8 +46,8 @@ class CheckoutScreen extends StatelessWidget {
               ),
 
               /// --Coupon TextField
-              TCouponCode(dark: dark),
-              const SizedBox(height: AppSizes.spaceBtwSections),
+              // TCouponCode(dark: dark),
+              // const SizedBox(height: AppSizes.spaceBtwSections),
 
               /// --Billing section
               TRoundedContainer(
@@ -66,10 +67,12 @@ class CheckoutScreen extends StatelessWidget {
                     /// Payment Methods
                     TBillingPaymentSection(),
                     const SizedBox(height: AppSizes.spaceBtwItems),
+                    const Divider(),
 
                     /// Address
                     TBillingAddressSection(),
                     const SizedBox(height: AppSizes.spaceBtwItems),
+                    const Divider(),
 
                     /// 🔥 CORRECTION : Section créneau horaire améliorée
                     _buildTimeSlotSection(orderController),
@@ -322,63 +325,63 @@ class CheckoutScreen extends StatelessWidget {
 
   // 🔥 MÉTHODE : Traitement de la commande
   void _processOrder(
-  OrderController orderController,
-  double totalAmount,
-  BuildContext context,
-) {
-  final cartController = CartController.instance;
+    OrderController orderController,
+    double totalAmount,
+    BuildContext context,
+  ) {
+    final cartController = CartController.instance;
 
-  // 1. Validate slot
-  if (orderController.selectedSlot.value == null ||
-      orderController.selectedDay.value == null) {
-    TLoaders.warningSnackBar(
-      title: 'Créneau manquant',
-      message: 'Veuillez choisir un créneau de retrait pour votre commande',
+    // 1. Validate slot
+    if (orderController.selectedSlot.value == null ||
+        orderController.selectedDay.value == null) {
+      TLoaders.warningSnackBar(
+        title: 'Créneau manquant',
+        message: 'Veuillez choisir un créneau de retrait pour votre commande',
+      );
+      return;
+    }
+
+    // 2. Validate cart
+    if (cartController.cartItems.isEmpty) {
+      TLoaders.warningSnackBar(
+        title: 'Panier vide',
+        message: 'Veuillez ajouter des produits au panier',
+      );
+      return;
+    }
+
+    // 3. Extract etablissementId from the first item (all items must belong to same etablissement)
+    final etablissementId = cartController.cartItems.first.etablissementId;
+
+    // 4. Calculate pickupDateTime
+    final now = DateTime.now();
+    final targetWeekday = THelperFunctions.weekdayFromJour(
+        THelperFunctions.stringToJourSemaine(
+            orderController.selectedDay.value!)); // your helper
+    final daysToAdd = (targetWeekday - now.weekday + 7) % 7;
+    final chosenDate = now.add(Duration(days: daysToAdd));
+
+    final startParts = orderController.selectedSlot.value!
+        .split(' - ')[0]
+        .split(':')
+        .map(int.parse)
+        .toList();
+
+    final pickupDateTime = DateTime(
+      chosenDate.year,
+      chosenDate.month,
+      chosenDate.day,
+      startParts[0],
+      startParts[1],
     );
-    return;
-  }
 
-  // 2. Validate cart
-  if (cartController.cartItems.isEmpty) {
-    TLoaders.warningSnackBar(
-      title: 'Panier vide',
-      message: 'Veuillez ajouter des produits au panier',
+    // 5. Process the order
+    orderController.processOrder(
+      totalAmount: totalAmount,
+      pickupDay: orderController.selectedDay.value!,
+      pickupTimeRange: orderController.selectedSlot.value!,
+      pickupDateTime: pickupDateTime,
+      etablissementId: etablissementId, // ✅ pass correctly
     );
-    return;
   }
-
-  // 3. Extract etablissementId from the first item (all items must belong to same etablissement)
-  final etablissementId = cartController.cartItems.first.etablissementId;
-
-  // 4. Calculate pickupDateTime
-  final now = DateTime.now();
-  final targetWeekday =
-      THelperFunctions.weekdayFromJour(THelperFunctions.stringToJourSemaine(orderController.selectedDay.value!)); // your helper
-  final daysToAdd = (targetWeekday - now.weekday + 7) % 7;
-  final chosenDate = now.add(Duration(days: daysToAdd));
-
-  final startParts = orderController.selectedSlot.value!
-      .split(' - ')[0]
-      .split(':')
-      .map(int.parse)
-      .toList();
-
-  final pickupDateTime = DateTime(
-    chosenDate.year,
-    chosenDate.month,
-    chosenDate.day,
-    startParts[0],
-    startParts[1],
-  );
-
-  // 5. Process the order
-  orderController.processOrder(
-    totalAmount: totalAmount,
-    pickupDay: orderController.selectedDay.value!,
-    pickupTimeRange: orderController.selectedSlot.value!,
-    pickupDateTime: pickupDateTime,
-    etablissementId: etablissementId, // ✅ pass correctly
-  );
-}
-
 }

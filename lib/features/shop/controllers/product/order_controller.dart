@@ -29,6 +29,7 @@ class OrderController extends GetxController {
   final isLoading = false.obs;
   final isUpdating = false.obs;
   RealtimeChannel? _ordersChannel;
+  final Rxn<Map<String, dynamic>> selectedAddress = Rxn<Map<String, dynamic>>();
 
   @override
   void onInit() {
@@ -226,6 +227,10 @@ class OrderController extends GetxController {
     selectedSlot.value = null;
   }
 
+  void setSelectedAddress(Map<String, dynamic> address) {
+    selectedAddress.value = address;
+  }
+
   String getEtsId(OrderModel order) {
     return order.etablissementId;
   }
@@ -309,139 +314,139 @@ class OrderController extends GetxController {
   }
 
   Future<void> cancelOrder(String orderId) async {
-  try {
-    isUpdating.value = true;
-    
-    final orderIndex = orders.indexWhere((o) => o.id == orderId);
-    if (orderIndex == -1) {
-      throw 'Commande non trouvée';
-    }
+    try {
+      isUpdating.value = true;
 
-    final order = orders[orderIndex];
+      final orderIndex = orders.indexWhere((o) => o.id == orderId);
+      if (orderIndex == -1) {
+        throw 'Commande non trouvée';
+      }
 
-    // Check if order can be cancelled (only pending orders)
-    if (order.status != OrderStatus.pending) {
-      TLoaders.errorSnackBar(
-        title: "Impossible d'annuler",
-        message: "Seules les commandes en attente peuvent être annulées.",
+      final order = orders[orderIndex];
+
+      // Check if order can be cancelled (only pending orders)
+      if (order.status != OrderStatus.pending) {
+        TLoaders.errorSnackBar(
+          title: "Impossible d'annuler",
+          message: "Seules les commandes en attente peuvent être annulées.",
+        );
+        return;
+      }
+
+      // Update locally first for immediate UI feedback
+      orders[orderIndex] = order.copyWith(status: OrderStatus.cancelled);
+      orders.refresh();
+
+      // Update in database
+      await orderRepository.updateOrder(orderId, {
+        'status': 'cancelled',
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      // Send notification to establishment
+      await _sendNotification(
+        userId: order.etablissementId, // This goes to the establishment
+        title: "Commande annulée",
+        message: "Le client a annulé la commande #${orderId.substring(0, 8)}",
+        etablissementId: order.etablissementId,
+        receiverRole: 'gérant',
       );
-      return;
-    }
 
-    // Update locally first for immediate UI feedback
-    orders[orderIndex] = order.copyWith(status: OrderStatus.cancelled);
-    orders.refresh();
-
-    // Update in database
-    await orderRepository.updateOrder(orderId, {
-      'status': 'cancelled',
-      'updated_at': DateTime.now().toIso8601String(),
-    });
-
-    // Send notification to establishment
-    await _sendNotification(
-      userId: order.etablissementId, // This goes to the establishment
-      title: "Commande annulée",
-      message: "Le client a annulé la commande #${orderId.substring(0, 8)}",
-      etablissementId: order.etablissementId,
-      receiverRole: 'gérant',
-    );
-
-    TLoaders.successSnackBar(
-      title: "Succès", 
-      message: "Votre commande a été annulée.",
-    );
-  } catch (e) {
-    // Revert local changes on error
-    fetchUserOrders(); // Reload to get correct state
-    TLoaders.errorSnackBar(
-      title: "Erreur", 
-      message: "Impossible d'annuler la commande: $e",
-    );
-  } finally {
-    isUpdating.value = false;
-  }
-}
-
-Future<void> updateOrderDetails({
-  required String orderId,
-  required String pickupDay,
-  required String pickupTimeRange,
-}) async {
-  try {
-    isUpdating.value = true;
-    
-    final orderIndex = orders.indexWhere((o) => o.id == orderId);
-    if (orderIndex == -1) {
-      throw 'Commande non trouvée';
-    }
-
-    final order = orders[orderIndex];
-
-    // Check if order can be modified (only pending orders)
-    if (order.status != OrderStatus.pending) {
-      TLoaders.errorSnackBar(
-        title: "Impossible de modifier",
-        message: "Seules les commandes en attente peuvent être modifiées.",
+      TLoaders.successSnackBar(
+        title: "Succès",
+        message: "Votre commande a été annulée.",
       );
-      return;
+    } catch (e) {
+      // Revert local changes on error
+      fetchUserOrders(); // Reload to get correct state
+      TLoaders.errorSnackBar(
+        title: "Erreur",
+        message: "Impossible d'annuler la commande: $e",
+      );
+    } finally {
+      isUpdating.value = false;
     }
-
-    // Update in database
-    await orderRepository.updateOrder(orderId, {
-      'pickup_day': pickupDay,
-      'pickup_time_range': pickupTimeRange,
-      'updated_at': DateTime.now().toIso8601String(),
-    });
-
-    // Send notification to establishment
-    await _sendNotification(
-      userId: order.etablissementId,
-      title: "Commande modifiée",
-      message: "Le client a modifié le créneau de retrait pour la commande #${orderId.substring(0, 8)}",
-      etablissementId: order.etablissementId,
-      receiverRole: 'gérant',
-    );
-
-    // Reload orders to get updated data
-    await fetchUserOrders();
-
-    TLoaders.successSnackBar(
-      title: "Succès", 
-      message: "Commande modifiée avec succès",
-    );
-  } catch (e) {
-    TLoaders.errorSnackBar(
-      title: "Erreur", 
-      message: "Impossible de modifier la commande: $e",
-    );
-  } finally {
-    isUpdating.value = false;
   }
-}
 
+  Future<void> updateOrderDetails({
+    required String orderId,
+    required String pickupDay,
+    required String pickupTimeRange,
+  }) async {
+    try {
+      isUpdating.value = true;
+
+      final orderIndex = orders.indexWhere((o) => o.id == orderId);
+      if (orderIndex == -1) {
+        throw 'Commande non trouvée';
+      }
+
+      final order = orders[orderIndex];
+
+      // Check if order can be modified (only pending orders)
+      if (order.status != OrderStatus.pending) {
+        TLoaders.errorSnackBar(
+          title: "Impossible de modifier",
+          message: "Seules les commandes en attente peuvent être modifiées.",
+        );
+        return;
+      }
+
+      // Update in database
+      await orderRepository.updateOrder(orderId, {
+        'pickup_day': pickupDay,
+        'pickup_time_range': pickupTimeRange,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      // Send notification to establishment
+      await _sendNotification(
+        userId: order.etablissementId,
+        title: "Commande modifiée",
+        message:
+            "Le client a modifié le créneau de retrait pour la commande #${orderId.substring(0, 8)}",
+        etablissementId: order.etablissementId,
+        receiverRole: 'gérant',
+      );
+
+      // Reload orders to get updated data
+      await fetchUserOrders();
+
+      TLoaders.successSnackBar(
+        title: "Succès",
+        message: "Commande modifiée avec succès",
+      );
+    } catch (e) {
+      TLoaders.errorSnackBar(
+        title: "Erreur",
+        message: "Impossible de modifier la commande: $e",
+      );
+    } finally {
+      isUpdating.value = false;
+    }
+  }
 
 // Helper method for notifications
-Future<void> _sendNotification({
-  required String userId,
-  required String title,
-  required String message,
-  required String etablissementId,
-  required String receiverRole,
-}) async {
-  try {
-    await _db.from('notifications').insert({
-      'user_id': userId,
-      'title': title,
-      'message': message,
-      'read': false,
-      'etablissement_id': etablissementId,
-      'receiver_role': receiverRole,
-      'created_at': DateTime.now().toIso8601String(),
-    });
-    debugPrint('✅ Notification envoyée à $receiverRole: $title');
-  } catch (e) {
-    debugPrint('❌ Erreur envoi notification: $e');
+  Future<void> _sendNotification({
+    required String userId,
+    required String title,
+    required String message,
+    required String etablissementId,
+    required String receiverRole,
+  }) async {
+    try {
+      await _db.from('notifications').insert({
+        'user_id': userId,
+        'title': title,
+        'message': message,
+        'read': false,
+        'etablissement_id': etablissementId,
+        'receiver_role': receiverRole,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      debugPrint('✅ Notification envoyée à $receiverRole: $title');
+    } catch (e) {
+      debugPrint('❌ Erreur envoi notification: $e');
+    }
   }
-}
 }
