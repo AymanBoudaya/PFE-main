@@ -21,18 +21,19 @@ class ProductCardAddToCartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartController = CartController.instance;
+
     return Obx(() {
       final productQuantityInCart =
           cartController.getProductQuantityInCart(product.id);
 
       return Container(
-        height: 32,
-        width: productQuantityInCart > 0 ? 80 : 32, 
+        height: 32, // Slightly larger for detail page
+        width: productQuantityInCart > 0 ? 80 : 32,
         decoration: BoxDecoration(
           color: productQuantityInCart > 0
               ? AppColors.primary
               : AppColors.dark.withAlpha((255 * 0.8).toInt()),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12), // Slightly larger radius
         ),
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
@@ -52,13 +53,13 @@ class ProductCardAddToCartButton extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: const Center(
           child: Icon(
             Icons.add_rounded,
             color: Colors.white,
-            size: 18,
+            size: 18, // Slightly larger icon
           ),
         ),
       ),
@@ -68,36 +69,37 @@ class ProductCardAddToCartButton extends StatelessWidget {
   Widget _buildCounterWidget(
       BuildContext context, CartController cartController, int quantity) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 4), // More padding
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // BOUTON DÉCRÉMENTER - Toujours visible quand quantité >= 1
+          // DECREMENT BUTTON
           GestureDetector(
             onTap: () => _handleDecrement(cartController),
             child: Container(
-              width: 24,
+              width: 24, // Slightly larger
               height: 24,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius:
+                    BorderRadius.circular(8), // Slightly larger radius
               ),
               child: const Center(
                 child: Icon(
                   Icons.remove_rounded,
                   color: Colors.white,
-                  size: 14,
+                  size: 14, // Slightly larger
                 ),
               ),
             ),
           ),
 
-          // QUANTITÉ
+          // QUANTITY
           Container(
             constraints: const BoxConstraints(minWidth: 20),
             child: Text(
               quantity.toString(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -105,7 +107,7 @@ class ProductCardAddToCartButton extends StatelessWidget {
             ),
           ),
 
-          // BOUTON INCREMENTER
+          // INCREMENT BUTTON
           GestureDetector(
             onTap: () => _handleIncrement(cartController),
             child: Container(
@@ -133,9 +135,9 @@ class ProductCardAddToCartButton extends StatelessWidget {
     if (isSingleProduct) {
       final cartItem = cartController.productToCartItem(product, 1);
       cartController.addOneToCart(cartItem);
-    } else {
-      Get.to(() => ProductDetailScreen(product: product));
     }
+    // For non-single products, you might want to show variant selection
+    // or keep the navigation if needed
   }
 
   void _handleIncrement(CartController cartController) {

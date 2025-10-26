@@ -17,6 +17,7 @@ import '../../controllers/product/cart_controller.dart';
 import '../../controllers/product/order_controller.dart';
 import 'widgets/billing_address_section.dart';
 import 'widgets/billing_amount_section.dart';
+import 'widgets/time_slot_modal.dart';
 
 class CheckoutScreen extends StatelessWidget {
   const CheckoutScreen({super.key});
@@ -116,6 +117,10 @@ class CheckoutScreen extends StatelessWidget {
 
   // 🔥 WIDGET : Aucun créneau sélectionné
   Widget _buildNoTimeSlotWidget(OrderController orderController) {
+    final dark = THelperFunctions.isDarkMode(Get.context!);
+    final cartController = CartController.instance;
+    final product = cartController.cartItems.first.product;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -130,7 +135,17 @@ class CheckoutScreen extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () => _showTimeSlotSelectionDialog(orderController),
+              onPressed: () async {
+                if (product == null) {
+                  TLoaders.warningSnackBar(
+                    title: 'Erreur',
+                    message: 'Impossible de trouver le produit du panier.',
+                  );
+                  return;
+                }
+                await TimeSlotModal()
+                    .openTimeSlotModal(Get.context!, dark, product);
+              },
               child: const Text(
                 "Choisir un créneau",
                 style: TextStyle(
@@ -185,7 +200,19 @@ class CheckoutScreen extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () => _showTimeSlotSelectionDialog(orderController),
+              onPressed: () async {
+                final dark = THelperFunctions.isDarkMode(Get.context!);
+                final product = CartController.instance.cartItems.first.product;
+                if (product == null) {
+                  TLoaders.warningSnackBar(
+                    title: 'Erreur',
+                    message: 'Impossible de trouver le produit du panier.',
+                  );
+                  return;
+                }
+                await TimeSlotModal()
+                    .openTimeSlotModal(Get.context!, dark, product);
+              },
               child: const Text(
                 "Modifier",
                 style: TextStyle(
@@ -237,91 +264,6 @@ class CheckoutScreen extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  // 🔥 MÉTHODE : Afficher la sélection de créneau
-  void _showTimeSlotSelectionDialog(OrderController orderController) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Choisir un créneau de retrait"),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: _buildTimeSlotSelectionContent(orderController),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text("Annuler"),
-          ),
-          Obx(() {
-            final hasSelection = orderController.selectedSlot.value != null &&
-                orderController.selectedDay.value != null;
-            return TextButton(
-              onPressed: hasSelection ? () => Get.back() : null,
-              child: const Text("Confirmer"),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  // 🔥 CONTENU DE LA SÉLECTION DE CRÉNEAU
-  Widget _buildTimeSlotSelectionContent(OrderController orderController) {
-    // Simuler des données de créneaux (à remplacer par vos vraies données)
-    final timeSlots = {
-      'Lundi': ['09:00 - 10:00', '14:00 - 15:00', '18:00 - 19:00'],
-      'Mardi': ['09:00 - 10:00', '14:00 - 15:00', '18:00 - 19:00'],
-      'Mercredi': ['09:00 - 10:00', '14:00 - 15:00', '18:00 - 19:00'],
-    };
-
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final entry in timeSlots.entries)
-            _buildDaySection(entry.key, entry.value, orderController),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDaySection(
-      String day, List<String> slots, OrderController orderController) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ExpansionTile(
-        title: Text(
-          day,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        children: slots
-            .map((slot) => _buildTimeSlotOption(day, slot, orderController))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildTimeSlotOption(
-      String day, String slot, OrderController orderController) {
-    return Obx(() {
-      final isSelected = orderController.selectedDay.value == day &&
-          orderController.selectedSlot.value == slot;
-
-      return ListTile(
-        leading: isSelected
-            ? const Icon(Icons.check_circle, color: Colors.green)
-            : const Icon(Icons.access_time),
-        title: Text(slot),
-        onTap: () {
-          orderController.setSelectedSlot(day, slot);
-        },
-        tileColor: isSelected ? Colors.green.shade50 : null,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      );
-    });
   }
 
   void _processOrder(
