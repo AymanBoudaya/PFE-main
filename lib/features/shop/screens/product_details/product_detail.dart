@@ -3,10 +3,8 @@ import 'package:caferesto/features/shop/controllers/product/favorites_controller
 import 'package:caferesto/features/shop/controllers/product/share_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_navigation/src/snackbar/snackbar.dart';
 import 'package:readmore/readmore.dart';
 
-import '../../../../common/widgets/products/favorite_icon/favorite_icon.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';

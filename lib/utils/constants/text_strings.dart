@@ -16,7 +16,7 @@ class TTexts {
   static const String onBoardingTitle2En = "Select Payment Method";
   static const String onBoardingTitle2 = "Payement à domicile ou à la caisse";
   static const String onBoardingTitle3En = "Deliver at your door step";
-  static const String onBoardingTitle3 = "Livraison à domicile";
+  static const String onBoardingTitle3 = "Commander sans payement internet";
 
   static const String onBoardingSubTitle1En =
       "Welcome to a World of Limitless Choices - Your Perfect Product Awaits!";
@@ -29,7 +29,7 @@ class TTexts {
       "Bienvenue dans un monde de choix illimités - Votre produit parfait vous attend !";
   static const String onBoardingSubTitle2 = "Votre confort, notre priorité !";
   static const String onBoardingSubTitle3 =
-      "De notre porte à la vôtre - Livraison rapide et sécurisée !";
+      "Délais d'attente réduits graçe à la commande anticipée";
 
   // -- Authentication Forms en Français
   static const String firstName = "Prénom";
@@ -99,8 +99,7 @@ class TTexts {
   static const String loginTitleEn =
       "Welcome back,"; // (Gardé en anglais comme référence)
   static const String loginTitle = "Bienvenue";
-  static const String loginSubTitle =
-      "Savourer la vie, sans file d'attente.";
+  static const String loginSubTitle = "Savourer la vie, sans file d'attente.";
   static const String signupTitle = "Créez votre compte";
   static const String forgetPasswordTitle = "Mot de passe oublié";
   static const String forgetPasswordSubTitle =

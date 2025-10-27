@@ -215,12 +215,12 @@ class ProductCardVertical extends StatelessWidget {
     final dark = THelperFunctions.isDarkMode(context);
 
     return Obx(() {
-      final isFavorite = FavoritesController.instance.isFavorite(product.id);
+      final isFavorite = FavoritesController.instance.isFavourite(product.id);
 
       return GestureDetector(
         onTap: onFavoriteTap ??
             () {
-              FavoritesController.instance.toggleFavorite(product.id);
+              FavoritesController.instance.toggleFavoriteProduct(product.id);
             },
         child: Container(
           padding: const EdgeInsets.all(6),

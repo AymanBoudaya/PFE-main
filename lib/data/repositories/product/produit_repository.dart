@@ -420,4 +420,45 @@ class ProduitRepository extends GetxController {
       return [];
     }
   }
+
+
+  /// Get multiple products by their IDs (for favorites)
+  Future<List<ProduitModel>> getProductsByIds(List<String> productIds) async {
+    if (productIds.isEmpty) return [];
+
+    try {
+      final chunks = _chunkList(productIds, 100);
+      List<ProduitModel> allProducts = [];
+
+      for (final chunk in chunks) {
+        final response = await _db
+            .from('produits')
+            .select()
+            .inFilter('id', chunk);
+
+        final List<Map<String, dynamic>> productData = 
+            (response as List).cast<Map<String, dynamic>>();
+
+        allProducts.addAll(
+            productData.map((json) => ProduitModel.fromMap(json)).toList());
+      }
+
+      // Maintain the order from productIds
+      allProducts.sort((a, b) =>
+          productIds.indexOf(a.id).compareTo(productIds.indexOf(b.id)));
+
+      return allProducts;
+    } on PostgrestException catch (e) {
+      throw 'Database error: ${e.message}';
+    } catch (e) {
+      throw 'Echec de chargement des produits : ${e.toString()}';
+    }
+  }
+
+  /// Alias for getProductsByIds to maintain compatibility
+  Future<List<ProduitModel>> getFavoriteProducts(List<String> productIds) async {
+    return getProductsByIds(productIds);
+  }
+
+
 }

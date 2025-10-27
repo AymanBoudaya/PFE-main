@@ -1,19 +1,21 @@
-import 'package:caferesto/common/widgets/appbar/appbar.dart';
-import 'package:caferesto/common/widgets/icons/t_circular_icon.dart';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:caferesto/common/widgets/appbar/appbar.dart';
+import 'package:caferesto/common/widgets/icons/t_circular_icon.dart';
+import 'package:caferesto/common/widgets/products/product_cards/product_card_vertical.dart';
+import 'package:caferesto/common/widgets/shimmer/vertical_product_shimmer.dart';
+import 'package:caferesto/features/shop/controllers/product/favorites_controller.dart';
+import 'package:caferesto/features/shop/models/produit_model.dart';
+import 'package:caferesto/navigation_menu.dart';
+import 'package:caferesto/utils/constants/colors.dart';
+import 'package:caferesto/utils/constants/image_strings.dart';
+import 'package:caferesto/utils/constants/sizes.dart';
+import 'package:caferesto/utils/device/device_utility.dart';
+import 'package:caferesto/utils/helpers/helper_functions.dart';
+import 'package:caferesto/utils/loaders/animation_loader.dart';
 
-import '../../../../common/widgets/products/product_cards/product_card_vertical.dart';
-import '../../../../common/widgets/shimmer/vertical_product_shimmer.dart';
-import '../../../../navigation_menu.dart';
-import '../../../../utils/constants/colors.dart';
-import '../../../../utils/constants/image_strings.dart';
-import '../../../../utils/constants/sizes.dart';
-import '../../../../utils/device/device_utility.dart';
-import '../../../../utils/helpers/helper_functions.dart';
-import '../../../../utils/loaders/animation_loader.dart';
-import '../../controllers/product/favorites_controller.dart';
-import '../../models/produit_model.dart';
+import '../../../../utils/popups/loaders.dart';
 
 class FavoriteScreen extends StatelessWidget {
   const FavoriteScreen({super.key});
@@ -25,206 +27,333 @@ class FavoriteScreen extends StatelessWidget {
     final isDesktop = TDeviceUtils.isDesktop(context);
     final isTablet = TDeviceUtils.isTablet(context);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!controller.isLoading.value &&
+          controller.favoriteProducts.isEmpty &&
+          controller.favoriteIds.isNotEmpty) {
+        controller.loadFavorites();
+      }
+    });
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.dark : AppColors.light,
       appBar: _buildAppBar(context, isDark, controller),
-      body: _buildBody(context, controller, isDesktop, isTablet),
+      body: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: isDesktop ? 40 : AppSizes.defaultSpace,
+          vertical: isDesktop ? 20 : AppSizes.defaultSpace,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context, controller),
+            const SizedBox(height: AppSizes.spaceBtwSections),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.loadFavorites,
+                child: Obx(() => _buildContent(
+                      context,
+                      controller,
+                      isDesktop,
+                      isTablet,
+                    )),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, bool isDark, FavoritesController controller) {
+  PreferredSizeWidget _buildAppBar(
+      BuildContext context, bool isDark, FavoritesController controller) {
     return TAppBar(
       title: Text(
         'Mes Favoris',
         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-          color: isDark ? Colors.white : Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
+              color: isDark ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
       ),
       actions: [
-        // Clear all button
         Obx(() => controller.favoriteIds.isNotEmpty
             ? IconButton(
-                onPressed: () => _showClearAllDialog(context, controller),
-                icon: Icon(
-                  Icons.delete_outline_rounded,
-                  color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
-                ),
-                tooltip: 'Vider tous les favoris',
+                onPressed: () => _showClearAllBottomSheet(context, controller),
+                icon: Icon(Icons.delete_outline_rounded,
+                    color:
+                        isDark ? Colors.grey.shade300 : Colors.grey.shade700),
               )
             : const SizedBox.shrink()),
-        
-        // Home navigation
         TCircularIcon(
           icon: Icons.home_rounded,
-          onPressed: () => Get.off(() => const NavigationMenu()),
-          // tooltip: 'Retour à l\'accueil',
+          onPressed: () => Get.offAll(() => const NavigationMenu()),
         ),
       ],
-    );
-  }
-
-  Widget _buildBody(BuildContext context, FavoritesController controller, bool isDesktop, bool isTablet) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 40 : AppSizes.defaultSpace,
-        vertical: isDesktop ? 20 : AppSizes.defaultSpace,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with count
-          _buildHeader(context, controller),
-          
-          const SizedBox(height: AppSizes.spaceBtwSections),
-          
-          // Products grid
-          Expanded(
-            child: _buildProductsGrid(controller, isDesktop, isTablet),
-          ),
-        ],
-      ),
     );
   }
 
   Widget _buildHeader(BuildContext context, FavoritesController controller) {
-    return Obx(() => Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Produits favoris (${controller.favoriteIds.length})',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        
-        if (controller.favoriteIds.isNotEmpty)
-          Text(
-            '${controller.favoriteIds.length} ${controller.favoriteIds.length > 1 ? 'produits' : 'produit'}',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey.shade600,
-            ),
-          ),
-      ],
-    ));
-  }
-
-  Widget _buildProductsGrid(FavoritesController controller, bool isDesktop, bool isTablet) {
     return Obx(() {
-      if (controller.favoriteIds.isEmpty) {
-        return _buildEmptyState(controller);
-      }
-
-      return FutureBuilder(
-        future: controller.getFavoriteProducts(),
-        builder: (context, snapshot) {
-          // Handle loading state
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildLoadingState(isDesktop, isTablet);
-          }
-
-          // Handle error state
-          if (snapshot.hasError) {
-            return _buildErrorState(controller, snapshot.error.toString());
-          }
-
-          // Handle empty state after loading
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return _buildEmptyState(controller);
-          }
-
-          final products = snapshot.data!;
-          return _buildProductsGridContent(products, isDesktop, isTablet);
-        },
+      final count = controller.favoriteIds.length;
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('Produits favoris ($count)',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w600)),
+          if (count > 0)
+            Text('$count ${count > 1 ? 'produits' : 'produit'}',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Colors.grey.shade600)),
+        ],
       );
     });
   }
 
-  Widget _buildLoadingState(bool isDesktop, bool isTablet) {
+  Widget _buildContent(BuildContext context, FavoritesController controller,
+      bool isDesktop, bool isTablet) {
     final crossAxisCount = isDesktop ? 4 : (isTablet ? 3 : 2);
+    final mainAxisExtent = isDesktop ? 320.0 : (isTablet ? 300.0 : 280.0);
+
+    if (controller.isLoading.value) {
+      return GridView.builder(
+        physics: const BouncingScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: AppSizes.defaultSpace,
+          mainAxisSpacing: AppSizes.defaultSpace,
+          mainAxisExtent: mainAxisExtent,
+        ),
+        itemCount: 6,
+        itemBuilder: (_, __) => const TVerticalProductShimmer(),
+      );
+    }
+
+    if (controller.favoriteIds.isEmpty) {
+      return _buildEmptyState(context);
+    }
+
+    if (controller.favoriteProducts.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!controller.isLoading.value) controller.loadFavorites();
+      });
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final products = controller.favoriteProducts;
     return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: AppSizes.defaultSpace,
-        mainAxisSpacing: AppSizes.defaultSpace,
-        mainAxisExtent: 280,
-      ),
-      itemCount: 6,
-      itemBuilder: (_, index) => const TVerticalProductShimmer(),
-    );
-  }
-
-  Widget _buildErrorState(FavoritesController controller, String error) {
-    return TAnimationLoaderWidget(
-      text: "Erreur de chargement",
-      animation: TImages.docerAnimation,
-      showAction: true,
-      actionText: "Réessayer",
-      onActionPressed: () => controller.getFavoriteProducts(),
-    );
-  }
-
-  Widget _buildEmptyState(FavoritesController controller) {
-    return Center(
-      child: TAnimationLoaderWidget(
-        text: "Votre liste de favoris est vide !",
-        animation: TImages.pencilAnimation,
-        showAction: true,
-        actionText: "Découvrir des produits",
-        onActionPressed: () => Get.off(() => const NavigationMenu()),
-      ),
-    );
-  }
-
-  Widget _buildProductsGridContent(List<ProduitModel> products, bool isDesktop, bool isTablet) {
-    final crossAxisCount = isDesktop ? 4 : (isTablet ? 3 : 2);
-    
-    return GridView.builder(
+      key: const PageStorageKey('favorites_grid'),
       physics: const BouncingScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: AppSizes.defaultSpace,
         mainAxisSpacing: AppSizes.defaultSpace,
-        mainAxisExtent: isDesktop ? 320 : (isTablet ? 300 : 280),
+        mainAxisExtent: mainAxisExtent,
       ),
       itemCount: products.length,
-      itemBuilder: (_, index) => ProductCardVertical(
-        product: products[index],
-        onFavoriteTap: () => FavoritesController.instance.toggleFavorite(products[index].id),
-      ),
+      itemBuilder: (_, index) {
+        final ProduitModel p = products[index];
+        return ProductCardVertical(
+          product: p,
+          onFavoriteTap: () => controller.toggleFavoriteProduct(p.id),
+        );
+      },
     );
   }
 
-  void _showClearAllDialog(BuildContext context, FavoritesController controller) {
-    Get.defaultDialog(
-      title: "Vider les favoris",
-      titleStyle: Theme.of(context).textTheme.headlineSmall,
-      content: Column(
-        children: [
-          Icon(Icons.warning_amber_rounded, size: 60, color: Colors.orange.shade600),
-          const SizedBox(height: AppSizes.spaceBtwItems),
-          Text(
-            "Êtes-vous sûr de vouloir supprimer tous vos produits favoris ?",
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+  /// --- Empty State ---
+  Widget _buildEmptyState(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final maxHeight = constraints.maxHeight.isFinite
+          ? constraints.maxHeight
+          : MediaQuery.of(context).size.height;
+      final animationHeight =
+          min(maxHeight * 0.45, 360.0); // scaled down safely
+
+      return Center(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Votre liste de favoris est vide !",
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
+                    ?.copyWith(fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: animationHeight,
+                child: TAnimationLoaderWidget(
+                  text: '',
+                  animation: TImages.pencilAnimation,
+                  showAction: false,
+                ),
+              ),
+              const SizedBox(height: 25),
+              _buildPrimaryButton(
+                context,
+                label: "Découvrir des produits",
+                icon: Icons.explore_outlined,
+                onPressed: () => Get.offAll(() => const NavigationMenu()),
+              ),
+            ],
           ),
-        ],
-      ),
-      confirm: ElevatedButton(
-        onPressed: () {
-          Get.back();
-          controller.clearAllFavorites();
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
-        child: const Text("Supprimer tout", style: TextStyle(color: Colors.white)),
+      );
+    });
+  }
+
+  /// --- Custom Ecommerce Button ---
+  Widget _buildPrimaryButton(BuildContext context,
+      {required String label,
+      required IconData icon,
+      required VoidCallback onPressed}) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        elevation: 6,
+        shadowColor: AppColors.primary.withOpacity(0.35),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
-      cancel: OutlinedButton(
-        onPressed: () => Get.back(),
-        child: const Text("Annuler"),
-      ),
+      icon: Icon(icon, size: 22),
+      label: Text(label),
+      onPressed: onPressed,
+    );
+  }
+
+  /// --- Modal Bottom Sheet ---
+  void _showClearAllBottomSheet(
+      BuildContext context, FavoritesController controller) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final sheetHeight = min(screenHeight * 0.38, 380.0);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: FractionallySizedBox(
+            heightFactor: sheetHeight / screenHeight,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 18,
+                    offset: const Offset(0, -6),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 6,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  const Icon(Icons.delete_sweep_outlined,
+                      size: 44, color: Colors.redAccent),
+                  const SizedBox(height: 10),
+                  Text("Vider les favoris",
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Supprimer tous vos produits favoris ? Cette action est irréversible.",
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: Colors.grey.shade600),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Get.back(),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            side: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          child: const Text("Annuler"),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Obx(() {
+                          final isBusy = controller.isLoading.value;
+                          return ElevatedButton.icon(
+                            onPressed: isBusy
+                                ? null
+                                : () async {
+                                    final success =
+                                        await controller.clearAllFavorites();
+                                    Get.back();
+                                    if (success) {
+                                      TLoaders.successSnackBar(
+                                          title: "Favoris vidés",
+                                          message:
+                                              "Tous les produits favoris ont été supprimés.");
+                                    } else {
+                                      TLoaders.errorSnackBar(
+                                          title: "Erreur",
+                                          message:
+                                              "Impossible de vider vos favoris.");
+                                    }
+                                  },
+                            icon: isBusy
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2, color: Colors.white))
+                                : const Icon(Icons.delete_forever_outlined,
+                                    size: 18),
+                            label:
+                                Text(isBusy ? "Suppression..." : "Supprimer"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
