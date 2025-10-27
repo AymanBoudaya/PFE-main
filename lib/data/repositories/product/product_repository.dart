@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../features/shop/models/product_model.dart';
+import '../../../features/shop/models/produit_model.dart';
 import '../../../utils/exceptions/platform_exceptions.dart';
 
 class ProductRepository extends GetxController {
@@ -64,29 +65,34 @@ class ProductRepository extends GetxController {
       throw 'Something went wrong! Please try again';
     }
   }
+Future<List<ProduitModel>> getFavoriteProducts(List<String> productIds) async {
+  if (productIds.isEmpty) return [];
 
-  Future<List<ProductModel>> getFavoriteProducts(
-      List<String> productIds) async {
-    if (productIds.isEmpty) return [];
+  try {
+    final chunks = _chunkList(productIds, 100);
+    List<ProduitModel> allProducts = [];
 
-    try {
-      final chunks = _chunkList(productIds, 100);
-      List<ProductModel> allProducts = [];
+    for (final chunk in chunks) {
+      final response = await _db.from('produits').select().inFilter('id', chunk);
 
-      for (final chunk in chunks) {
-        final response =
-            await _db.from('products').select().inFilter('id', chunk);
-
-        allProducts.addAll(
-            response.map((json) => ProductModel.fromJson(json)).toList());
-      }
-      return allProducts;
-    } on PostgrestException catch (e) {
-      throw 'Database error: ${e.message}';
-    } catch (e) {
-      throw 'Echec de chargement des produits favoris :${e.toString()}';
+      // Direct casting should work with newer versions
+      final List<Map<String, dynamic>> productData = 
+          (response as List).cast<Map<String, dynamic>>();
+      
+      allProducts.addAll(
+        productData.map((json) => ProduitModel.fromJson(json)).toList()
+      );
     }
+    
+    // Maintain the order from favoriteIds
+    return allProducts..sort((a, b) => 
+        productIds.indexOf(a.id).compareTo(productIds.indexOf(b.id)));
+  } on PostgrestException catch (e) {
+    throw 'Database error: ${e.message}';
+  } catch (e) {
+    throw 'Echec de chargement des produits favoris : ${e.toString()}';
   }
+}
 
   Future<List<ProductModel>> getProductsForBrand(
       {required String brandId, int limit = -1}) async {

@@ -2,13 +2,13 @@
 
 import 'dart:ui';
 
-import 'package:caferesto/common/widgets/products/favorite_icon/favorite_icon.dart';
 import 'package:caferesto/common/widgets/products/product_cards/widgets/aucune_image.dart';
 import 'package:caferesto/utils/constants/colors.dart';
 import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../features/shop/controllers/product/favorites_controller.dart';
 import '../../../../features/shop/controllers/product/produit_controller.dart';
 import '../../../../features/shop/models/produit_model.dart';
 import '../../../../features/shop/screens/product_details/product_detail.dart';
@@ -23,9 +23,11 @@ class ProductCardVertical extends StatelessWidget {
   const ProductCardVertical({
     super.key,
     required this.product,
+    this.onFavoriteTap,
   });
 
   final ProduitModel product;
+  final VoidCallback? onFavoriteTap;
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +138,7 @@ class ProductCardVertical extends StatelessWidget {
                                   : AppColors.white,
                               shape: BoxShape.circle,
                             ),
-                            child: FavoriteIcon(productId: product.id),
+                            child: _buildFavoriteIcon(context),
                           ),
                         ),
                       ],
@@ -208,11 +210,42 @@ class ProductCardVertical extends StatelessWidget {
     );
   }
 
+  /// Build favorite icon with custom onTap callback
+  Widget _buildFavoriteIcon(BuildContext context) {
+    final dark = THelperFunctions.isDarkMode(context);
+
+    return Obx(() {
+      final isFavorite = FavoritesController.instance.isFavorite(product.id);
+
+      return GestureDetector(
+        onTap: onFavoriteTap ??
+            () {
+              FavoritesController.instance.toggleFavorite(product.id);
+            },
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: dark
+                ? Colors.black.withAlpha(100)
+                : Colors.white.withAlpha(200),
+          ),
+          child: Icon(
+            isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+            color: isFavorite
+                ? Colors.redAccent
+                : (dark ? Colors.grey.shade300 : Colors.grey.shade600),
+            size: 16,
+          ),
+        ),
+      );
+    });
+  }
+
   /// Méthode pour construire l'image du produit (supporte réseau et assets)
   Widget _buildProductImage() {
     // Si l'URL de l'image commence par http, c'est une image réseau
-    if (product.imageUrl.isNotEmpty &&
-        product.imageUrl.startsWith('http')) {
+    if (product.imageUrl.isNotEmpty && product.imageUrl.startsWith('http')) {
       return Image.network(
         product.imageUrl,
         height: 150,
