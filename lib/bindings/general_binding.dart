@@ -12,6 +12,8 @@ import '../features/authentication/controllers/signup/verify_otp_controller.dart
 import '../features/personalization/controllers/user_controller.dart';
 import '../features/shop/controllers/etablissement_controller.dart';
 import '../features/shop/controllers/product/checkout_controller.dart';
+import '../features/shop/controllers/product/favorites_controller.dart';
+import '../features/shop/controllers/product/share_controller.dart';
 import '../features/shop/controllers/product/variation_controller.dart';
 import '../utils/helpers/network_manager.dart';
 
@@ -29,6 +31,8 @@ class GeneralBinding extends Bindings {
     Get.lazyPut<AddressController>(() => AddressController(), fenix: true);
     Get.lazyPut<OrderRepository>(() => OrderRepository(), fenix: true);
     Get.lazyPut<AddressRepository>(() => AddressRepository(), fenix: true);
+    Get.lazyPut<FavoritesController>(() => FavoritesController(), fenix: true);
+    Get.lazyPut<ShareController>(() => ShareController(), fenix: true);
 
     Get.put(NetworkManager());
     Get.put(UserController());

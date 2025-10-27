@@ -62,6 +62,7 @@ dependencies:
   flutter_3d_controller: ^2.0.1 # For 3D perspective effects
   flutter_localization: ^0.3.3
   searchable_listview: ^2.19.3
+  share_plus: ^7.0.1
 
 flutter_native_splash:
   color: "#1e293b" # Deep slate blue for modern feel

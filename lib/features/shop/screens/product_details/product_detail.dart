@@ -1,8 +1,12 @@
+import 'package:caferesto/common/widgets/appbar/appbar.dart';
+import 'package:caferesto/features/shop/controllers/product/favorites_controller.dart';
+import 'package:caferesto/features/shop/controllers/product/share_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/snackbar/snackbar.dart';
 import 'package:readmore/readmore.dart';
 
+import '../../../../common/widgets/products/favorite_icon/favorite_icon.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';
@@ -87,101 +91,106 @@ class ProductDetailScreen extends StatelessWidget {
   }
 
   Widget _buildTrendyImagePlaceholder(bool dark) {
-    return Container(
-      height: 400,
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: dark
-              ? [Colors.grey.shade800, Colors.grey.shade900]
-              : [Colors.grey.shade100, Colors.grey.shade200],
+    return Scaffold(
+      appBar: TAppBar(),
+      body: Container(
+        height: 400,
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: dark
+                ? [Colors.grey.shade800, Colors.grey.shade900]
+                : [Colors.grey.shade100, Colors.grey.shade200],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Background Pattern
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _ProductPlaceholderPainter(dark: dark),
-            ),
-          ),
-
-          // Content
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Animated Icon
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: dark
-                        ? Colors.green.shade800.withOpacity(0.3)
-                        : Colors.green.shade100,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.photo_camera_rounded,
-                    size: 40,
-                    color: dark ? Colors.green.shade300 : Colors.green.shade600,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Text
-                Text(
-                  'Image non disponible',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: dark ? Colors.grey.shade300 : Colors.grey.shade700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Subtitle
-                Text(
-                  'Produit de qualité garantie',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: dark ? Colors.grey.shade500 : Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Decorative Elements
-          Positioned(
-            top: 20,
-            right: 20,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            // Background Pattern
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _ProductPlaceholderPainter(dark: dark),
               ),
-              child: Text(
-                'Nouveau',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+            ),
+
+            // Content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Animated Icon
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: dark
+                          ? Colors.green.shade800.withOpacity(0.3)
+                          : Colors.green.shade100,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.photo_camera_rounded,
+                      size: 40,
+                      color:
+                          dark ? Colors.green.shade300 : Colors.green.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Text
+                  Text(
+                    'Image non disponible',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: dark ? Colors.grey.shade300 : Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Subtitle
+                  Text(
+                    'Produit de qualité garantie',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: dark ? Colors.grey.shade500 : Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Decorative Elements
+            Positioned(
+              top: 20,
+              right: 20,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Nouveau',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -256,25 +265,40 @@ class ProductDetailScreen extends StatelessWidget {
                 color: dark ? Colors.grey.shade800 : Colors.grey.shade100,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.share_rounded,
-                size: 18,
-                color: dark ? Colors.grey.shade300 : Colors.grey.shade700,
+              child: InkWell(
+                onTap: () => ShareController.instance.shareProduct(product),
+                child: Icon(
+                  Icons.share_rounded,
+                  size: 18,
+                  color: dark ? Colors.grey.shade300 : Colors.grey.shade700,
+                ),
               ),
             ),
             const SizedBox(width: 12),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: dark ? Colors.grey.shade800 : Colors.grey.shade100,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.favorite_border_rounded,
-                size: 18,
-                color: dark ? Colors.grey.shade300 : Colors.grey.shade700,
-              ),
-            ),
+            Obx(() {
+              final isFav =
+                  FavoritesController.instance.isFavourite(product.id);
+              return Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: dark ? Colors.grey.shade800 : Colors.grey.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: InkWell(
+                  onTap: () => FavoritesController.instance
+                      .toggleFavoriteProduct(product.id),
+                  child: Icon(
+                    isFav
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    size: 18,
+                    color: isFav
+                        ? Colors.red
+                        : (dark ? Colors.grey.shade300 : Colors.grey.shade700),
+                  ),
+                ),
+              );
+            })
           ],
         ),
       ],
@@ -519,7 +543,6 @@ class ProductDetailScreen extends StatelessWidget {
               color: Colors.green.shade600,
             ),
           ),
-
         ],
       );
     });
