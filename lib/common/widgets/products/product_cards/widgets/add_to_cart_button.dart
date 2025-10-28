@@ -1,8 +1,7 @@
-import 'package:caferesto/features/shop/screens/product_details/product_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../features/shop/controllers/product/cart_controller.dart';
+import '../../../../../features/shop/controllers/product/panier_controller.dart';
 import '../../../../../features/shop/models/produit_model.dart';
 import '../../../../../utils/constants/colors.dart';
 
@@ -132,6 +131,8 @@ class ProductCardAddToCartButton extends StatelessWidget {
   }
 
   void _handleAddToCart(CartController cartController) {
+    // Vérifier si on peut ajouter ce produit
+    if (!cartController.canAddProduct(product)) return;
     if (isSingleProduct) {
       final cartItem = cartController.productToCartItem(product, 1);
       cartController.addOneToCart(cartItem);
@@ -141,6 +142,8 @@ class ProductCardAddToCartButton extends StatelessWidget {
   }
 
   void _handleIncrement(CartController cartController) {
+    // Vérifier si on peut ajouter ce produit
+    if (!cartController.canAddProduct(product)) return;
     if (isSingleProduct) {
       final cartItem = cartController.productToCartItem(product, 1);
       cartController.addOneToCart(cartItem);

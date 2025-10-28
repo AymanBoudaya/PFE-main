@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../../data/repositories/horaire/horaire_repository.dart';
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/helpers/helper_functions.dart';
-import '../../../controllers/product/cart_controller.dart';
+import '../../../controllers/product/panier_controller.dart';
 import '../../../controllers/product/horaire_controller.dart';
 import '../../../controllers/product/order_controller.dart';
 import '../../../models/horaire_model.dart';

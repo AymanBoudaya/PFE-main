@@ -9,7 +9,7 @@ import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';
 import '../../../../utils/helpers/helper_functions.dart';
-import '../../controllers/product/cart_controller.dart';
+import '../../controllers/product/panier_controller.dart';
 import '../../models/produit_model.dart';
 import '../cart/cart.dart';
 import '../product_reviews/product_reviews.dart';
@@ -740,6 +740,8 @@ class ProductDetailScreen extends StatelessWidget {
   }
 
   void _handleMainAction(CartController controller) {
+    if (!controller.canAddProduct(product)) return;
+
     if (product.productType == 'variable') {
       final hasSelectedVariant = controller.hasSelectedVariant(product.id);
       if (!hasSelectedVariant) {
@@ -766,6 +768,7 @@ class ProductDetailScreen extends StatelessWidget {
   }
 
   void _handleIncrement(CartController controller) {
+    if (!controller.canAddProduct(product)) return;
     if (product.productType == 'single' ||
         controller.hasSelectedVariant(product.id)) {
       final cartItem = controller.productToCartItem(product, 1);

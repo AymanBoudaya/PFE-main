@@ -13,7 +13,7 @@ import '../../../../common/widgets/products/product_cards/widgets/rounded_contai
 import '../../../../utils/helpers/pricing_calculator.dart';
 import '../../../personalization/controllers/address_controller.dart';
 import '../../../personalization/controllers/user_controller.dart';
-import '../../controllers/product/cart_controller.dart';
+import '../../controllers/product/panier_controller.dart';
 import '../../controllers/product/order_controller.dart';
 import 'widgets/billing_address_section.dart';
 import 'widgets/billing_amount_section.dart';

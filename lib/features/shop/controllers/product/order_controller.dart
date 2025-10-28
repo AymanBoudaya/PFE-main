@@ -12,7 +12,7 @@ import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../../utils/popups/loaders.dart';
 import '../../../personalization/controllers/address_controller.dart';
 import '../../models/order_model.dart';
-import 'cart_controller.dart';
+import 'panier_controller.dart';
 import 'checkout_controller.dart';
 
 class OrderController extends GetxController {

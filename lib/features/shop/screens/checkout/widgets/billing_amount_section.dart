@@ -2,7 +2,7 @@ import 'package:caferesto/utils/helpers/pricing_calculator.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../utils/constants/sizes.dart';
-import '../../../controllers/product/cart_controller.dart';
+import '../../../controllers/product/panier_controller.dart';
 
 class TBillingAmountSection extends StatelessWidget {
   const TBillingAmountSection({super.key});

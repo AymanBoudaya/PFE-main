@@ -30,7 +30,7 @@ class THomeCategories extends StatelessWidget {
         );
       }
       return SizedBox(
-        height: 120,
+        height: 160,
         child: ListView.builder(
             padding: const EdgeInsets.only(left: 16),
             shrinkWrap: true,

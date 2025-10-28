@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../../common/widgets/texts/product_price_text.dart';
 import '../../../../../utils/constants/sizes.dart';
-import '../../../controllers/product/cart_controller.dart';
+import '../../../controllers/product/panier_controller.dart';
 import '../add_remove_button.dart';
 import '../cart_item.dart';
 

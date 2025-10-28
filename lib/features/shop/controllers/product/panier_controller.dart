@@ -6,13 +6,6 @@ import '../../../../utils/popups/loaders.dart';
 import '../../models/cart_item_model.dart';
 import '../../models/produit_model.dart';
 import 'variation_controller.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import '../../../../utils/constants/enums.dart';
-import '../../../../utils/popups/loaders.dart';
-import '../../models/cart_item_model.dart';
-import '../../models/produit_model.dart';
-import 'variation_controller.dart';
 
 class CartController extends GetxController {
   static CartController get instance => Get.find();
@@ -25,6 +18,26 @@ class CartController extends GetxController {
 
   CartController() {
     loadCartItems();
+  }
+
+  bool canAddProduct(ProduitModel product) {
+    // Si le panier est vide, tout est autorisé
+    if (cartItems.isEmpty) return true;
+
+    // Récupère l'établissement du premier produit du panier
+    final currentEtablissementId = cartItems.first.etablissementId;
+
+    // Vérifie si l'établissement du produit correspond
+    if (product.etablissementId == currentEtablissementId) {
+      return true;
+    } else {
+      // Refuser si ce n'est pas le même établissement
+      TLoaders.customToast(
+        message:
+            "Vous ne pouvez pas ajouter des produits de plusieurs établissements.",
+      );
+      return false;
+    }
   }
 
   // --- 🔹 Helper methods --------------------------------------------------------
@@ -72,6 +85,8 @@ class CartController extends GetxController {
   // --- 🔹 Add / Remove from Cart -----------------------------------------------
 
   void addToCart(ProduitModel product) {
+    if (!canAddProduct(product)) return; // 🔸 Vérification ajoutée ici
+
     final quantity = getTempQuantity(product);
 
     // Prevent adding if 0
