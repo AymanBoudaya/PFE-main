@@ -2,6 +2,7 @@ import 'package:caferesto/common/widgets/appbar/appbar.dart';
 import 'package:caferesto/common/widgets/custom_shapes/containers/primary_header_container.dart';
 import 'package:caferesto/common/widgets/texts/section_heading.dart';
 import 'package:caferesto/features/personalization/screens/profile/profile.dart';
+import 'package:caferesto/features/shop/screens/cart/cart.dart';
 import 'package:caferesto/features/shop/screens/order/gerant_order_management_screen.dart';
 import 'package:caferesto/features/shop/screens/order/order.dart';
 import 'package:caferesto/utils/constants/colors.dart';
@@ -95,7 +96,7 @@ class SettingsScreen extends StatelessWidget {
                     title: "Mon Panier",
                     subTitle: "Ajouter, modifier ou supprimer des articles",
                     icon: Iconsax.shopping_cart,
-                    onTap: () {}),
+                    onTap: () => Get.to(() => const CartScreen())),
                 TSettingsMenuTile(
                     title: "Mes Commandes",
                     subTitle: "Commandes passées et en cours",

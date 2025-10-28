@@ -162,22 +162,27 @@ class TOrderListItems extends StatelessWidget {
   }
 
   Widget _header(BuildContext context, OrderModel order) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      runSpacing: 8,
       children: [
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Commande #${order.id.substring(0, 8).toUpperCase()}',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(order.formattedOrderDate,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.grey.shade600)),
-        ]),
+        Flexible(
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Commande #${order.id.substring(0, 8).toUpperCase()}',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(order.formattedOrderDate,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Colors.grey.shade600)),
+          ]),
+        ),
         _statusChip(context, order.status),
       ],
     );

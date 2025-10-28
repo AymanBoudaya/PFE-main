@@ -8,7 +8,6 @@ import '../../../../utils/constants/sizes.dart';
 
 import '../../../../utils/helpers/helper_functions.dart';
 import '../../models/order_model.dart';
-import 'delivery_map_screen.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
   final OrderModel order;
@@ -34,6 +33,7 @@ class OrderTrackingScreen extends StatelessWidget {
           children: [
             // 🔹 Order Summary
             TRoundedContainer(
+              width: double.infinity,
               backgroundColor: cardColor!,
               padding: const EdgeInsets.all(AppSizes.md),
               child: Column(
@@ -55,8 +55,10 @@ class OrderTrackingScreen extends StatelessWidget {
                         ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    runSpacing: 12,
+                    spacing: 8,
                     children: [
                       _infoColumn("Montant total", "${order.totalAmount} DT",
                           textColor),

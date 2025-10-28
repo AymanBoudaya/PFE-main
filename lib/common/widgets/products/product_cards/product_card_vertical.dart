@@ -48,7 +48,11 @@ class ProductCardVertical extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSizes.defaultSpace),
           boxShadow: [TShadowStyle.vericalCardProductShadow],
         ),
+        constraints: const BoxConstraints(
+          minHeight: 0, // Permet à la carte de rétrécir si besoin
+        ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// Thumbnail
