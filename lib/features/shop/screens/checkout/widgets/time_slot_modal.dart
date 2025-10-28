@@ -11,7 +11,8 @@ import '../../../models/horaire_model.dart';
 import '../../../models/produit_model.dart';
 
 class TimeSlotModal {
-  Future<void> openTimeSlotModal(BuildContext context, bool dark, ProduitModel product) async {
+  Future<void> openTimeSlotModal(
+      BuildContext context, bool dark, ProduitModel product) async {
     final orderController = Get.put(OrderController());
     final cartController = CartController.instance;
     final horaireController = Get.put(HoraireController(HoraireRepository()));
@@ -99,6 +100,42 @@ class TimeSlotModal {
         );
       }
 
+// Fonction utilitaire pour convertir le nom du jour en numéro (lundi = 1, ..., dimanche = 7)
+      int getDayIndex(String jour) {
+        switch (jour.toLowerCase()) {
+          case 'lundi':
+            return 1;
+          case 'mardi':
+            return 2;
+          case 'mercredi':
+            return 3;
+          case 'jeudi':
+            return 4;
+          case 'vendredi':
+            return 5;
+          case 'samedi':
+            return 6;
+          case 'dimanche':
+            return 7;
+          default:
+            return 0;
+        }
+      }
+
+// Obtenir le jour actuel
+      final today = DateTime.now().weekday; // lundi = 1 ... dimanche = 7
+
+// Trier la liste : le jour courant en premier, puis les jours suivants, puis les jours avant
+      horaires.sort((a, b) {
+        final aIndex = getDayIndex(a.jour.toString());
+        final bIndex = getDayIndex(b.jour.toString());
+
+        // Décaler les jours pour que "aujourd'hui" soit en premier
+        final aShifted = (aIndex - today + 7) % 7;
+        final bShifted = (bIndex - today + 7) % 7;
+        return aShifted.compareTo(bShifted);
+      });
+
       return ListView.builder(
         shrinkWrap: true,
         itemCount: horaires.length,
@@ -135,12 +172,23 @@ class TimeSlotModal {
     final isToday = daysToAdd == 0;
 
     return ExpansionTile(
-      title: Text(
-        dayLabel,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
+      title: Row(
+        children: [
+          Text(
+            isToday ? "$dayLabel (Aujourd’hui)" : dayLabel,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color:
+                  isToday ? Colors.green : (dark ? Colors.white : Colors.black),
+            ),
+          ),
+          if (isToday)
+            const Padding(
+              padding: EdgeInsets.only(left: 8.0),
+              child: Icon(Icons.star, color: Colors.green, size: 18),
+            ),
+        ],
       ),
       initiallyExpanded: orderController.selectedDay.value == dayLabel,
       children: slots
