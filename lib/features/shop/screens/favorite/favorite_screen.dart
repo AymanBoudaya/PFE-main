@@ -14,7 +14,6 @@ import 'package:caferesto/utils/constants/sizes.dart';
 import 'package:caferesto/utils/device/device_utility.dart';
 import 'package:caferesto/utils/helpers/helper_functions.dart';
 import 'package:caferesto/utils/loaders/animation_loader.dart';
-
 import '../../../../utils/popups/loaders.dart';
 
 class FavoriteScreen extends StatelessWidget {
@@ -84,10 +83,6 @@ class FavoriteScreen extends StatelessWidget {
                         isDark ? Colors.grey.shade300 : Colors.grey.shade700),
               )
             : const SizedBox.shrink()),
-        TCircularIcon(
-          icon: Icons.home_rounded,
-          onPressed: () => Get.offAll(() => const NavigationMenu()),
-        ),
       ],
     );
   }
@@ -165,46 +160,53 @@ class FavoriteScreen extends StatelessWidget {
     );
   }
 
-  /// --- Empty State ---
+  /// --- Responsive Empty State ---
   Widget _buildEmptyState(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final maxHeight = constraints.maxHeight.isFinite
-          ? constraints.maxHeight
-          : MediaQuery.of(context).size.height;
+      final screenHeight = MediaQuery.of(context).size.height;
+      final availableHeight =
+          constraints.maxHeight.isFinite ? constraints.maxHeight : screenHeight;
       final animationHeight =
-          min(maxHeight * 0.45, 360.0); // scaled down safely
+          max(180.0, min(availableHeight * 0.4, 320.0)); // 180–320px range
 
-      return Center(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Votre liste de favoris est vide !",
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: animationHeight,
-                child: TAnimationLoaderWidget(
-                  text: '',
-                  animation: TImages.pencilAnimation,
-                  showAction: false,
+      return SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Votre liste de favoris est vide !",
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 25),
-              _buildPrimaryButton(
-                context,
-                label: "Découvrir des produits",
-                icon: Icons.explore_outlined,
-                onPressed: () => Get.offAll(() => const NavigationMenu()),
-              ),
-            ],
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: animationHeight,
+                  width: min(animationHeight * 1.2, 400),
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: TAnimationLoaderWidget(
+                      text: '',
+                      animation: TImages.pencilAnimation,
+                      showAction: false,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 25),
+                _buildPrimaryButton(
+                  context,
+                  label: "Découvrir des produits",
+                  icon: Icons.explore_outlined,
+                  onPressed: () => Get.offAll(() => const NavigationMenu()),
+                ),
+              ],
+            ),
           ),
         ),
       );
