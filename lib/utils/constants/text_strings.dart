@@ -12,9 +12,9 @@ class TTexts {
 
   // -- OnBoarding Texts
   static const String onBoardingTitle1En = "Choose your product";
-  static const String onBoardingTitle1 = "Choisir votre produit";
+  static const String onBoardingTitle1 = "Choisir votre produit ";
   static const String onBoardingTitle2En = "Select Payment Method";
-  static const String onBoardingTitle2 = "Payement à domicile ou à la caisse";
+  static const String onBoardingTitle2 = "Suivre votre commande en temps réel";
   static const String onBoardingTitle3En = "Deliver at your door step";
   static const String onBoardingTitle3 = "Commander sans payement internet";
 

@@ -40,6 +40,7 @@ class HomeScreen extends StatelessWidget {
                   /// Catégories
                   TSectionHeading(
                       title: 'Catégories Populaires',
+                      padding: EdgeInsets.all(0),
                       showActionButton: true,
                       whiteTextColor: true),
                   const SizedBox(height: AppSizes.spaceBtwItems),
@@ -76,6 +77,7 @@ class HomeScreen extends StatelessWidget {
                   /// -- En tête
                   TSectionHeading(
                     title: 'Produits Populaires',
+                    padding: EdgeInsets.all(0),
                     showActionButton: true,
                     onPressed: () => Get.to(() => AllProducts(
                           title: 'Produits populaires',

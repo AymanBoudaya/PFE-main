@@ -106,11 +106,11 @@ class SettingsScreen extends StatelessWidget {
                     subTitle: "Notifications de l'application",
                     icon: Iconsax.notification,
                     onTap: () {}),
-                TSettingsMenuTile(
-                    title: "Sécurité du Compte",
-                    subTitle: "Sécuriser mon compte",
-                    icon: Iconsax.security_card,
-                    onTap: () {}),
+                // TSettingsMenuTile(
+                //     title: "Sécurité du Compte",
+                //     subTitle: "Sécuriser mon compte",
+                //     icon: Iconsax.security_card,
+                //     onTap: () {}),
 
                 /// Paramètres de l'app
                 SizedBox(height: AppSizes.spaceBtwSections),
