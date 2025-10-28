@@ -32,38 +32,38 @@ class TBillingAmountSection extends StatelessWidget {
         ),
 
         /// Shipping fee
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Frais de livraison',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            Text(
-              '${TPricingCalculator.calculateShippingCost(subTotal, 'tn')} DT',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       'Frais de livraison',
+        //       style: Theme.of(context).textTheme.bodyMedium,
+        //     ),
+        //     Text(
+        //       '${TPricingCalculator.calculateShippingCost(subTotal, 'tn')} DT',
+        //       style: Theme.of(context).textTheme.bodyMedium,
+        //     ),
+        //   ],
+        // ),
 
         const SizedBox(
           height: AppSizes.spaceBtwItems / 2,
         ),
 
         /// Tax fee
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Taxes',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            Text(
-              '${TPricingCalculator.calculateTax(subTotal, 'tn')} DT',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       'Taxes',
+        //       style: Theme.of(context).textTheme.bodyMedium,
+        //     ),
+        //     Text(
+        //       '${TPricingCalculator.calculateTax(subTotal, 'tn')} DT',
+        //       style: Theme.of(context).textTheme.bodyMedium,
+        //     ),
+        //   ],
+        // ),
         const SizedBox(
           height: AppSizes.spaceBtwItems / 2,
         ),

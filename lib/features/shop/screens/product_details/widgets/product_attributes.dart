@@ -7,8 +7,8 @@ import 'package:get/get.dart';
 
 import '../../../../../common/widgets/products/product_cards/widgets/rounded_container.dart';
 import '../../../../../utils/constants/sizes.dart';
+import '../../../controllers/product/variation_controller.dart';
 import '../../../models/produit_model.dart';
-
 class TProductAttributes extends StatelessWidget {
   const TProductAttributes({super.key, required this.product});
 
@@ -17,8 +17,7 @@ class TProductAttributes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = THelperFunctions.isDarkMode(context);
-    final RxString selectedSize = ''.obs; // reactive size
-    final RxDouble selectedPrice = 0.0.obs;
+    final variationController = VariationController.instance;
 
     return Obx(() {
       return Column(
@@ -35,7 +34,8 @@ class TProductAttributes extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: product.sizesPrices.map((sp) {
-              final bool isSelected = selectedSize.value == sp.size;
+              final bool isSelected =
+                  variationController.selectedSize.value == sp.size;
               return ChoiceChip(
                 label: Text(
                   '${sp.size} (${sp.price.toStringAsFixed(2)} DT)',
@@ -54,11 +54,9 @@ class TProductAttributes extends StatelessWidget {
                 ),
                 onSelected: (bool selected) {
                   if (selected) {
-                    selectedSize.value = sp.size;
-                    selectedPrice.value = sp.price;
+                    variationController.selectVariation(sp.size, sp.price);
                   } else {
-                    selectedSize.value = '';
-                    selectedPrice.value = 0.0;
+                    variationController.clearVariation();
                   }
                 },
               );
@@ -68,7 +66,7 @@ class TProductAttributes extends StatelessWidget {
           const SizedBox(height: AppSizes.spaceBtwItems * 1.5),
 
           // --- Selected size / price info ---
-          if (selectedSize.value.isNotEmpty)
+          if (variationController.selectedSize.value.isNotEmpty)
             TRoundedContainer(
               padding: const EdgeInsets.all(AppSizes.md),
               backgroundColor: dark ? AppColors.darkerGrey : AppColors.grey,
@@ -76,7 +74,7 @@ class TProductAttributes extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Taille sélectionnée : ${selectedSize.value}',
+                    'Taille sélectionnée : ${variationController.selectedSize.value}',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: AppSizes.sm),
@@ -85,7 +83,10 @@ class TProductAttributes extends StatelessWidget {
                       const Text('Prix : ',
                           style: TextStyle(
                               fontWeight: FontWeight.w600, fontSize: 15)),
-                      ProductPriceText(price: selectedPrice.value.toString()),
+                      ProductPriceText(
+                        price: variationController.selectedPrice.value
+                            .toStringAsFixed(2),
+                      ),
                     ],
                   ),
                 ],

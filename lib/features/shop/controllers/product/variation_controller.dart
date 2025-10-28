@@ -4,71 +4,34 @@ import '../../models/product_variation_model.dart';
 
 class VariationController extends GetxController {
   static VariationController get instance => Get.find();
+
   /// Variables
   final RxMap<String, dynamic> selectedAttributes = <String, dynamic>{}.obs;
   final RxString variationStockStatus = ''.obs;
   final Rx<ProductVariationModel> selectedVariation =
       ProductVariationModel.empty().obs;
 
-  /// -- Select Attribute and variation
-  /*void onAttributeSelected(
-      ProductModel product, String attributeName, dynamic attributeValue) {
-    // Update selected attributes
-    selectedAttributes[attributeName] = attributeValue;
-
-    // Find matching variation
-    final selectedVariation = _findMatchingVariation(product);
-
-    // Update UI and cart state
-    _updateSelectionStates(product, selectedVariation);
-  }
-*/
-  /*ProductVariationModel _findMatchingVariation(ProductModel product) {
-    return product.productVariations?.firstWhere(
-          (variation) => _isSameAttributeValues(
-            variation.attributeValues,
-            selectedAttributes,
-          ),
-          orElse: () => ProductVariationModel.empty(),
-        ) ??
-        ProductVariationModel.empty();
-  }
-
-  void _updateSelectionStates(
-      ProductModel product, ProductVariationModel variation) {
-    // Update selected variation
-    selectedVariation.value = variation;
-
-    // Update product image if variation has one
-    if (variation.image.isNotEmpty) {
-      ImagesController.instance.selectedProductImage.value = variation.image;
-    }
-
-    // Update stock status
-    getProductVariationStockStatus();
-
-    // Reset temp quantity when variation changes
-    if (variation.id.isNotEmpty) {
-      final cartController = CartController.instance;
-      cartController.updateTempQuantity(
-        product,
-        cartController.getExistingQuantity(product),
-      );
-    }
-  }
-*/
   /// -- Check if selected attributes match variation attributes
-  bool _isSameAttributeValues(
-    Map<String, dynamic> variationAttributes,
-    Map<String, dynamic> selectedAttributes,
-  ) {
-    if (variationAttributes.length != selectedAttributes.length) return false;
+  RxString selectedSize = ''.obs;
+  RxDouble selectedPrice = 0.0.obs;
 
-    for (final key in variationAttributes.keys) {
-      if (variationAttributes[key] != selectedAttributes[key]) return false;
-    }
+  void selectVariation(String size, double price) {
+    selectedSize.value = size;
+    selectedPrice.value = price;
 
-    return true;
+    // Create or update the variation model
+    selectedVariation.value = ProductVariationModel(
+      id: size, // or a unique combination if needed
+      attributeValues: {'size': size},
+      price: price,
+      salePrice: 0.0,
+      stock: 10, // example or dynamic value
+    );
+  }
+
+  void clearVariation() {
+    selectedSize.value = '';
+    selectedPrice.value = 0.0;
   }
 
   /// -- Get available attribute values based on stock

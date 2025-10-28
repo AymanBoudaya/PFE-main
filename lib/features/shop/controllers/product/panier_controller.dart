@@ -48,7 +48,7 @@ class CartController extends GetxController {
   }
 
   String _getKey(ProduitModel product) {
-    final variationId = product.productType == ProductType.variable.toString()
+    final variationId = product.productType == 'variable'
         ? variationController.selectedVariation.value.id
         : "";
     return '${product.id}-$variationId';

@@ -219,9 +219,9 @@ class ProductDetailScreen extends StatelessWidget {
         const SizedBox(height: AppSizes.xl),
 
         /// Reviews Preview
-        _buildReviewsSection(dark),
+        // _buildReviewsSection(dark),
 
-        const SizedBox(height: 100), // Space for bottom bar
+        // const SizedBox(height: 100), // Space for bottom bar
       ],
     );
   }
