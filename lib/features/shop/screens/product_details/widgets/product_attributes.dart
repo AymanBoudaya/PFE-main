@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 
 import '../../../../../common/widgets/products/product_cards/widgets/rounded_container.dart';
 import '../../../../../utils/constants/sizes.dart';
+import '../../../controllers/product/panier_controller.dart';
 import '../../../controllers/product/variation_controller.dart';
 import '../../../models/produit_model.dart';
 
@@ -54,6 +55,11 @@ class TProductAttributes extends StatelessWidget {
                 onSelected: (bool selected) {
                   if (selected) {
                     variationController.selectVariation(sp.size, sp.price);
+                    CartController.instance.updateVariation(
+                      product.id,
+                      variationController.selectedSize.value,
+                      variationController.selectedPrice.value,
+                    );
                   } else {
                     variationController.clearVariation();
                   }

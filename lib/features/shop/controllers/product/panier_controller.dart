@@ -20,6 +20,20 @@ class CartController extends GetxController {
     loadCartItems();
   }
 
+  void updateVariation(String productId, String newSize, double newPrice) {
+    int index = cartItems.indexWhere((item) => item.productId == productId);
+    if (index >= 0) {
+      cartItems[index] = cartItems[index].copyWith(
+        selectedVariation: {
+          'size': newSize,
+          'price': newPrice.toString(),
+        },
+        price: newPrice,
+      );
+    }
+    updateCartTotals();
+  }
+
   bool canAddProduct(ProduitModel product) {
     // Si le panier est vide, tout est autorisé
     if (cartItems.isEmpty) return true;

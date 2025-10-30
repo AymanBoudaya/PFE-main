@@ -60,4 +60,27 @@ class CartItemModel {
       etablissementId: data['etablissement_id'] ?? '',
     );
   }
+  CartItemModel copyWith({
+    String? productId,
+    String? title,
+    double? price,
+    String? image,
+    int? quantity,
+    String? brandName,
+    Map<String, String>? selectedVariation,
+    String? etablissementId,
+    ProduitModel? product,
+  }) {
+    return CartItemModel(
+      productId: productId ?? this.productId,
+      title: title ?? this.title,
+      price: price ?? this.price,
+      image: image ?? this.image,
+      quantity: quantity ?? this.quantity,
+      brandName: brandName ?? this.brandName,
+      selectedVariation: selectedVariation ?? this.selectedVariation,
+      etablissementId: etablissementId ?? this.etablissementId,
+      product: product ?? this.product,
+    );
+  }
 }
