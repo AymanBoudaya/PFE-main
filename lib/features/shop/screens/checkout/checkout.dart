@@ -38,9 +38,7 @@ class CheckoutScreen extends StatelessWidget {
           child: Column(
             children: [
               /// Items in cart
-              TCartItems(
-                showAddRemoveButtons: false,
-              ),
+              TCartItems(),
               SizedBox(
                 height: AppSizes.spaceBtwSections,
               ),
