@@ -56,7 +56,6 @@ class TCartItems extends StatelessWidget {
                           flex: 2,
                           child: OutlinedButton.icon(
                             onPressed: () {
-                               controller.prepareVariationForEditing(item);
                               // Navigate to product page for variant editing
                               Get.to(() =>
                                   ProductDetailScreen(product: item.product!));
