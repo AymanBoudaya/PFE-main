@@ -57,7 +57,7 @@ class CartItemModel {
       selectedVariation: data['selectedVariation'] != null
           ? Map<String, String>.from(data['selectedVariation'])
           : null,
-      etablissementId: data['etablissement_id'] ?? '',
+      etablissementId: data['etablissementId'] ?? '',
     );
   }
   CartItemModel copyWith({
