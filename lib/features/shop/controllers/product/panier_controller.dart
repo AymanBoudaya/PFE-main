@@ -26,7 +26,7 @@ class CartController extends GetxController {
 
     // Récupère l'établissement du premier produit du panier
     final currentEtablissementId = cartItems.first.etablissementId;
-
+    print('Current Etablissement ID in cart: $currentEtablissementId');
     // Vérifie si l'établissement du produit correspond
     if (product.etablissementId == currentEtablissementId) {
       return true;
@@ -42,9 +42,9 @@ class CartController extends GetxController {
 
   // --- 🔹 Helper methods --------------------------------------------------------
 
-  bool hasSelectedVariant(String productId) {
-    final item = cartItems.firstWhereOrNull((p) => p.productId == productId);
-    return item != null && item.selectedVariation != null;
+  bool hasSelectedVariant() {
+    final variation = variationController.selectedVariation.value;
+    return variation.id.isNotEmpty && variation.attributeValues.isNotEmpty;
   }
 
   String _getKey(ProduitModel product) {

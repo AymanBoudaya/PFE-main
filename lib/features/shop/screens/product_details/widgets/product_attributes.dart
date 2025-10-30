@@ -9,6 +9,7 @@ import '../../../../../common/widgets/products/product_cards/widgets/rounded_con
 import '../../../../../utils/constants/sizes.dart';
 import '../../../controllers/product/variation_controller.dart';
 import '../../../models/produit_model.dart';
+
 class TProductAttributes extends StatelessWidget {
   const TProductAttributes({super.key, required this.product});
 
@@ -16,26 +17,23 @@ class TProductAttributes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = THelperFunctions.isDarkMode(context);
     final variationController = VariationController.instance;
+    final dark = THelperFunctions.isDarkMode(context);
 
     return Obx(() {
+      final selectedSize = variationController.selectedSize.value;
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const TSectionHeading(
-            title: 'Tailles disponibles',
-            showActionButton: false,
-          ),
+              title: 'Tailles disponibles', showActionButton: false),
           const SizedBox(height: AppSizes.spaceBtwItems),
-
-          // --- Modern Chips ---
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: product.sizesPrices.map((sp) {
-              final bool isSelected =
-                  variationController.selectedSize.value == sp.size;
+              final bool isSelected = selectedSize == sp.size;
               return ChoiceChip(
                 label: Text(
                   '${sp.size} (${sp.price.toStringAsFixed(2)} DT)',
@@ -62,21 +60,16 @@ class TProductAttributes extends StatelessWidget {
               );
             }).toList(),
           ),
-
           const SizedBox(height: AppSizes.spaceBtwItems * 1.5),
-
-          // --- Selected size / price info ---
-          if (variationController.selectedSize.value.isNotEmpty)
+          if (selectedSize.isNotEmpty)
             TRoundedContainer(
               padding: const EdgeInsets.all(AppSizes.md),
               backgroundColor: dark ? AppColors.darkerGrey : AppColors.grey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Taille sélectionnée : ${variationController.selectedSize.value}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text('Taille sélectionnée : $selectedSize',
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: AppSizes.sm),
                   Row(
                     children: [

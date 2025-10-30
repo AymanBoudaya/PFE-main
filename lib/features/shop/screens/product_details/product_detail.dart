@@ -10,6 +10,7 @@ import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';
 import '../../../../utils/helpers/helper_functions.dart';
 import '../../controllers/product/panier_controller.dart';
+import '../../controllers/product/variation_controller.dart';
 import '../../models/produit_model.dart';
 import '../cart/cart.dart';
 import '../product_reviews/product_reviews.dart';
@@ -18,9 +19,11 @@ import 'widgets/product_detail_image_slider.dart';
 import 'widgets/product_meta_data.dart';
 
 class ProductDetailScreen extends StatelessWidget {
-  const ProductDetailScreen({super.key, required this.product});
-
+  ProductDetailScreen({super.key, required this.product}) {
+    variationController.resetSelectedAttributes();
+  }
   final ProduitModel product;
+  final variationController = VariationController.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -743,7 +746,7 @@ class ProductDetailScreen extends StatelessWidget {
     if (!controller.canAddProduct(product)) return;
 
     if (product.productType == 'variable') {
-      final hasSelectedVariant = controller.hasSelectedVariant(product.id);
+      final hasSelectedVariant = controller.hasSelectedVariant();
       if (!hasSelectedVariant) {
         Get.snackbar(
           'Sélection requise',
@@ -769,16 +772,14 @@ class ProductDetailScreen extends StatelessWidget {
 
   void _handleIncrement(CartController controller) {
     if (!controller.canAddProduct(product)) return;
-    if (product.productType == 'single' ||
-        controller.hasSelectedVariant(product.id)) {
+    if (product.productType == 'single' || controller.hasSelectedVariant()) {
       final cartItem = controller.productToCartItem(product, 1);
       controller.addOneToCart(cartItem);
     }
   }
 
   void _handleDecrement(CartController controller) {
-    if (product.productType == 'single' ||
-        controller.hasSelectedVariant(product.id)) {
+    if (product.productType == 'single' || controller.hasSelectedVariant()) {
       final cartItem = controller.productToCartItem(product, 1);
       controller.removeOneFromCart(cartItem);
     }

@@ -33,11 +33,11 @@ class GeneralBinding extends Bindings {
     Get.lazyPut<AddressRepository>(() => AddressRepository(), fenix: true);
     Get.lazyPut<FavoritesController>(() => FavoritesController(), fenix: true);
     Get.lazyPut<ShareController>(() => ShareController(), fenix: true);
+    Get.lazyPut<VariationController>(() => VariationController(), fenix: true);
+    Get.lazyPut<CheckoutController>(() => CheckoutController(), fenix: true);
 
     Get.put(NetworkManager());
     Get.put(UserController());
-    Get.put(VariationController());
-    Get.put(CheckoutController());
     Get.put(EtablissementController(Get.find<EtablissementRepository>()));
   }
 }

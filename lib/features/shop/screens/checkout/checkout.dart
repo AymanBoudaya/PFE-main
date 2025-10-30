@@ -76,7 +76,7 @@ class CheckoutScreen extends StatelessWidget {
                     const SizedBox(height: AppSizes.spaceBtwItems),
                     const Divider(),
 
-                    /// 🔥 CORRECTION : Section créneau horaire améliorée
+                    /// Section créneau horaire
                     _buildTimeSlotSection(orderController),
                   ],
                 ),
