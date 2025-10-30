@@ -91,11 +91,11 @@ class AddressModel {
     return AddressModel(
       id: data['id']?.toString() ?? '',
       name: data['name'] ?? '',
-      phoneNumber: data['phone_number'] ?? '', // ✅ snake_case
+      phoneNumber: data['phone_number'] ?? '', // snake_case
       street: data['street'] ?? '',
       city: data['city'] ?? '',
       state: data['state'] ?? '',
-      postalCode: data['postal_code'] ?? '', // ✅ snake_case
+      postalCode: data['postal_code'] ?? '', // snake_case
       country: data['country'] ?? '',
       selectedAddress: data['selected_address'] ?? false,
       latitude: data['latitude'] != null

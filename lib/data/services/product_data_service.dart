@@ -10,16 +10,16 @@
 
 //   final ProduitRepository _repo = Get.find();
 
-//   // 🔥 DONNÉES PARTAGÉES
+//   // DONNÉES PARTAGÉES
 //   final RxList<ProduitModel> _allProducts = <ProduitModel>[].obs;
 //   final RxList<CategoryModel> _categories = <CategoryModel>[].obs;
 //   final RxList<Etablissement> _etablissements = <Etablissement>[].obs;
 
-//   // 🔥 ÉTATS DE CHARGEMENT
+//   // ÉTATS DE CHARGEMENT
 //   final RxBool _isProductsLoaded = false.obs;
 //   final RxBool _isFiltersLoaded = false.obs;
 
-//   // 🔥 GETTERS POUR L'ACCÈS EXTERNE
+//   // GETTERS POUR L'ACCÈS EXTERNE
 //   List<ProduitModel> get allProducts => _allProducts.toList();
 //   List<CategoryModel> get categories => _categories.toList();
 //   List<Etablissement> get etablissements => _etablissements.toList();
@@ -32,7 +32,7 @@
 //     loadAllData();
 //   }
 
-//   // 🔥 CHARGEMENT UNIQUE DE TOUTES LES DONNÉES
+//   // CHARGEMENT UNIQUE DE TOUTES LES DONNÉES
 //   Future<void> loadAllData() async {
 //     await Future.wait([
 //       loadProductsWithRelations(),
@@ -40,7 +40,7 @@
 //     ]);
 //   }
 
-//   // 🔥 CHARGEMENT DES PRODUITS AVEC RELATIONS
+//   // CHARGEMENT DES PRODUITS AVEC RELATIONS
 //   Future<void> loadProductsWithRelations() async {
 //     if (_isProductsLoaded.value) return;
 
@@ -50,13 +50,13 @@
 //       _allProducts.assignAll(products);
 //       _isProductsLoaded.value = true;
       
-//       print('✅ ${products.length} produits chargés avec relations');
+//       print('${products.length} produits chargés avec relations');
 //     } catch (e) {
-//       print('❌ Erreur chargement produits: $e');
+//       print('Erreur chargement produits: $e');
 //     }
 //   }
 
-//   // 🔥 CHARGEMENT DES DONNÉES DE FILTRES
+//   // CHARGEMENT DES DONNÉES DE FILTRES
 //   Future<void> loadFilterData() async {
 //     if (_isFiltersLoaded.value) return;
 
@@ -71,13 +71,13 @@
 //       _etablissements.assignAll(etablissementsData);
 //       _isFiltersLoaded.value = true;
 
-//       print('✅ ${categoriesData.length} catégories et ${etablissementsData.length} établissements chargés');
+//       print('${categoriesData.length} catégories et ${etablissementsData.length} établissements chargés');
 //     } catch (e) {
-//       print('❌ Erreur chargement filtres: $e');
+//       print('Erreur chargement filtres: $e');
 //     }
 //   }
 
-//   // 🔥 MÉTHODES DE RECHERCHE ET FILTRES
+//   // MÉTHODES DE RECHERCHE ET FILTRES
 //   List<ProduitModel> searchProducts({
 //     String? query,
 //     String? categoryId,
@@ -159,7 +159,7 @@
 //     }
 //   }
 
-//   // 🔥 RECHARGEMENT FORCÉ
+//   // RECHARGEMENT FORCÉ
 //   Future<void> refreshData() async {
 //     _isProductsLoaded.value = false;
 //     _isFiltersLoaded.value = false;

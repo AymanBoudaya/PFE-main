@@ -40,7 +40,7 @@ class CartController extends GetxController {
     }
   }
 
-  // --- 🔹 Helper methods --------------------------------------------------------
+  // --- Helper methods --------------------------------------------------------
 
   bool hasSelectedVariant() {
     final variation = variationController.selectedVariation.value;
@@ -54,7 +54,7 @@ class CartController extends GetxController {
     return '${product.id}-$variationId';
   }
 
-  // --- 🔹 Quantity Management ---------------------------------------------------
+  // --- Quantity Management ---------------------------------------------------
 
   void updateTempQuantity(ProduitModel product, int quantity) {
     final key = _getKey(product);
@@ -82,10 +82,10 @@ class CartController extends GetxController {
     }
   }
 
-  // --- 🔹 Add / Remove from Cart -----------------------------------------------
+  // --- Add / Remove from Cart -----------------------------------------------
 
   void addToCart(ProduitModel product) {
-    if (!canAddProduct(product)) return; // 🔸 Vérification ajoutée ici
+    if (!canAddProduct(product)) return; // Vérification ajoutée ici
 
     final quantity = getTempQuantity(product);
 
@@ -153,7 +153,7 @@ class CartController extends GetxController {
     );
   }
 
-  // --- 🔹 Cart Management -------------------------------------------------------
+  // --- Cart Management -------------------------------------------------------
 
   void updateCart() {
     updateCartTotals();
@@ -205,7 +205,7 @@ class CartController extends GetxController {
     );
   }
 
-  // --- 🔹 Totals & Storage ------------------------------------------------------
+  // --- Totals & Storage ------------------------------------------------------
 
   void updateCartTotals() {
     double calculatedTotalPrice = 0.0;
@@ -232,7 +232,7 @@ class CartController extends GetxController {
     }
   }
 
-  // --- 🔹 Get Quantities --------------------------------------------------------
+  // --- Get Quantities --------------------------------------------------------
 
   int getProductQuantityInCart(String productId) {
     return cartItems
@@ -257,7 +257,7 @@ class CartController extends GetxController {
     if (cartItems.isEmpty) return false;
 
     for (final item in cartItems) {
-      if (item.quantity <= 0) return false; // 🔸 prevent checkout if 0 qty
+      if (item.quantity <= 0) return false; // prevent checkout if 0 qty
       final product = item.product;
       if (product != null && product.productType == 'variable') {
         if (item.selectedVariation == null || item.selectedVariation!.isEmpty) {

@@ -4,8 +4,8 @@ import '../../../../utils/popups/loaders.dart';
 import '../../models/order_model.dart';
 import '../product/order_controller.dart';
 
-
-class OrderListController extends GetxController with GetTickerProviderStateMixin {
+class OrderListController extends GetxController
+    with GetTickerProviderStateMixin {
   final orderController = Get.find<OrderController>();
 
   late TabController tabController;
@@ -33,14 +33,18 @@ class OrderListController extends GetxController with GetTickerProviderStateMixi
     }
   }
 
-  // 🔥 Cancel confirmation dialog
-  Future<void> showCancelConfirmation(BuildContext context, OrderModel order) async {
+  // Cancel confirmation dialog
+  Future<void> showCancelConfirmation(
+      BuildContext context, OrderModel order) async {
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         title: const Text("Annuler la commande"),
-        content: const Text("Êtes-vous sûr de vouloir annuler cette commande ? Cette action est irréversible."),
+        content: const Text(
+            "Êtes-vous sûr de vouloir annuler cette commande ? Cette action est irréversible."),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text("Non")),
+          TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text("Non")),
           ElevatedButton(
             onPressed: () => Get.back(result: true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -57,7 +61,8 @@ class OrderListController extends GetxController with GetTickerProviderStateMixi
 
   // ✏️ Edit pickup info dialog
   void showEditDialog(BuildContext context, OrderModel order) {
-    final timeController = TextEditingController(text: order.pickupTimeRange ?? "");
+    final timeController =
+        TextEditingController(text: order.pickupTimeRange ?? "");
     final dayController = TextEditingController(text: order.pickupDay ?? "");
 
     Get.dialog(
@@ -89,7 +94,8 @@ class OrderListController extends GetxController with GetTickerProviderStateMixi
           TextButton(onPressed: Get.back, child: const Text("Annuler")),
           ElevatedButton(
             onPressed: () async {
-              if (dayController.text.trim().isEmpty || timeController.text.trim().isEmpty) {
+              if (dayController.text.trim().isEmpty ||
+                  timeController.text.trim().isEmpty) {
                 TLoaders.warningSnackBar(
                   title: "Champs requis",
                   message: "Veuillez remplir tous les champs.",

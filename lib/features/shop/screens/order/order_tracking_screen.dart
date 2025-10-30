@@ -31,7 +31,7 @@ class OrderTrackingScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔹 Order Summary
+            // Order Summary
             TRoundedContainer(
               width: double.infinity,
               backgroundColor: cardColor!,
@@ -73,7 +73,7 @@ class OrderTrackingScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.spaceBtwItems),
 
-            // 🔹 Delivery & Pickup Info
+            // Delivery & Pickup Info
             if (order.pickupDay != null && order.pickupTimeRange != null)
               TRoundedContainer(
                 backgroundColor: cardColor!,
@@ -114,7 +114,7 @@ class OrderTrackingScreen extends StatelessWidget {
               ),
             const SizedBox(height: AppSizes.spaceBtwItems),
 
-            // 🔹 Order Items
+            // Order Items
             TRoundedContainer(
               backgroundColor: cardColor!,
               padding: const EdgeInsets.all(AppSizes.md),
@@ -179,7 +179,7 @@ class OrderTrackingScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.spaceBtwItems),
 
-            // 🔹 Delivery Map Button
+            // Delivery Map Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(

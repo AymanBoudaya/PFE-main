@@ -235,7 +235,7 @@ class TimeSlotModal {
                 ? Colors.grey.shade200
                 : isSelected
                     ? Colors.green.withOpacity(
-                        0.3) // 🔥 CORRECTION : Opacité augmentée pour meilleure visibilité
+                        0.3) // CORRECTION : Opacité augmentée pour meilleure visibilité
                     : Colors.transparent,
             border: Border.all(
               color: isSelected
@@ -252,7 +252,7 @@ class TimeSlotModal {
                       offset: const Offset(0, 2),
                     )
                   ]
-                : null, // 🔥 AJOUT : Ombre pour mieux mettre en évidence
+                : null, // AJOUT : Ombre pour mieux mettre en évidence
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -268,13 +268,13 @@ class TimeSlotModal {
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   fontSize: isSelected
                       ? 15
-                      : 14, // 🔥 AJOUT : Taille de police légèrement augmentée
+                      : 14, // AJOUT : Taille de police légèrement augmentée
                 ),
               ),
               if (isSelected)
                 Icon(Icons.check_circle,
                     color: Colors.green,
-                    size: 20), // 🔥 CORRECTION : Taille d'icône
+                    size: 20), // CORRECTION : Taille d'icône
             ],
           ),
         ),

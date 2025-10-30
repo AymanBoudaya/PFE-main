@@ -55,7 +55,7 @@ class _GerantOrderManagementScreenState
 
   Future<void> _loadGerantOrders() async {
     try {
-      // 🚀 FIX: Check if user has establishment
+      // FIX: Check if user has establishment
       if (!userController.hasEtablissement) {
         // Use Future.delayed to avoid BuildContext issues
         Future.delayed(Duration.zero, () {
@@ -67,7 +67,7 @@ class _GerantOrderManagementScreenState
         return;
       }
 
-      // 🚀 FIX: Use the correct establishment ID getter
+      // FIX: Use the correct establishment ID getter
       final etablissementId = userController.currentEtablissementId;
       if (etablissementId == null || etablissementId.isEmpty) {
         Future.delayed(Duration.zero, () {
@@ -81,10 +81,9 @@ class _GerantOrderManagementScreenState
 
       debugPrint('🔄 Loading orders for establishment: $etablissementId');
       print(etablissementId);
-      await orderController
-          .fetchGerantOrders(etablissementId);
+      await orderController.fetchGerantOrders(etablissementId);
     } catch (e) {
-      debugPrint('❌ Error in _loadGerantOrders: $e');
+      debugPrint('Error in _loadGerantOrders: $e');
       Future.delayed(Duration.zero, () {
         TLoaders.errorSnackBar(
           title: "Erreur",
@@ -149,7 +148,7 @@ class _GerantOrderManagementScreenState
           // Search Bar
           Padding(
             padding: const EdgeInsets.all(AppSizes.defaultSpace),
-            // 🔥 FIXED: Use the enhanced TSearchContainer with controller
+            // FIXED: Use the enhanced TSearchContainer with controller
             child: TSearchContainer(
               text: 'Rechercher une commande...',
               controller: _searchController,
@@ -226,7 +225,7 @@ class _GerantOrderManagementScreenState
     );
   }
 
-  // 🎨 Stats Overview Widget
+  // Stats Overview Widget
   Widget _buildStatsOverview() {
     return Obx(() {
       final totalOrders = orderController.orders.length;
@@ -287,7 +286,7 @@ class _GerantOrderManagementScreenState
     );
   }
 
-  // 🎨 Shimmer Loading Effect
+  // Shimmer Loading Effect
   Widget _buildShimmerLoader() {
     return ListView.builder(
       padding: const EdgeInsets.all(AppSizes.defaultSpace),
@@ -309,7 +308,7 @@ class _GerantOrderManagementScreenState
     );
   }
 
-  // 🎨 Empty State
+  // Empty State
   Widget _buildEmptyState(BuildContext context, String tabLabel) {
     return Center(
       child: Column(
@@ -341,7 +340,7 @@ class _GerantOrderManagementScreenState
     );
   }
 
-  // 🎨 Beautiful Order Card
+  // Beautiful Order Card
   Widget _buildOrderCard(OrderModel order, BuildContext context, bool dark) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -410,7 +409,7 @@ class _GerantOrderManagementScreenState
     );
   }
 
-  // 🎨 Status Chip
+  // Status Chip
   Widget _buildStatusChip(OrderStatus status, BuildContext context) {
     final statusConfig = _getStatusConfig(status);
 
@@ -438,7 +437,7 @@ class _GerantOrderManagementScreenState
     );
   }
 
-  // 🎨 Order Details
+  // Order Details
   Widget _buildOrderDetails(OrderModel order, BuildContext context) {
     return Row(
       children: [
@@ -485,7 +484,7 @@ class _GerantOrderManagementScreenState
     );
   }
 
-  // 🎨 Time Slot
+  // Time Slot
   Widget _buildTimeSlot(OrderModel order, BuildContext context) {
     return Container(
       width: double.infinity,
@@ -526,7 +525,7 @@ class _GerantOrderManagementScreenState
     );
   }
 
-  // 🎨 Items Preview - FIXED: Use item.title instead of item.product.nom
+  // Items Preview - FIXED: Use item.title instead of item.product.nom
   Widget _buildItemsPreview(OrderModel order, BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 12),
@@ -555,14 +554,14 @@ class _GerantOrderManagementScreenState
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        // 🔥 FIXED: Use item.title instead of item.product.nom
+                        // FIXED: Use item.title instead of item.product.nom
                         '${item.quantity}x ${item.title}',
                         style: Theme.of(context).textTheme.bodyMedium,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Text(
-                      // 🔥 FIXED: Use item.price instead of item.product.prix
+                      // FIXED: Use item.price instead of item.product.prix
                       '${(item.price * item.quantity).toStringAsFixed(2)} DT',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
@@ -586,7 +585,7 @@ class _GerantOrderManagementScreenState
     );
   }
 
-  // 🎨 Action Buttons
+  // Action Buttons
   Widget _buildActionButtons(OrderModel order, BuildContext context) {
     return Obx(() {
       final isUpdating = orderController.isUpdating.value;
@@ -677,7 +676,7 @@ class _GerantOrderManagementScreenState
     });
   }
 
-  // 🎨 Status Configuration
+  // Status Configuration
   _StatusConfig _getStatusConfig(OrderStatus status) {
     switch (status) {
       case OrderStatus.pending:

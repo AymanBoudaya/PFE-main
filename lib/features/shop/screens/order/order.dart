@@ -7,7 +7,7 @@ import '../../controllers/product/order_controller.dart';
 import 'widgets/order_list.dart';
 
 class OrderScreen extends StatelessWidget {
-  const OrderScreen({super.key}); // super
+  const OrderScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

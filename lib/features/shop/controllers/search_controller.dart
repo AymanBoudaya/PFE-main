@@ -47,9 +47,9 @@ class ResearchController extends GetxController {
       etablissements.assignAll(ets);
 
       print(
-          '✅ Filtres chargés: ${cats.length} catégories, ${ets.length} établissements');
+          'Filtres chargés: ${cats.length} catégories, ${ets.length} établissements');
     } catch (e) {
-      print('❌ Erreur chargement filtres: $e');
+      print('Erreur chargement filtres: $e');
     }
   }
 
@@ -85,7 +85,7 @@ class ResearchController extends GetxController {
 
       applyFilters();
     } catch (e) {
-      print('❌ Erreur fetch produits: $e');
+      print('Erreur fetch produits: $e');
     } finally {
       isLoading.value = false;
       isPaginating.value = false;
@@ -127,12 +127,12 @@ class ResearchController extends GetxController {
     switch (selectedSort.value) {
       case 'Prix ↑':
         print('results $results');
-        results.sort((a, b) =>
-            _getEffectivePrice(a).compareTo(_getEffectivePrice(b)));
+        results.sort(
+            (a, b) => _getEffectivePrice(a).compareTo(_getEffectivePrice(b)));
         break;
       case 'Prix ↓':
-        results.sort((a, b) =>
-            _getEffectivePrice(b).compareTo(_getEffectivePrice(a)));
+        results.sort(
+            (a, b) => _getEffectivePrice(b).compareTo(_getEffectivePrice(a)));
         break;
       case 'Nom A-Z':
         results.sort((a, b) => a.name.compareTo(b.name));

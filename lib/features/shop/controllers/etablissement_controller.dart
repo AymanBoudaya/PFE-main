@@ -174,8 +174,7 @@ class EtablissementController extends GetxController {
                     '$gerantName a ajouté un nouvel établissement "$etabName".',
                 'etablissement_id': id,
               }).select();
-              print(
-                  '✅ Notification créée pour admin ${admin['id']}: $response');
+              print('Notification créée pour admin ${admin['id']}: $response');
             }
           }
         } catch (notifyErr) {

@@ -8,11 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/widgets/appbar/appbar.dart';
-import '../../../../common/widgets/products/cart/coupon_widget.dart';
 import '../../../../common/widgets/products/product_cards/widgets/rounded_container.dart';
 import '../../../../utils/helpers/pricing_calculator.dart';
 import '../../../personalization/controllers/address_controller.dart';
-import '../../../personalization/controllers/user_controller.dart';
 import '../../controllers/product/panier_controller.dart';
 import '../../controllers/product/order_controller.dart';
 import 'widgets/billing_address_section.dart';
@@ -101,7 +99,7 @@ class CheckoutScreen extends StatelessWidget {
     );
   }
 
-  // 🔥 NOUVELLE MÉTHODE : Section créneau horaire
+  // Section créneau horaire
   Widget _buildTimeSlotSection(OrderController orderController) {
     return Obx(() {
       final hasTimeSlot = orderController.selectedSlot.value != null &&
@@ -115,7 +113,7 @@ class CheckoutScreen extends StatelessWidget {
     });
   }
 
-  // 🔥 WIDGET : Aucun créneau sélectionné
+  // WIDGET : Aucun créneau sélectionné
   Widget _buildNoTimeSlotWidget(OrderController orderController) {
     final dark = THelperFunctions.isDarkMode(Get.context!);
     final cartController = CartController.instance;
@@ -184,7 +182,7 @@ class CheckoutScreen extends StatelessWidget {
     );
   }
 
-  // 🔥 WIDGET : Créneau sélectionné
+  // WIDGET : Créneau sélectionné
   Widget _buildSelectedTimeSlotWidget(OrderController orderController) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,7 +272,7 @@ class CheckoutScreen extends StatelessWidget {
     final cartController = CartController.instance;
     final addressController = AddressController.instance;
 
-    // ✅ Vérifier adresse
+    // Vérifier adresse
     if (addressController.selectedAddress.value.id.isEmpty) {
       TLoaders.warningSnackBar(
         title: 'Adresse manquante',
@@ -283,7 +281,7 @@ class CheckoutScreen extends StatelessWidget {
       return;
     }
 
-    // ✅ Vérifier créneau
+    // Vérifier créneau
     if (orderController.selectedSlot.value == null ||
         orderController.selectedDay.value == null) {
       TLoaders.warningSnackBar(
@@ -293,7 +291,7 @@ class CheckoutScreen extends StatelessWidget {
       return;
     }
 
-    // ✅ Vérifier panier
+    // Vérifier panier
     if (cartController.cartItems.isEmpty) {
       TLoaders.warningSnackBar(
         title: 'Panier vide',
@@ -302,7 +300,7 @@ class CheckoutScreen extends StatelessWidget {
       return;
     }
 
-    // ✅ Calcul etablissementId + date/heure
+    // Calcul etablissementId + date/heure
     final etablissementId = cartController.cartItems.first.etablissementId;
     final selectedAddressId = addressController.selectedAddress.value.id;
 
@@ -320,14 +318,14 @@ class CheckoutScreen extends StatelessWidget {
       startParts[1],
     );
 
-    // ✅ Envoi
+    // Envoi
     orderController.processOrder(
       totalAmount: totalAmount,
       pickupDay: orderController.selectedDay.value!,
       pickupTimeRange: orderController.selectedSlot.value!,
       pickupDateTime: pickupDateTime,
       etablissementId: etablissementId,
-      addressId: selectedAddressId, // ✅ plus de ""
+      addressId: selectedAddressId, // plus de ""
     );
   }
 }

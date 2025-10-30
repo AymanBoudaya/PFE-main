@@ -1,4 +1,3 @@
-import 'package:caferesto/features/personalization/controllers/address_controller.dart';
 import 'package:caferesto/utils/constants/colors.dart';
 import 'package:caferesto/utils/constants/sizes.dart';
 import 'package:caferesto/utils/helpers/helper_functions.dart';
@@ -44,7 +43,7 @@ class TOrderListItems extends StatelessWidget {
         ),
         const SizedBox(height: AppSizes.spaceBtwSections),
 
-        // 🔹 Orders List
+        // Orders List
         Expanded(
           child: RefreshIndicator(
             onRefresh: listController.loadOrders,
@@ -84,7 +83,7 @@ class TOrderListItems extends StatelessWidget {
     );
   }
 
-  // 🧩 Shimmer loader
+  // Shimmer loader
   Widget _buildShimmer() {
     return ListView.builder(
       itemCount: 6,
@@ -104,7 +103,7 @@ class TOrderListItems extends StatelessWidget {
     );
   }
 
-  // 🧩 Empty state
+  // Empty state
   Widget _buildEmpty(BuildContext context) => TAnimationLoaderWidget(
         text: "Aucune commande",
         animation: 'assets/animations/empty_order.json',
@@ -128,7 +127,7 @@ class TOrderListItems extends StatelessWidget {
         ),
       );
 
-  // 🧩 Order card
+  // Order card
   Widget _buildOrderCard(BuildContext context, OrderModel order, bool dark,
       OrderListController listController) {
     final orderController = listController.orderController;

@@ -96,14 +96,14 @@ class AllProductsController extends GetxController {
     try {
       isLoading.value = true;
 
-      // ✅ Appel au dépôt pour récupérer les produits du brand
+      // Appel au dépôt pour récupérer les produits du brand
       final produits =
           await repository.getProductsByEtablissement(etablissementId);
 
-      // ✅ Assigner à la liste réactive
+      // Assigner à la liste réactive
       brandProducts.assignAll(produits ?? []);
 
-      // ✅ Trier après assignation (même logique que pour tous les produits)
+      // Trier après assignation (même logique que pour tous les produits)
       sortBrandProducts(selectedSortOption.value);
     } catch (e) {
       print("Erreur chargement produits marque : $e");

@@ -69,26 +69,26 @@ class OrderModel {
     }
   }
 
-  // 🔥 NEW: Check if order can be modified by client
+  // Check if order can be modified by client
   bool get canBeModified => status == OrderStatus.pending;
 
-  // 🔥 NEW: Check if order can be cancelled by client
+  // Check if order can be cancelled by client
   bool get canBeCancelled => status == OrderStatus.pending;
 
-  // 🔥 NEW: Check if order is active (not completed)
+  // Check if order is active (not completed)
   bool get isActive =>
       status == OrderStatus.pending ||
       status == OrderStatus.preparing ||
       status == OrderStatus.ready;
 
-  // 🔥 NEW: Check if order is completed
+  // Check if order is completed
   bool get isCompleted =>
       status == OrderStatus.delivered ||
       status == OrderStatus.cancelled ||
       status == OrderStatus.refused;
 
   // -------------------------
-  // 🚀 COPYWITH METHOD
+  // COPYWITH METHOD
   // -------------------------
 
   OrderModel copyWith({
@@ -190,8 +190,7 @@ class OrderModel {
           ? Etablissement.fromJson(json['etablissement'])
           : null,
       etablissementId: json['etablissement_id'] ?? '',
-      refusalReason:
-          json['refusal_reason'] as String?, 
+      refusalReason: json['refusal_reason'] as String?,
     );
   }
 
@@ -225,20 +224,20 @@ class OrderModel {
     );
   }
 
-  // 🔥 NEW: Helper method to check if order belongs to user
+  // Helper method to check if order belongs to user
   bool belongsToUser(String userId) {
     return this.userId == userId;
   }
 
-  // 🔥 NEW: Helper method to check if order belongs to establishment
+  // Helper method to check if order belongs to establishment
   bool belongsToEstablishment(String etablissementId) {
     return this.etablissementId == etablissementId;
   }
 
-  // 🔥 NEW: Get item count
+  // Get item count
   int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
 
-  // 🔥 NEW: Get formatted total amount
+  // Get formatted total amount
   String get formattedTotalAmount => '${totalAmount.toStringAsFixed(2)} DT';
 
   @override

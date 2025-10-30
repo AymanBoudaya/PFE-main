@@ -56,7 +56,7 @@ class OrderRepository extends GetxController {
         'updated_at': order.updatedAt?.toIso8601String(),
       }).select();
     } on PostgrestException catch (e) {
-      print('❌ Postgres error: ${e.message}');
+      print('Postgres error: ${e.message}');
       rethrow;
     } catch (e) {
       TLoaders.errorSnackBar(title: 'Erreur', message: e.toString());

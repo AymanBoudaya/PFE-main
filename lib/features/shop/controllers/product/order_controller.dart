@@ -65,25 +65,25 @@ class OrderController extends GetxController {
   Future<List<OrderModel>> fetchGerantOrders(String etablissementId) async {
     try {
       isLoading.value = true;
-      debugPrint('🔍 Chargement commandes gérant pour: $etablissementId');
+      debugPrint(' Chargement commandes gérant pour: $etablissementId');
 
-      // 🚀 FIX: Use the repository method
+      // FIX: Use the repository method
       final gerantOrders =
           await orderRepository.fetchOrdersByEtablissement(etablissementId);
 
       orders.value = gerantOrders;
-      debugPrint('✅ ${gerantOrders.length} commandes gérant chargées');
+      debugPrint('${gerantOrders.length} commandes gérant chargées');
       return gerantOrders;
     } catch (e) {
-      debugPrint('❌ Erreur fetchGerantOrders: $e');
-      // 🚀 FIX: Don't show snackbar here - let the screen handle it
+      debugPrint('Erreur fetchGerantOrders: $e');
+      // FIX: Don't show snackbar here - let the screen handle it
       rethrow; // Re-throw to let caller handle the error
     } finally {
       isLoading.value = false;
     }
   }
 
-  // 🚀 NEW: Update order status with notification
+  //  Update order status with notification
   Future<void> updateOrderStatus({
     required String orderId,
     required OrderStatus newStatus,
@@ -125,7 +125,7 @@ class OrderController extends GetxController {
     }
   }
 
-  // 🚀 NEW: Send notification for status changes
+  //  Send notification for status changes
   Future<void> _sendStatusNotification(
     OrderModel order,
     OrderStatus newStatus,
@@ -169,11 +169,11 @@ class OrderController extends GetxController {
         'created_at': DateTime.now().toIso8601String(),
       });
     } catch (e) {
-      debugPrint('❌ Erreur notification: $e');
+      debugPrint('Erreur notification: $e');
     }
   }
 
-  // 🚀 NEW: Real-time subscription
+  //  Real-time subscription
   void _subscribeToOrdersRealtime() {
     try {
       _ordersChannel = _db.channel('public:orders');
@@ -202,7 +202,7 @@ class OrderController extends GetxController {
               }
             }
           } catch (e) {
-            debugPrint('❌ Erreur temps réel: $e');
+            debugPrint('Erreur temps réel: $e');
           }
         },
       );
@@ -210,16 +210,16 @@ class OrderController extends GetxController {
       _ordersChannel!.subscribe(
         (status, [_]) {
           if (status == RealtimeSubscribeStatus.subscribed) {
-            debugPrint('✅ Abonnement temps réel activé pour les commandes');
+            debugPrint('Abonnement temps réel activé pour les commandes');
           }
         },
       );
     } catch (e) {
-      debugPrint('❌ Erreur abonnement temps réel: $e');
+      debugPrint('Erreur abonnement temps réel: $e');
     }
   }
 
-  // 🚀 NEW: Filter orders by status
+  //  Filter orders by status
   List<OrderModel> get pendingOrders =>
       orders.where((o) => o.status == OrderStatus.pending).toList();
   List<OrderModel> get activeOrders => orders
@@ -466,9 +466,9 @@ class OrderController extends GetxController {
         'receiver_role': receiverRole,
         'created_at': DateTime.now().toIso8601String(),
       });
-      debugPrint('✅ Notification envoyée à $receiverRole: $title');
+      debugPrint('Notification envoyée à $receiverRole: $title');
     } catch (e) {
-      debugPrint('❌ Erreur envoi notification: $e');
+      debugPrint('Erreur envoi notification: $e');
     }
   }
 }

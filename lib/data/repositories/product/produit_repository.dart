@@ -323,7 +323,7 @@ class ProduitRepository extends GetxController {
     }
   }
 
-  // NOUVELLES MÉTHODES : Récupération avec IDs
+  // Récupération avec IDs
   Future<List<CategoryModel>> getAllCategoriesWithIds() async {
     try {
       final data = await _db
@@ -342,7 +342,7 @@ class ProduitRepository extends GetxController {
         }
       }).toList();
     } catch (e) {
-      print('❌ Erreur getAllCategoriesWithIds: $e');
+      print('Erreur getAllCategoriesWithIds: $e');
       return [];
     }
   }
@@ -362,7 +362,7 @@ class ProduitRepository extends GetxController {
               ))
           .toList();
     } catch (e) {
-      print('❌ Erreur getAllEtablissementsWithIds: $e');
+      print('Erreur getAllEtablissementsWithIds: $e');
       return [];
     }
   }
@@ -416,11 +416,10 @@ class ProduitRepository extends GetxController {
       final response = await request;
       return response.map((e) => ProduitModel.fromMap(e)).toList();
     } catch (e) {
-      print('❌ Erreur searchProductsWithFilters: $e');
+      print('Erreur searchProductsWithFilters: $e');
       return [];
     }
   }
-
 
   /// Get multiple products by their IDs (for favorites)
   Future<List<ProduitModel>> getProductsByIds(List<String> productIds) async {
@@ -431,12 +430,10 @@ class ProduitRepository extends GetxController {
       List<ProduitModel> allProducts = [];
 
       for (final chunk in chunks) {
-        final response = await _db
-            .from('produits')
-            .select()
-            .inFilter('id', chunk);
+        final response =
+            await _db.from('produits').select().inFilter('id', chunk);
 
-        final List<Map<String, dynamic>> productData = 
+        final List<Map<String, dynamic>> productData =
             (response as List).cast<Map<String, dynamic>>();
 
         allProducts.addAll(
@@ -456,9 +453,8 @@ class ProduitRepository extends GetxController {
   }
 
   /// Alias for getProductsByIds to maintain compatibility
-  Future<List<ProduitModel>> getFavoriteProducts(List<String> productIds) async {
+  Future<List<ProduitModel>> getFavoriteProducts(
+      List<String> productIds) async {
     return getProductsByIds(productIds);
   }
-
-
 }

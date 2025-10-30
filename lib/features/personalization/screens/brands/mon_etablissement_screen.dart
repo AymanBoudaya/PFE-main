@@ -129,7 +129,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
           children: [
             const SizedBox(height: 12),
 
-            // 🔹 Filtres stylés avec ChoiceChip
+            // Filtres stylés avec ChoiceChip
             if (_userRole == 'Admin') ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -149,7 +149,7 @@ class _MonEtablissementScreenState extends State<MonEtablissementScreen> {
 
             const SizedBox(height: 12),
 
-            // 🔹 Liste des établissements
+            // Liste des établissements
             Expanded(
               child: hasResults
                   ? ListView.builder(

@@ -370,7 +370,7 @@ class _ListProduitScreenState extends State<ListProduitScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 🔹 AJOUT: Afficher le nom du gérant/établissement pour l'admin
+        // AJOUT: Afficher le nom du gérant/établissement pour l'admin
         if (isAdmin && produit.etablissement?.name != null)
           Text(
             'Établissement: ${produit.etablissement?.name}',

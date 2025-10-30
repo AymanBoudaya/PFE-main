@@ -4,14 +4,13 @@ import 'package:get/get.dart';
 import '../../../../data/repositories/horaire/horaire_repository.dart';
 import '../../../../utils/helpers/helper_functions.dart';
 import '../../controllers/product/horaire_controller.dart';
-import '../../models/jour_semaine.dart';
 
 class PickUpSlotPicker extends StatelessWidget {
   final horaireController = Get.put(HoraireController(HoraireRepository()));
   final Function(String? pickupDateTime, String dayLabel, String timeRange)
       onSlotSelected;
 
-  // 🕐 Durée d’un créneau en minutes (modifiable)
+  //Durée d’un créneau en minutes (modifiable)
   final int slotDurationMinutes;
 
   PickUpSlotPicker({
@@ -56,7 +55,7 @@ class PickUpSlotPicker extends StatelessWidget {
                   );
                 }
 
-                // 🔹 Génération automatique des créneaux
+                // Génération automatique des créneaux
                 final slots = _generateSlots(h.ouverture!, h.fermeture!);
 
                 return ExpansionTile(
@@ -115,7 +114,7 @@ class PickUpSlotPicker extends StatelessWidget {
     );
   }
 
-  // 🔸 Génère des créneaux entre deux heures données
+  // Génère des créneaux entre deux heures données
   List<Map<String, String>> _generateSlots(String ouverture, String fermeture) {
     final openParts = ouverture.split(':').map(int.parse).toList();
     final closeParts = fermeture.split(':').map(int.parse).toList();

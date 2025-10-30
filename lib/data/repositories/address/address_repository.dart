@@ -57,7 +57,7 @@ class AddressRepository extends GetxController {
 
       return response['id'] as String;
     } catch (e, s) {
-      print('❌ Supabase insert error: $e\n$s');
+      print('Supabase insert error: $e\n$s');
       rethrow;
     }
   }
