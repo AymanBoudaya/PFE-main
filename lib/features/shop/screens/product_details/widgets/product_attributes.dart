@@ -11,13 +11,14 @@ import '../../../controllers/product/variation_controller.dart';
 import '../../../models/produit_model.dart';
 
 class TProductAttributes extends StatelessWidget {
-  const TProductAttributes({super.key, required this.product});
-
   final ProduitModel product;
+  final String? tag;
+
+  const TProductAttributes({super.key, required this.product, this.tag});
 
   @override
   Widget build(BuildContext context) {
-    final variationController = VariationController.instance;
+    final variationController = Get.find<VariationController>(tag: tag);
     final dark = THelperFunctions.isDarkMode(context);
 
     return Obx(() {

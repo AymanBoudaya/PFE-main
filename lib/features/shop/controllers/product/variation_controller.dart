@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import '../../models/product_variation_model.dart';
 
 class VariationController extends GetxController {
-  static VariationController get instance => Get.find();
 
   /// Variables
   final RxMap<String, dynamic> selectedAttributes = <String, dynamic>{}.obs;
@@ -32,6 +31,13 @@ class VariationController extends GetxController {
   void clearVariation() {
     selectedSize.value = '';
     selectedPrice.value = 0.0;
+  }
+
+  @override
+  void onClose() {
+    // Nettoyage automatique quand le contrôleur est supprimé
+    clearVariation();
+    super.onClose();
   }
 
   /// -- Get available attribute values based on stock

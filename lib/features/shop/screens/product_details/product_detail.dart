@@ -19,23 +19,31 @@ import 'widgets/product_detail_image_slider.dart';
 import 'widgets/product_meta_data.dart';
 
 class ProductDetailScreen extends StatelessWidget {
-  ProductDetailScreen({super.key, required this.product}) {
-    variationController.resetSelectedAttributes();
-  }
   final ProduitModel product;
-  final variationController = VariationController.instance;
+
+  const ProductDetailScreen({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
+    final VariationController variationController =
+        Get.put(VariationController(), tag: product.id, permanent: false);
     final dark = THelperFunctions.isDarkMode(context);
     final isDesktop = TDeviceUtils.isDesktop(context);
     final isSmallScreen = MediaQuery.of(context).size.width < 380;
 
-    return Scaffold(
-      backgroundColor: dark ? AppColors.dark : AppColors.light,
-      bottomNavigationBar: _buildBottomBar(context, dark, isSmallScreen),
-      body: SafeArea(
-        child: isDesktop ? _buildDesktopLayout(dark) : _buildMobileLayout(dark),
+    return WillPopScope(
+      onWillPop: () async {
+        // Nettoyage manuel si besoin
+        Get.delete<VariationController>(tag: product.id);
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: dark ? AppColors.dark : AppColors.light,
+        bottomNavigationBar: _buildBottomBar(context, dark, isSmallScreen),
+        body: SafeArea(
+          child:
+              isDesktop ? _buildDesktopLayout(dark) : _buildMobileLayout(dark),
+        ),
       ),
     );
   }
