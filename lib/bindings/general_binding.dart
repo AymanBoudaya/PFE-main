@@ -20,9 +20,9 @@ import '../utils/helpers/network_manager.dart';
 class GeneralBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put(ProduitRepository());
-    Get.put(UserRepository());
-    Get.put(EtablissementRepository());
+    Get.lazyPut<ProduitRepository>(() => ProduitRepository(), fenix: true);
+    Get.lazyPut<UserRepository>(() => UserRepository(), fenix: true);
+    Get.lazyPut<EtablissementRepository>(() => EtablissementRepository(), fenix: true);
 
     Get.lazyPut(() => SignupController());
     Get.lazyPut(() => OTPVerificationController());
@@ -36,8 +36,10 @@ class GeneralBinding extends Bindings {
     Get.lazyPut<VariationController>(() => VariationController(), fenix: true);
     Get.lazyPut<CheckoutController>(() => CheckoutController(), fenix: true);
 
-    Get.put(NetworkManager());
-    Get.put(UserController());
-    Get.put(EtablissementController(Get.find<EtablissementRepository>()));
+    Get.lazyPut<NetworkManager>(() => NetworkManager(), fenix: true);
+    Get.lazyPut<UserController>(() => UserController(), fenix: true);
+    Get.lazyPut<EtablissementController>(
+        () => EtablissementController(Get.find<EtablissementRepository>()),
+        fenix: true);
   }
 }
