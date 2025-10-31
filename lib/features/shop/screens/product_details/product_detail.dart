@@ -13,6 +13,7 @@ import '../../controllers/product/panier_controller.dart';
 import '../../controllers/product/variation_controller.dart';
 import '../../models/produit_model.dart';
 import '../cart/cart.dart';
+import '../cart/quantity_controls.dart';
 import '../product_reviews/product_reviews.dart';
 import 'widgets/product_attributes.dart';
 import 'widgets/product_detail_image_slider.dart';
@@ -562,83 +563,13 @@ class ProductDetailScreen extends StatelessWidget {
 
     return Obx(() {
       final quantity = controller.getProductQuantityInCart(product.id);
+      final isVariableProduct = product.productType == 'variable';
+      final canAdjust = !isVariableProduct || controller.hasSelectedVariant();
 
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        decoration: BoxDecoration(
-          color: dark
-              ? Colors.green.shade900.withOpacity(0.2)
-              : Colors.green.shade50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: dark ? Colors.green.shade800 : Colors.green.shade100,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            /// Decrement Button
-            GestureDetector(
-              onTap: quantity > 0 ? () => _handleDecrement(controller) : null,
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: quantity > 0
-                      ? (dark ? Colors.green.shade800 : Colors.green.shade100)
-                      : (dark ? Colors.grey.shade800 : Colors.grey.shade100),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.remove_rounded,
-                  size: 16,
-                  color: quantity > 0
-                      ? (dark ? Colors.green.shade200 : Colors.green.shade800)
-                      : (dark ? Colors.grey.shade500 : Colors.grey.shade400),
-                ),
-              ),
-            ),
-
-            /// Quantity Display
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                quantity.toString(),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: dark ? Colors.white : Colors.black,
-                ),
-              ),
-            ),
-
-            /// Increment Button
-            GestureDetector(
-              onTap: () => _handleIncrement(controller),
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: dark ? Colors.green.shade800 : Colors.green.shade100,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                          Colors.green.shade200.withOpacity(dark ? 0.3 : 0.5),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.add_rounded,
-                  size: 16,
-                  color: dark ? Colors.green.shade200 : Colors.green.shade800,
-                ),
-              ),
-            ),
-          ],
-        ),
+      return QuantityControls(
+        quantity: quantity,
+        onIncrement: () => _handleIncrement(controller),
+        onDecrement: () => _handleDecrement(controller),
       );
     });
   }

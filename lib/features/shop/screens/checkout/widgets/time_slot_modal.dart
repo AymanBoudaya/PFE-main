@@ -100,35 +100,13 @@ class TimeSlotModal {
         );
       }
 
-// Fonction utilitaire pour convertir le nom du jour en numéro (lundi = 1, ..., dimanche = 7)
-      int getDayIndex(String jour) {
-        switch (jour.toLowerCase()) {
-          case 'lundi':
-            return 1;
-          case 'mardi':
-            return 2;
-          case 'mercredi':
-            return 3;
-          case 'jeudi':
-            return 4;
-          case 'vendredi':
-            return 5;
-          case 'samedi':
-            return 6;
-          case 'dimanche':
-            return 7;
-          default:
-            return 0;
-        }
-      }
-
 // Obtenir le jour actuel
       final today = DateTime.now().weekday; // lundi = 1 ... dimanche = 7
 
 // Trier la liste : le jour courant en premier, puis les jours suivants, puis les jours avant
       horaires.sort((a, b) {
-        final aIndex = getDayIndex(a.jour.toString());
-        final bIndex = getDayIndex(b.jour.toString());
+        final aIndex = THelperFunctions.weekdayFromJour(a.jour);
+        final bIndex = THelperFunctions.weekdayFromJour(b.jour);
 
         // Décaler les jours pour que "aujourd'hui" soit en premier
         final aShifted = (aIndex - today + 7) % 7;
